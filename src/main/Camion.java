@@ -76,28 +76,33 @@ public class Camion {
     }
 
     private void calculeaza_distanta() { //varianta greedy
-        //resetam distanta
-        solutie = new int[pachete.size()];
+        if(pachete.isEmpty()) { //daca nu avem pachete in camion
+            distanta = 0.0;
+            solutia = null;
+            return;
+        }
+        ArrayList<Integer> pachete_bak = new ArrayList(); //altfel
+        pachete_bak.addAll(pachete);
+        solutie = new int[pachete_bak.size()];
         for(int i:solutie) i=-1; //initializare
         distanta=Double.MAX_VALUE;
-        int closest=-1;
-        Double min_dist = Double.MAX_VALUE;
-        Double cur_dist;
-        for(int i=0;i<pachete.size();i++) {
+        int closest;
+        Double min_dist, cur_dist;
+        int i=0; //pozitia din cadrul solutiei
+        while(pachete_bak.isEmpty()==false) {
+            closest = -1; //reset general
+            min_dist = Double.MAX_VALUE;
             if(i==0) { //calculam cel mai apropiat de casa
                 min_dist = Double.MAX_VALUE;
-                for(int j=0;j<pachete.size();j++){
-                    cur_dist = distanta(casa,clienti.get(pachete.get(j)));
+                for(int j=0;j<pachete_bak.size();j++){
+                    cur_dist = distanta(casa,clienti.get(pachete_bak.get(j)));
                     if(cur_dist<min_dist) {
                         min_dist = cur_dist;
                         closest = j;
                     }
-                }
-                                    
+                }                  
             } else { //pachetul cel mai apropiat de cel curent
-                closest = -1;
-                min_dist = Double.MAX_VALUE;
-                for(int j=0;j<pachete.size();j++) {
+                for(int j=0;j<pachete_bak.size();j++) {
                     if(i==j) continue;
                     cur_dist = distante[solutie[i-1]][pachete.get(j)];
                     if(cur_dist<min_dist) {
@@ -106,13 +111,14 @@ public class Camion {
                     }
                 }
             }
-            solutie[i] = pachete.get(closest);
+            
+            solutie[i] = pachete_bak.get(closest);
+            pachete_bak.remove(closest);
+            ++i;
         }
-        //System.out.println(solutie);
-        //solutie gasita, calculam distanta totala
-        Double dist = 0.0; //distanta(casa,clienti.get(solutie[0])); //dsitanta initiala de la casa
-        for(int i=0;i<solutie.length-1;i++) { //restul distantei
-            dist += distante[solutie[i]][solutie[i+1]];
+        Double dist = distanta(casa,clienti.get(solutie[0])); //dsitanta initiala de la casa
+        for(int j=0;j<solutie.length-1;j++) { //restul distantei
+            dist += distante[solutie[j]][solutie[j+1]];
         }
         distanta = dist;
         solutia = solutie;
