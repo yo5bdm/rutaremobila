@@ -17,9 +17,9 @@ import static main.MainFrame.*;
 public class AlgoritmGenetic extends Thread {
     
     private int nr_clienti;
-    private final int nr_indivizi=20;
-    private final double probabilitate_mutatie = 0.05;
-    private final int max_generatii = 200;
+    private final int nr_indivizi=50;
+    private final double probabilitate_mutatie = 0.05; //5%
+    private final int max_generatii = 1000;
     private final int nr_camioane=48;
     
     private final Random r = new Random();
@@ -40,7 +40,7 @@ public class AlgoritmGenetic extends Thread {
         System.out.println("Optimizare incarcaturi...");
         int x=0;
         for(Individ c:populatie) {
-            c.optimize_loads();
+            c.fitnes();
         }
         System.out.println("Calculam fitnesul total al generatiei initiale");
         System.out.println(""+fitnes_total());
@@ -50,10 +50,8 @@ public class AlgoritmGenetic extends Thread {
             System.out.println("Incep generatia "+g+"...");
             recombinare();//
             mutatie();//
-            populatie.forEach((c) -> {
-                c.optimize_loads();
-            });
             total = fitnes_total();
+            m.setFit(total);
             selectie();//
             System.out.println("Generatia "+g+", fitnes total "+total);
         }
@@ -111,7 +109,7 @@ public class AlgoritmGenetic extends Thread {
                     }
                 }
             }
-            c.optimize_loads(); //optimizam incarcarile
+            //c.optimize_loads(); //optimizam incarcarile
             c.fitnes(); //calculam fitnes
         }
     }
@@ -134,8 +132,8 @@ public class AlgoritmGenetic extends Thread {
     private double fitnes_total() {
         System.out.println("Calculez fitnes total");
         double tot=0.0;
-        for(int i=0;i<populatie.size();i++) {
-            tot += populatie.get(i).fitnes();
+        for(Individ i:populatie) {
+            tot += i.fitnes();
         }
         return tot;
     }

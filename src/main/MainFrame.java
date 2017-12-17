@@ -27,7 +27,7 @@ public class MainFrame extends javax.swing.JFrame {
     public static MainFrame m;
     public static ModelTabel model;
     public static AlgoritmGenetic a;
-
+    public Testing t = new Testing();
     /**
      *
      * @param u the value of u
@@ -36,7 +36,7 @@ public class MainFrame extends javax.swing.JFrame {
      */
     public static double distanta(Client u, Client d) {
         //https://www.movable-type.co.uk/scripts/latlong.html
-        double delta_lat = toRad(u.latitudine - d.latitudine);
+        double delta_lat = toRad(u.latitudine - d.latitudine); //latitudine
         double delta_long = toRad(u.longitudine - d.longitudine);
         double R = 6371; //km
         double a = Math.sin(delta_lat / 2) * Math.sin(delta_lat / 2) + Math.cos(toRad(u.latitudine)) * Math.cos(toRad(d.latitudine)) * Math.sin(delta_long / 2) * Math.sin(delta_long / 2);
@@ -112,6 +112,7 @@ public class MainFrame extends javax.swing.JFrame {
         m = this;
         model = new ModelTabel();
         jTable1.setModel(model);
+        //t.run(); //testele
     }
 
     /**
@@ -130,6 +131,8 @@ public class MainFrame extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
         GenCur = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        FitTotal = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -144,7 +147,7 @@ public class MainFrame extends javax.swing.JFrame {
         );
         Panel1Layout.setVerticalGroup(
             Panel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 589, Short.MAX_VALUE)
+            .addGap(0, 619, Short.MAX_VALUE)
         );
 
         jSlider1.addChangeListener(new javax.swing.event.ChangeListener() {
@@ -177,28 +180,35 @@ public class MainFrame extends javax.swing.JFrame {
 
         GenCur.setText("-1");
 
+        jLabel2.setText("Fitnes total:");
+
+        FitTotal.setText("1");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jSlider1, javax.swing.GroupLayout.DEFAULT_SIZE, 638, Short.MAX_VALUE)
-                    .addComponent(Panel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(GenCur)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(jSlider1, javax.swing.GroupLayout.PREFERRED_SIZE, 638, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 132, Short.MAX_VALUE))
+                    .addComponent(Panel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                            .addComponent(jLabel1)
+                            .addGap(154, 154, 154)
+                            .addComponent(GenCur))
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 304, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jButton1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 137, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 304, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 137, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(10, 10, 10))))
+                        .addComponent(FitTotal)))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -210,13 +220,17 @@ public class MainFrame extends javax.swing.JFrame {
                             .addComponent(jLabel1)
                             .addComponent(GenCur))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane1))
+                        .addComponent(jScrollPane1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(FitTotal, javax.swing.GroupLayout.Alignment.TRAILING)))
                     .addComponent(Panel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jSlider1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton1))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jSlider1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton1, javax.swing.GroupLayout.Alignment.TRAILING))
+                .addContainerGap())
         );
 
         pack();
@@ -225,6 +239,7 @@ public class MainFrame extends javax.swing.JFrame {
     private void jSlider1StateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_jSlider1StateChanged
         int fs = jSlider1.getValue();
         ploteaza_punctele(fs);
+        //ploteaza_testul(fs);
     }//GEN-LAST:event_jSlider1StateChanged
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
@@ -253,6 +268,75 @@ public class MainFrame extends javax.swing.JFrame {
             x = max_x/2 + ((int)(((c.longitudine-dx)*fs))); 
             y = max_y/2 - ((int)(((c.latitudine-dy)*fs)));
             g.drawOval(x,y,3,3);
+        }
+        // ---------- functia de desenare drumuri ---------------
+        /*//drumul cel mai scurt
+        int x2,y2;
+        //linia de acasa pana la primul:
+        g.setColor(Color.BLUE);
+        x = max_x/2 + ((int)(((casa.longitudine-dx)*fs))); 
+        y = max_y/2 - ((int)(((casa.latitudine-dy)*fs)));
+        x2 = max_x/2 + ((int)(((clienti.get(t.c.solutia.get(0)).longitudine-dx)*fs))); 
+        y2 = max_y/2 - ((int)(((clienti.get(t.c.solutia.get(0)).latitudine-dy)*fs)));
+        g.drawLine(x,y,x2,y2);
+        g.setColor(Color.black);
+        for(int i=0;i<t.c.solutia.size()-1;i++) {
+            int i1 = t.c.solutia.get(i);
+            int i2 = t.c.solutia.get(i+1);
+            x = max_x/2 + ((int)(((clienti.get(i1).longitudine-dx)*fs))); 
+            y = max_y/2 - ((int)(((clienti.get(i1).latitudine-dy)*fs)));
+            x2 = max_x/2 + ((int)(((clienti.get(i2).longitudine-dx)*fs))); 
+            y2 = max_y/2 - ((int)(((clienti.get(i2).latitudine-dy)*fs)));
+            g.drawLine(x,y,x2,y2);
+        }*/
+    }
+    
+    private void ploteaza_testul(int f) {
+        int max_x = Panel1.getWidth();
+        int max_y = Panel1.getHeight();
+        
+        double fs = (double)f;
+        Double dx=0.0, dy=0.0;
+        for(Integer t:t.c.solutia) {
+            dx += (clienti.get(t).longitudine);
+            dy += (clienti.get(t).latitudine);
+        }
+        dx /= t.c.pachete.size();
+        dy /= t.c.pachete.size();
+        Graphics g = Panel1.getGraphics();
+        g.setColor(Color.white);
+        g.fillRect(0,0,max_x,max_y);
+        g.setColor(Color.black);
+        int x, y;
+        //punctele
+        for(Integer t:t.c.solutia) {
+            x = max_x/2 + ((int)(((clienti.get(t).longitudine-dx)*fs))); 
+            y = max_y/2 - ((int)(((clienti.get(t).latitudine-dy)*fs)));
+            g.drawOval(x,y,3,3);
+        }
+        //drumul cel mai scurt
+        int x2,y2;
+        //linia de acasa pana la primul:
+        g.setColor(Color.BLUE);
+        x = max_x/2 + ((int)(((casa.longitudine-dx)*fs))); 
+        y = max_y/2 - ((int)(((casa.latitudine-dy)*fs)));
+        x2 = max_x/2 + ((int)(((clienti.get(t.c.solutia.get(0)).longitudine-dx)*fs))); 
+        y2 = max_y/2 - ((int)(((clienti.get(t.c.solutia.get(0)).latitudine-dy)*fs)));
+        g.drawLine(x,y,x2,y2);
+        g.setColor(Color.black);
+        for(int i=0;i<t.c.solutia.size()-1;i++) {
+            int i1 = t.c.solutia.get(i);
+            int i2 = t.c.solutia.get(i+1);
+            x = max_x/2 + ((int)(((clienti.get(i1).longitudine-dx)*fs))); 
+            y = max_y/2 - ((int)(((clienti.get(i1).latitudine-dy)*fs)));
+            x2 = max_x/2 + ((int)(((clienti.get(i2).longitudine-dx)*fs))); 
+            y2 = max_y/2 - ((int)(((clienti.get(i2).latitudine-dy)*fs)));
+            g.drawLine(x,y,x2,y2);
+            /*try {
+                TimeUnit.SECONDS.sleep(1);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+            }*/
         }
     }
     /**
@@ -287,10 +371,12 @@ public class MainFrame extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel FitTotal;
     private javax.swing.JLabel GenCur;
     private javax.swing.JPanel Panel1;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSlider jSlider1;
     private javax.swing.JTable jTable1;
@@ -298,6 +384,10 @@ public class MainFrame extends javax.swing.JFrame {
 
     void setGen(int g) {
         GenCur.setText(""+g);
+    }
+
+    void setFit(Double total) {
+        FitTotal.setText(""+total.intValue());
     }
 
     

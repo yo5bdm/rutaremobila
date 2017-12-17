@@ -16,7 +16,6 @@ public class Individ implements Comparable {
     private Double distanta_totala;
     private Double fitness; // media procentul de incarcare impartit la nr de camioane
     private Integer nr_camioane;
-    
     public Integer[] cromozom; //indexul e obiectul, valoarea e camionul pe care e incarcat
 
     ArrayList<Camion> camioane = new ArrayList();
@@ -34,56 +33,108 @@ public class Individ implements Comparable {
             }
             camioane.add(new Camion(capacitate));
         }
-        optimize_loads();
     }
+    
+    private void reset_camioane() {
+        for(Camion c:camioane) c.reset();
+        if(camioane.size()<nr_camioane) {
+            int nr = nr_camioane-camioane.size();
+            for(int i=0;i<nr;i++) {
+                camioane.add(new Camion(81));
+            }
+        }
+        nr_camioane = camioane.size();
+    }
+    
     /**
      * Calculeaza fitnes-ul individului curent.
      * @return 
      */
     public double fitnes() {
-        optimize_loads();
-        Camion c;
-        fitness = 0.0;
+        int max=0;
+        for(int i:cromozom) if(i>max) max=i; //gasim maxim
+        nr_camioane = max+1;
+        reset_camioane();
         for(int i=0;i<cromozom.length;i++) {
-            if(cromozom[i]==-1) continue;
-            c = camioane.get(cromozom[i]); //luat camionul cu nr gasit la indexul i
-            c.pachete.add(i); //adaugam produsul in camion
+            if(cromozom[i]==-2) cromozom[i]=-1;
         }
+        for(int i=0;i<cromozom.length;i++) {
+            if(cromozom[i]==-1) continue; //cromozom[i]==-2
+            camioane.get(cromozom[i]).add(i); //luat camionul cu nr gasit la indexul i si adaugam produsul in el
+        }
+        optimize_loads();
+        fitness = 0.0;
         for (Camion camion : camioane) {
             fitness += camion.calc(); //distanta totala parcursa de toate camioanele
         } 
+        //fiecare neincarcabil scade fitnesul total cu 10k
+        for(int i=0;i<neincarcabile();i++){
+            fitness += 9999.0;
+        }
         return fitness;
+    }
+    
+    private int neincarcate() {
+        int ret=0;
+        for(int i:cromozom) {
+            if(i==-1) {
+                ret++;
+            }
+        }
+        return ret;
+    }
+    
+    public int neincarcabile() {
+        int ret=0;
+        for(int i:cromozom) {
+            if(i==-2) {
+                ret++;
+            }
+        }
+        return ret;
     }
     /**
      * Elimina pachetele ce nu incap intr-un camion anume si le incarca in alt camion mai gol.
      */
-    void optimize_loads() {
+    private void optimize_loads() {
         //golim camioanele suprapline
-        //System.out.println("Golim camioanele suprapline...");
         for(int i=0;i<camioane.size();i++) {
             Camion c = camioane.get(i);
-            while(c.ocupat > 100) {
-                int obiect = c.pachete.remove(c.pachete.size()-1); //pop last element
+            while(c.ok != true) {
+                int obiect = c.pop(); //pop last element
                 cromozom[obiect] = -1; //il marcam si in cromozom ca fiind nefolosit
-                c.calc();
             }
-            camioane.set(i,c);
         }
-        //System.out.println("Punem pachetele in alt camion care nu e plin...");
         //punem pachetele in plus in alt camion care nu e plin
-        for(int i=0;i<cromozom.length;i++) {
-            if(cromozom[i]==null) continue;
-            if(cromozom[i] == -1) { //clientul nu e incarcat
-                camioane: for(int j=0;j<camioane.size();j++) {
-                    Camion c = camioane.get(j);
-                    if((c.capacitate - c.ocupat)>=clienti.get(i).volum) {
-                        cromozom[i] = j;
-                        c.pachete.add(i);
-                        c.calc();
-                        camioane.set(j,c);
-                        break camioane; //iesi din bucla for
+        while(neincarcate()!=0) {
+            //prima data incercam sa incarcam pe un camion existent
+            int incarcat=0;
+            for(int i=0;i<cromozom.length;i++) {
+                if(cromozom[i] == -1) { //clientul nu e incarcat
+                    incarcat=0;
+                    camioane: for(int j=0;j<camioane.size();j++) {
+                        Camion c = camioane.get(j);
+                        if(c.opriri>=15) continue;
+                        if((c.capacitate - c.ocupat)>=clienti.get(i).volum) {
+                            cromozom[i] = j;
+                            c.add(i);
+                            incarcat=1;
+                            break camioane; //iesi din bucla for
+                        }
+                    }
+                    //nu am reusit sa incarc produsul, volumul e mai mare decat camioanele disponibile
+                    if(incarcat==0 && clienti.get(i).volum>80) {
+                        cromozom[i]=-2; //il marcam ca atare
                     }
                 }
+            }
+            //daca totusi nu reusim sa le incarcam toate, mai punem un camion in lista
+            
+            if(neincarcate()!=0) {
+                Camion c = new Camion(81);
+                c.calc();
+                nr_camioane++;
+                camioane.add(c);
             }
         }
     }
@@ -101,19 +152,16 @@ public class Individ implements Comparable {
     
     public int compareTo(Object o) {
         Individ c = (Individ) o;
-        return c.fitness.compareTo(this.fitness);
+        return this.fitness.compareTo(c.fitness);
     }
 
     @Override
     public String toString() {
-        System.out.println("Individ{" + "distanta_totala=" + distanta_totala + ", fitness=" + fitness + '}');
+        System.out.println("Individ{ neincarcabile: " +neincarcabile()+ ", distanta_totala=" + distanta_totala + ", fitness=" + fitness + '}');
         for(Camion c:camioane) System.out.println(c);
         return "";
     }
-
     Object getFitnes() {
         return fitness;
-    }
-    
-    
+    }    
 }
