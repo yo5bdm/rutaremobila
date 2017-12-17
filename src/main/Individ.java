@@ -157,11 +157,17 @@ public class Individ implements Comparable {
 
     @Override
     public String toString() {
-        System.out.println("Individ{ neincarcabile: " +neincarcabile()+ ", distanta_totala=" + distanta_totala + ", fitness=" + fitness + '}');
+        System.out.println("Individ{ neincarcabile: " +neincarcabile()+", neincarcate: " +neincarcate()+ ", nr camioane=" + camioane.size() + ", fitness=" + fitness + '}');
         for(Camion c:camioane) System.out.println(c);
         return "";
     }
     Object getFitnes() {
         return fitness;
     }    
+
+    boolean ok() {
+        if(neincarcabile()>0 && neincarcate()>=0) return false;
+        for(Camion c:camioane) if(c.ok==false) return false;
+        return true;
+    }
 }

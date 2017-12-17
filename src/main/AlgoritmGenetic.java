@@ -44,19 +44,30 @@ public class AlgoritmGenetic extends Thread {
         }
         System.out.println("Calculam fitnesul total al generatiei initiale");
         System.out.println(""+fitnes_total());
+        Individ best_fit, best;
+        Collections.sort(populatie);
+        best_fit = populatie.get(0);
+        int best_gen=-1; //generatia celui mai bun
         for(int g=0;g<max_generatii;g++) {//
             model.fireTableDataChanged();
             m.setGen(g);
             System.out.println("Incep generatia "+g+"...");
             recombinare();//
             mutatie();//
+            selectie();//
+            
             total = fitnes_total();
             m.setFit(total);
-            selectie();//
+            Collections.sort(populatie);
+            best = populatie.get(0);
+            if(best.fitnes()<best_fit.fitnes() && best.ok()==true) {
+                best_fit = best;
+                best_gen = g;
+            }
             System.out.println("Generatia "+g+", fitnes total "+total);
         }
-        Collections.sort(populatie);
-        System.out.println(populatie.get(0));
+        System.out.println("Cel mai bun a fost gasit in generatia: "+best_gen);
+        System.out.println(best_fit);
     }
 
     private void genereaza_pop_initiala(int nr_indivizi, int nr_camioane) {
