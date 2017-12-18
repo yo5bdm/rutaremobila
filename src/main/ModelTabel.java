@@ -13,12 +13,10 @@ import static main.MainFrame.*;
  * @author yo5bdm
  */
 class ModelTabel extends AbstractTableModel {
-    
-    
-    
+
     String[] coloane = {"Distanta","Ocupat","Opriri","OK"};
     private final Class[] columnClass = new Class[] {
-        Double.class, Double.class, Integer.class, Boolean.class
+        Integer.class, Integer.class, Integer.class, Boolean.class
     };
     
     @Override
@@ -37,9 +35,9 @@ class ModelTabel extends AbstractTableModel {
         Camion c = m.best.camioane.get(rowIndex);
         switch(columnIndex) {
             case 0:
-                return c.distanta;
+                return (int)c.distanta;
             case 1:
-                return c.ocupat(); 
+                return c.ocupat().intValue(); 
             case 2:
                 return c.opriri;
             default:

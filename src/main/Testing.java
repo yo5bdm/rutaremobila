@@ -17,7 +17,7 @@ public class Testing {
     private Random r = new Random();
     public void run() {
         CamionTest();
-        IndividTest();
+        //IndividTest();
     }
     
     private int CamionTest() {
@@ -29,10 +29,15 @@ public class Testing {
         System.out.println("ok="+c.ok+" "+c.opriri+" "+c.pachete.size());
         System.out.println("Ocupat "+c.ocupat+" = "+(c.ocupat/c.capacitate));
         System.out.println("Distanta = "+c.distanta);
-        System.out.println("Pachetele: ");
-        for(Integer i:c.pachete) {
-            System.out.println(i+" GPS="+clienti.get(i).latitudine+","+clienti.get(i).longitudine);
-        }
+//        System.out.println("Pachetele: ");
+//        for(Integer i:c.pachete) {
+//            System.out.println(i+" GPS="+clienti.get(i).latitudine+","+clienti.get(i).longitudine);
+//        }
+        System.out.println("Optimizez cu backtracking:");
+        c.optimizare();
+        System.out.println("ok="+c.ok+" "+c.opriri+" "+c.pachete.size());
+        System.out.println("Ocupat "+c.ocupat+" = "+(c.ocupat/c.capacitate));
+        System.out.println("Distanta = "+c.distanta);
         return 0;
     }
     

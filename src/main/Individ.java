@@ -6,6 +6,7 @@
 package main;
 
 import java.util.ArrayList;
+import static main.AlgoritmGenetic.r;
 import static main.MainFrame.clienti;
 
 /**
@@ -19,10 +20,21 @@ public class Individ implements Comparable {
     public Integer[] cromozom; //indexul e obiectul, valoarea e camionul pe care e incarcat
 
     ArrayList<Camion> camioane = new ArrayList();
-    public Individ(int nr, int cam) {
+    /**
+     * 
+     * @param nr numarul de clienti (locatii)
+     * @param cam numarul de camioane
+     */
+    public Individ(int nr, int cam, boolean generare) {
         cromozom = new Integer[nr];
         nr_camioane = cam;
         int capacitate;
+        if(generare == true) {
+            for(int j=0;j<nr;j++) {
+            cromozom[j] = r.nextInt(nr_camioane-1); //random in camioanele care pot duce marfa respectiva
+            //clienti.get(j).volum
+            }
+        }
         for(int i=0;i<nr_camioane;i++) {
             if(i<=10) {
                 capacitate = 101;
@@ -33,6 +45,7 @@ public class Individ implements Comparable {
             }
             camioane.add(new Camion(capacitate));
         }
+        if(generare == true) optimize_loads();
     }
     
     private void reset_camioane() {
@@ -55,11 +68,11 @@ public class Individ implements Comparable {
         for(int i:cromozom) if(i>max) max=i; //gasim maxim
         nr_camioane = max+1;
         reset_camioane();
-        for(int i=0;i<cromozom.length;i++) {
+        for(int i=0;i<cromozom.length;i++) { //incercam sa plasam si neplasabilele
             if(cromozom[i]==-2) cromozom[i]=-1;
         }
         for(int i=0;i<cromozom.length;i++) {
-            if(cromozom[i]==-1) continue; //cromozom[i]==-2
+            if(cromozom[i]==-1) continue;
             camioane.get(cromozom[i]).add(i); //luat camionul cu nr gasit la indexul i si adaugam produsul in el
         }
         optimize_loads();
@@ -123,13 +136,12 @@ public class Individ implements Comparable {
                         }
                     }
                     //nu am reusit sa incarc produsul, volumul e mai mare decat camioanele disponibile
-                    if(incarcat==0 && clienti.get(i).volum>80) {
+                    if(incarcat==0 && clienti.get(i).volum>80) { //&& clienti.get(i).volum>80
                         cromozom[i]=-2; //il marcam ca atare
                     }
                 }
             }
             //daca totusi nu reusim sa le incarcam toate, mai punem un camion in lista
-            
             if(neincarcate()!=0) {
                 Camion c = new Camion(81);
                 c.calc();
@@ -138,7 +150,11 @@ public class Individ implements Comparable {
             }
         }
     }
-
+    
+    public void optimizare() {
+        for(Camion c:camioane) c.optimizare();
+    }
+    
     @Override
     public boolean equals(Object obj) {
         Individ o = (Individ)obj;
@@ -158,7 +174,7 @@ public class Individ implements Comparable {
     @Override
     public String toString() {
         System.out.println("Individ{ neincarcabile: " +neincarcabile()+", neincarcate: " +neincarcate()+ ", nr camioane=" + camioane.size() + ", fitness=" + fitness + '}');
-        for(Camion c:camioane) System.out.println(c);
+        //for(Camion c:camioane) System.out.println(c);
         return "";
     }
     Object getFitnes() {

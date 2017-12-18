@@ -22,6 +22,7 @@ public class Camion {
     public ArrayList<Integer> pachete = new ArrayList();
     public double distanta;
     public ArrayList<Integer> solutia;
+    public int[] solutie;
     
     public Camion(int capacitate) {
         this.capacitate = capacitate;
@@ -33,7 +34,11 @@ public class Camion {
         calc();
     }
     
-    
+    public void optimizare() {
+//        System.out.println("Distanta inainte de bktr: "+distanta);
+//        calculeazaDistantaBacktracking();
+//        System.out.println("Distanta dupa bktr: "+distanta);
+    }
     
     public double calc() {
         sort();
@@ -82,19 +87,18 @@ public class Camion {
     }
     
     private void calculeaza_ocupat() {
-        double volum=0;
+        ocupat = 0.0;
         for(int i=0;i<pachete.size();i++) {
             int p = pachete.get(i);
-            volum += MainFrame.clienti.get(p).volum;
+            ocupat += clienti.get(p).volum;
         }
-        ocupat = volum;
     }
 
     @Override
     public String toString() {
         String obiecte="";
         for(int i:pachete) {
-            obiecte += " "+i+":"+MainFrame.clienti.get(i).volum+",";
+            obiecte += " "+i+":"+clienti.get(i).volum+",";
         }
         return "Camion{ ok=" +ok+ ", capacitate=" + capacitate + ", ocupat=" + ocupat + ", opriri=" + opriri + ", distanta=" + distanta + ", obiecte= "+obiecte+" }";
     }
@@ -109,7 +113,7 @@ public class Camion {
         pachete_bak.addAll(pachete);
         distanta=Double.MAX_VALUE;
         int closest;
-        Double min_dist, cur_dist = 0.0;
+        Double min_dist, cur_dist;
         int i=0; //pozitia din cadrul solutiei
         while(pachete_bak.isEmpty()==false) {
             closest = -1; //reset general
@@ -117,11 +121,11 @@ public class Camion {
             if(i==0) { //calculam cel mai apropiat de casa
                 min_dist = Double.MAX_VALUE;
                 for(int j=0;j<pachete_bak.size();j++){
-                    cur_dist = distanta(casa,clienti.get(pachete_bak.get(j)));
+                    cur_dist = catre_casa[pachete_bak.get(j)]; //distanta(casa,clienti.get(pachete_bak.get(j)));
                     if(cur_dist<min_dist) {
                         min_dist = cur_dist;
                         closest = j;
-                    }     
+                    }  
                 }  
             } else { //pachetul cel mai apropiat de cel curent
                 i = solutia.size()-1;
@@ -132,21 +136,19 @@ public class Camion {
                         min_dist = cur_dist;
                     }
                 }
+                i++;
             }
             solutia.add(pachete_bak.get(closest));
             pachete_bak.remove(closest);
         }
-        Double dist = distanta(casa,clienti.get(solutia.get(0))); //dsitanta initiala de la casa
+        Double dist = catre_casa[solutia.get(0)]; //distanta(casa,clienti.get(solutia.get(0))); //dsitanta initiala de la casa
         for(int j=0;j<solutia.size()-1;j++) { //restul distantei
             dist += distante[solutia.get(j)][solutia.get(j+1)];
         }
         distanta = dist;
     }
     
-    
-    
-    
-    /*private void calculeaza_distanta() { //varianta backtracking
+    private void calculeazaDistantaBacktracking() { //varianta backtracking
         //backtracking pe solutie
         solutie = new int[pachete.size()];
         for(int i:solutie) i=-1; //initializare
@@ -156,9 +158,9 @@ public class Camion {
     
     //start backtracking functions
     private void backtr(int pos) {
-        if(pos>=solutie.size()) return;
+        if(pos>=solutie.length) return;
         for(int i=0;i<pachete.size();i++) {
-            solutie.get(pos) = pachete.get(i);
+            solutie[pos] = pachete.get(i);
             if(verifica(pos)) backtr(++pos);
         }
     }
@@ -170,16 +172,18 @@ public class Camion {
             if(solutie[pos]==solutie[i]) return false;
         }
         if(pos==(solutie.length-1)) { //daca solutia e completa
+            dist += catre_casa[solutie[0]];
             for(int i=0;i<solutie.length-1;i++) {
                 dist += distante[solutie[i]][solutie[i+1]];
             }
             if(dist<distanta) {
                 distanta = dist;
-                solutia = solutie;
+                solutia.clear();
+                for(int k:solutie) solutia.add(k);
             }
             return false; //am ajuns la capat, nu mai continuam
         }
         return true;
-    }*/
+    }
     //end backtracking
 }

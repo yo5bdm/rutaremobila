@@ -27,6 +27,7 @@ public class MainFrame extends javax.swing.JFrame {
     public static ArrayList<Client> clienti = new ArrayList();
     public static Client casa = new Client("ACASA", 47.075866, 21.901441, 0.0);
     public static Double[][] distante;
+    public static Double[] catre_casa;
     public static MainFrame m;
     public static ModelTabel model;
     public static AlgoritmGenetic a;
@@ -35,6 +36,10 @@ public class MainFrame extends javax.swing.JFrame {
     
     private Timer paint;
     private Camion camion;
+    //pentru desenare
+    private double dx, dy;
+    private double fs;
+    private Graphics g;
     /**
      * Creates new form MainFrame
      */
@@ -49,10 +54,14 @@ public class MainFrame extends javax.swing.JFrame {
         setBest(null,-1);
         jTable1.setModel(model);
         camion = null;
-        //paint = new Timer(10000, listener); //incercare afisare harta de la inceput
-        //Panel1.repaint();
-        //paint.start();
-        //t.run(); //testele
+        for(Client c:clienti) { 
+            dx += (c.longitudine);
+            dy += (c.latitudine);
+        }
+        dx /= clienti.size();
+        dy /= clienti.size();
+        g = Panel1.getGraphics();
+        t.run(); //testele
     }
     
     ActionListener listener = new ActionListener() {
@@ -64,8 +73,8 @@ public class MainFrame extends javax.swing.JFrame {
     };
     
     private void redraw() {
-        int fs = jSlider1.getValue();
-        ploteaza_punctele(fs);
+        fs = (double)jSlider1.getValue();
+        ploteaza_punctele();
         //ploteaza_testul(fs);
     }
     
@@ -102,6 +111,8 @@ public class MainFrame extends javax.swing.JFrame {
         BSDistanta = new javax.swing.JLabel();
         BSNrCamioane = new javax.swing.JLabel();
         BSGeneratia = new javax.swing.JLabel();
+        jLabel6 = new javax.swing.JLabel();
+        VitezaAlgoritm = new javax.swing.JComboBox<>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Rutare pachete");
@@ -173,6 +184,11 @@ public class MainFrame extends javax.swing.JFrame {
 
         BSGeneratia.setText("jLabel6");
 
+        jLabel6.setText("Tip generare:");
+
+        VitezaAlgoritm.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Rapid", "Mediu", "Lent", "Infinit" }));
+        VitezaAlgoritm.setSelectedIndex(2);
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -182,6 +198,18 @@ public class MainFrame extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                     .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel4)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(BSDistanta))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel6)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(VitezaAlgoritm, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(BSGeneratia))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addGroup(jPanel1Layout.createSequentialGroup()
@@ -194,17 +222,9 @@ public class MainFrame extends javax.swing.JFrame {
                                 .addComponent(FitTotal)))
                         .addGap(0, 104, Short.MAX_VALUE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel4)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(BSDistanta))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel5)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(BSNrCamioane))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel3)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(BSGeneratia)))
+                        .addComponent(BSNrCamioane)))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -219,6 +239,10 @@ public class MainFrame extends javax.swing.JFrame {
                     .addComponent(jLabel2)
                     .addComponent(FitTotal))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel6)
+                    .addComponent(VitezaAlgoritm, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -226,14 +250,14 @@ public class MainFrame extends javax.swing.JFrame {
                     .addComponent(BSGeneratia))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel4)
-                    .addComponent(BSDistanta))
+                    .addComponent(BSDistanta)
+                    .addComponent(jLabel4))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5)
                     .addComponent(BSNrCamioane))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 531, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 503, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -267,12 +291,14 @@ public class MainFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jSlider1StateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_jSlider1StateChanged
+
         redraw();
     }//GEN-LAST:event_jSlider1StateChanged
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        int viteza = VitezaAlgoritm.getSelectedIndex();
         redraw();
-        a = new AlgoritmGenetic(clienti.size());
+        a = new AlgoritmGenetic(clienti.size(),viteza);
         a.start();
     }//GEN-LAST:event_jButton1ActionPerformed
 
@@ -285,19 +311,10 @@ public class MainFrame extends javax.swing.JFrame {
         redraw();
     }//GEN-LAST:event_jTable1MouseClicked
 
-    private void ploteaza_punctele(int f) {
+    private void ploteaza_punctele() {
         int max_x = Panel1.getWidth();
         int max_y = Panel1.getHeight();
         
-        double fs = (double)f;
-        Double dx=0.0, dy=0.0;
-        for(Client c:clienti) { 
-            dx += (c.longitudine);
-            dy += (c.latitudine);
-        }
-        dx /= clienti.size();
-        dy /= clienti.size();
-        Graphics g = Panel1.getGraphics();
         g.setColor(Color.white);
         g.fillRect(0,0,max_x,max_y);
         g.setColor(Color.black);
@@ -330,54 +347,6 @@ public class MainFrame extends javax.swing.JFrame {
         }
     }
     
-    private void ploteaza_testul(int f) {
-        int max_x = Panel1.getWidth();
-        int max_y = Panel1.getHeight();
-        
-        double fs = (double)f;
-        Double dx=0.0, dy=0.0;
-        for(Integer t:t.c.solutia) {
-            dx += (clienti.get(t).longitudine);
-            dy += (clienti.get(t).latitudine);
-        }
-        dx /= t.c.pachete.size();
-        dy /= t.c.pachete.size();
-        Graphics g = Panel1.getGraphics();
-        g.setColor(Color.white);
-        g.fillRect(0,0,max_x,max_y);
-        g.setColor(Color.black);
-        int x, y;
-        //punctele
-        for(Integer t:t.c.solutia) {
-            x = max_x/2 + ((int)(((clienti.get(t).longitudine-dx)*fs))); 
-            y = max_y/2 - ((int)(((clienti.get(t).latitudine-dy)*fs)));
-            g.drawOval(x,y,3,3);
-        }
-        //drumul cel mai scurt
-        int x2,y2;
-        //linia de acasa pana la primul:
-        g.setColor(Color.BLUE);
-        x = max_x/2 + ((int)(((casa.longitudine-dx)*fs))); 
-        y = max_y/2 - ((int)(((casa.latitudine-dy)*fs)));
-        x2 = max_x/2 + ((int)(((clienti.get(t.c.solutia.get(0)).longitudine-dx)*fs))); 
-        y2 = max_y/2 - ((int)(((clienti.get(t.c.solutia.get(0)).latitudine-dy)*fs)));
-        g.drawLine(x,y,x2,y2);
-        g.setColor(Color.black);
-        for(int i=0;i<t.c.solutia.size()-1;i++) {
-            int i1 = t.c.solutia.get(i);
-            int i2 = t.c.solutia.get(i+1);
-            x = max_x/2 + ((int)(((clienti.get(i1).longitudine-dx)*fs))); 
-            y = max_y/2 - ((int)(((clienti.get(i1).latitudine-dy)*fs)));
-            x2 = max_x/2 + ((int)(((clienti.get(i2).longitudine-dx)*fs))); 
-            y2 = max_y/2 - ((int)(((clienti.get(i2).latitudine-dy)*fs)));
-            g.drawLine(x,y,x2,y2);
-            /*try {
-                TimeUnit.SECONDS.sleep(1);
-            } catch (InterruptedException ex) {
-                Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
-            }*/
-        }
-    }
     /**
      * @param args the command line arguments
      */
@@ -416,12 +385,14 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JLabel FitTotal;
     private javax.swing.JLabel GenCur;
     private javax.swing.JPanel Panel1;
+    private javax.swing.JComboBox<String> VitezaAlgoritm;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSlider jSlider1;
@@ -439,7 +410,7 @@ public class MainFrame extends javax.swing.JFrame {
     public void setBest(Individ i, int generatia) {
         if(i!=null) {
             best = i;
-            BSDistanta.setText(best.getFitnes()+"");
+            BSDistanta.setText((int)((double)best.getFitnes())+" km");
             BSNrCamioane.setText(best.camioane.size()+"");
             BSGeneratia.setText("("+generatia+")");
         } else {
@@ -470,11 +441,15 @@ public class MainFrame extends javax.swing.JFrame {
      *
      */
     private static void calculeaza_tablou_distante() {
-        distante = new Double[MainFrame.clienti.size()][MainFrame.clienti.size()];
-        for (int i = 0; i < MainFrame.clienti.size(); i++) {
-            for (int j = 0; j < MainFrame.clienti.size(); j++) {
-                MainFrame.distante[i][j] = distanta(MainFrame.clienti.get(i), MainFrame.clienti.get(j));
+        distante = new Double[clienti.size()][clienti.size()];
+        for (int i = 0; i < clienti.size(); i++) {
+            for (int j = 0; j < clienti.size(); j++) {
+                distante[i][j] = distanta(clienti.get(i), clienti.get(j));
             }
+        }
+        catre_casa = new Double[clienti.size()];
+        for(int i=0;i<clienti.size();i++) {
+            catre_casa[i] = distanta(casa,clienti.get(i));
         }
     }
 

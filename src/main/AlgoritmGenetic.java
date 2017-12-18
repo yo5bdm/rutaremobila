@@ -17,78 +17,76 @@ import static main.MainFrame.*;
 public class AlgoritmGenetic extends Thread {
     
     private int nr_clienti;
-    private final int nr_indivizi=50;
-    private final double probabilitate_mutatie = 0.05; //5%
-    private final int max_generatii = 1000;
+    private final int nr_indivizi=1000;
+    private final double probabilitate_mutatie = 0.03; //5%
+    private int max_generatii;
     private final int nr_camioane=48;
     
-    private final Random r = new Random();
+    public static final Random r = new Random();
     public final ArrayList<Individ> populatie = new ArrayList();
     private final ArrayList<Individ> pop_temp = new ArrayList();
      
     
-    public AlgoritmGenetic(int size) {
+    public AlgoritmGenetic(int size,int viteza) {
         nr_clienti = size;
         populatie.clear();
         pop_temp.clear();
+        switch(viteza) {
+            case 0: //rapid
+                max_generatii = 500;
+            case 1: //mediu
+                max_generatii = 2000;
+            case 2: //lent
+                max_generatii = 10000;
+            default: // case 3: infinit
+                max_generatii = Integer.MAX_VALUE;
+        }
     }
 
     public void run() {
         double total;
-        System.out.println("Generez populatia initiala: "+nr_indivizi+" indivizi, "+nr_camioane+" camioane...");
         genereaza_pop_initiala(nr_indivizi,nr_camioane);//
-        System.out.println("Optimizare incarcaturi...");
         int x=0;
         for(Individ c:populatie) {
             c.fitnes();
         }
-        System.out.println("Calculam fitnesul total al generatiei initiale");
-        System.out.println(""+fitnes_total());
         Individ best_fit, best;
         Collections.sort(populatie);
         best_fit = populatie.get(0);
-        int best_gen=-1; //generatia celui mai bun
         for(int g=0;g<max_generatii;g++) {//
             m.setGen(g);
-            System.out.println("Incep generatia "+g+"...");
             recombinare();//
             mutatie();//
+            for(Individ i:pop_temp) i.fitnes(); //calculam fitnessul pentru populatia temporara
             selectie();//
             total = fitnes_total();
             m.setFit(total);
             Collections.sort(populatie);
             best = populatie.get(0);
-            if(best.fitnes()<best_fit.fitnes() && best.ok()==true) {
+            if(best.fitnes()<best_fit.fitnes() && best.ok()==true) { //&& best.ok()==true
+                System.out.println("Am gasit unul mai bun...");
+                System.out.println(best);
                 best_fit = best;
-                best_gen = g;
-                m.setBest(best,g);
-                System.out.println("Gasit mai bun in generatia "+g);
+                m.setBest(best_fit,g);
             }
         }
-        System.out.println("Cel mai bun a fost gasit in generatia: "+best_gen);
         System.out.println(best_fit);
     }
 
     private void genereaza_pop_initiala(int nr_indivizi, int nr_camioane) {
-        for(int i=0;i<nr_indivizi;i++) {
-            Individ n = new Individ(nr_clienti,nr_camioane);
-            for(int j=0;j<nr_clienti;j++) {
-                n.cromozom[j] = r.nextInt(nr_camioane-1);
-            }
-            populatie.add(n);
+        for(int i=0;i<nr_indivizi;i++) {            
+            populatie.add(new Individ(nr_clienti,nr_camioane,true));
         }
     }
 
     private void recombinare() {
         pop_temp.clear();
-        for(int k=0;k<nr_indivizi/2;k++){
-            int i1 = r.nextInt(populatie.size());
-            int i2 = r.nextInt(populatie.size());
-            Individ p1 = populatie.get(i1);
-            Individ p2 = populatie.get(i2);
+        for(int k=0;k<nr_indivizi;k++){
+            Individ p1 = populatie.get(r.nextInt(populatie.size()));
+            Individ p2 = populatie.get(r.nextInt(populatie.size()));
             
-            Individ a = new Individ(nr_clienti,nr_camioane);
-            Individ b = new Individ(nr_clienti,nr_camioane);
+            Individ a = new Individ(nr_clienti,nr_camioane,false); //false = nu generam cromozomul
+            Individ b = new Individ(nr_clienti,nr_camioane,false);
             int pct_taiere = r.nextInt(nr_clienti-1);
             for(int i=0;i<nr_clienti;i++) {
                 if(i<pct_taiere) {
@@ -105,28 +103,25 @@ public class AlgoritmGenetic extends Thread {
     }
 
     private void mutatie() {
-        //System.out.println("Mutatie...");
         for(Individ c:pop_temp) { //pentru fiecare individ
             for(int i=0;i<c.cromozom.length;i++) { //se ia fiecare cromozom
                 if(r.nextDouble()<probabilitate_mutatie) { //random < probabilitatea de mutatie
                     int pos2 = r.nextInt(c.cromozom.length-1); //se selecteaza random o alta pozitie din cromozom
-                    if(pos2!=i) { //si se face swap
-                        int temp = c.cromozom[i];
-                        c.cromozom[i] = c.cromozom[pos2];
-                        c.cromozom[pos2] = temp;
+                    while(pos2==i) {
+                        pos2 = r.nextInt(c.cromozom.length-1);
                     }
+                    //si se face swap
+                    int temp = c.cromozom[i];
+                    c.cromozom[i] = c.cromozom[pos2];
+                    c.cromozom[pos2] = temp;
                 }
             }
-            //c.optimize_loads(); //optimizam incarcarile
-            c.fitnes(); //calculam fitnes
         }
     }
 
     private void selectie() {
-        pop_temp.addAll(populatie);
+        pop_temp.addAll(populatie); //includem si parintii?
         populatie.clear();
-        //System.out.println("Selectie...");
-//sorteaza descendent dupa fitnes_total
         Collections.sort(pop_temp);
         for(int i=0;i<this.nr_indivizi;i++) {
             //random gausian absolut intre 0 si nr_indivizi
