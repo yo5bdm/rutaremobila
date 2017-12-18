@@ -49,13 +49,11 @@ public class AlgoritmGenetic extends Thread {
         best_fit = populatie.get(0);
         int best_gen=-1; //generatia celui mai bun
         for(int g=0;g<max_generatii;g++) {//
-            model.fireTableDataChanged();
             m.setGen(g);
             System.out.println("Incep generatia "+g+"...");
             recombinare();//
             mutatie();//
             selectie();//
-            
             total = fitnes_total();
             m.setFit(total);
             Collections.sort(populatie);
@@ -63,8 +61,9 @@ public class AlgoritmGenetic extends Thread {
             if(best.fitnes()<best_fit.fitnes() && best.ok()==true) {
                 best_fit = best;
                 best_gen = g;
+                m.setBest(best,g);
+                System.out.println("Gasit mai bun in generatia "+g);
             }
-            System.out.println("Generatia "+g+", fitnes total "+total);
         }
         System.out.println("Cel mai bun a fost gasit in generatia: "+best_gen);
         System.out.println(best_fit);
@@ -72,7 +71,6 @@ public class AlgoritmGenetic extends Thread {
 
     private void genereaza_pop_initiala(int nr_indivizi, int nr_camioane) {
         for(int i=0;i<nr_indivizi;i++) {
-            System.out.println("Individ "+i);
             Individ n = new Individ(nr_clienti,nr_camioane);
             for(int j=0;j<nr_clienti;j++) {
                 n.cromozom[j] = r.nextInt(nr_camioane-1);
@@ -83,7 +81,6 @@ public class AlgoritmGenetic extends Thread {
 
     private void recombinare() {
         pop_temp.clear();
-        System.out.println("Recombinare...");
         for(int k=0;k<nr_indivizi/2;k++){
             int i1 = r.nextInt(populatie.size());
             int i2 = r.nextInt(populatie.size());
@@ -108,7 +105,7 @@ public class AlgoritmGenetic extends Thread {
     }
 
     private void mutatie() {
-        System.out.println("Mutatie...");
+        //System.out.println("Mutatie...");
         for(Individ c:pop_temp) { //pentru fiecare individ
             for(int i=0;i<c.cromozom.length;i++) { //se ia fiecare cromozom
                 if(r.nextDouble()<probabilitate_mutatie) { //random < probabilitatea de mutatie
@@ -128,7 +125,7 @@ public class AlgoritmGenetic extends Thread {
     private void selectie() {
         pop_temp.addAll(populatie);
         populatie.clear();
-        System.out.println("Selectie...");
+        //System.out.println("Selectie...");
 //sorteaza descendent dupa fitnes_total
         Collections.sort(pop_temp);
         for(int i=0;i<this.nr_indivizi;i++) {
@@ -141,7 +138,7 @@ public class AlgoritmGenetic extends Thread {
     }
 
     private double fitnes_total() {
-        System.out.println("Calculez fitnes total");
+        //System.out.println("Calculez fitnes total");
         double tot=0.0;
         for(Individ i:populatie) {
             tot += i.fitnes();

@@ -28,89 +28,21 @@ public class MainFrame extends javax.swing.JFrame {
     public static ModelTabel model;
     public static AlgoritmGenetic a;
     public Testing t = new Testing();
-    /**
-     *
-     * @param u the value of u
-     * @param d the value of d
-     * @return the double
-     */
-    public static double distanta(Client u, Client d) {
-        //https://www.movable-type.co.uk/scripts/latlong.html
-        double delta_lat = toRad(u.latitudine - d.latitudine); //latitudine
-        double delta_long = toRad(u.longitudine - d.longitudine);
-        double R = 6371; //km
-        double a = Math.sin(delta_lat / 2) * Math.sin(delta_lat / 2) + Math.cos(toRad(u.latitudine)) * Math.cos(toRad(d.latitudine)) * Math.sin(delta_long / 2) * Math.sin(delta_long / 2);
-        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    }
-
-    /**
-     *
-     */
-    private static void calculeaza_tablou_distante() {
-        distante = new Double[MainFrame.clienti.size()][MainFrame.clienti.size()];
-        for (int i = 0; i < MainFrame.clienti.size(); i++) {
-            for (int j = 0; j < MainFrame.clienti.size(); j++) {
-                MainFrame.distante[i][j] = distanta(MainFrame.clienti.get(i), MainFrame.clienti.get(j));
-            }
-        }
-    }
-
-    /**
-     *
-     */
-    public static void incarca_clienti() {
-        BufferedReader fin;
-        try {
-            fin = new BufferedReader(new FileReader("clienti.csv"));
-            MainFrame.clienti.clear();
-            String linie;
-            while ((linie = fin.readLine()) != null) {
-                //fiecare elev pe o linie, separat prin virgula
-                StringTokenizer t = new StringTokenizer(linie, ";");
-                MainFrame.clienti.add(new Client(t.nextToken(), Double.parseDouble(t.nextToken()), Double.parseDouble(t.nextToken()), Double.parseDouble(t.nextToken())));
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    /**
-     *
-     * @param unghi the value of unghi
-     * @return the double
-     */
-    public static double toRad(double unghi) {
-        return unghi * Math.PI / 180;
-    }
-
-    /**
-     *
-     */
-    private static void sterge_cele_mari() {
-        int i = 0;
-        int max = MainFrame.clienti.size();
-        while (i < max) {
-            Client c = MainFrame.clienti.get(i);
-            if (c.volum > 100) {
-                System.out.println("Sterg " + c);
-                MainFrame.clienti.remove(i);
-                max--;
-                i--;
-            }
-            i++;
-        }
-    }
-
+    
+    
+    public static Individ best;
     /**
      * Creates new form MainFrame
      */
     public MainFrame() {
+        //setLocationRelativeTo(null); //center
         initComponents();
         incarca_clienti();
         sterge_cele_mari();//!!!!!!!!!!!!!!!!!! doar pentru testing
         calculeaza_tablou_distante();
         m = this;
         model = new ModelTabel();
+        setBest(null,-1);
         jTable1.setModel(model);
         //t.run(); //testele
     }
@@ -126,13 +58,20 @@ public class MainFrame extends javax.swing.JFrame {
 
         Panel1 = new javax.swing.JPanel();
         jSlider1 = new javax.swing.JSlider();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
         GenCur = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         FitTotal = new javax.swing.JLabel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTable1 = new javax.swing.JTable();
+        jButton1 = new javax.swing.JButton();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        BSDistanta = new javax.swing.JLabel();
+        BSNrCamioane = new javax.swing.JLabel();
+        BSGeneratia = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -147,7 +86,7 @@ public class MainFrame extends javax.swing.JFrame {
         );
         Panel1Layout.setVerticalGroup(
             Panel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 619, Short.MAX_VALUE)
+            .addGap(0, 0, Short.MAX_VALUE)
         );
 
         jSlider1.addChangeListener(new javax.swing.event.ChangeListener() {
@@ -155,6 +94,16 @@ public class MainFrame extends javax.swing.JFrame {
                 jSlider1StateChanged(evt);
             }
         });
+
+        jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        jLabel1.setText("Generatia curenta:");
+
+        GenCur.setText("-1");
+
+        jLabel2.setText("Fitnes total:");
+
+        FitTotal.setText("1");
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -169,20 +118,88 @@ public class MainFrame extends javax.swing.JFrame {
         ));
         jScrollPane1.setViewportView(jTable1);
 
-        jLabel1.setText("Generatia curenta:");
-
-        jButton1.setText("Porneste");
+        jButton1.setText("Porneste generarea");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton1ActionPerformed(evt);
             }
         });
 
-        GenCur.setText("-1");
+        jLabel3.setText("Cea mai buna solutie:");
 
-        jLabel2.setText("Fitnes total:");
+        jLabel4.setText("Distanta totala:");
 
-        FitTotal.setText("1");
+        jLabel5.setText("Nr Camioane folosite:");
+
+        BSDistanta.setText("jLabel6");
+
+        BSNrCamioane.setText("jLabel6");
+
+        BSGeneratia.setText("jLabel6");
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLabel1)
+                                .addGap(89, 89, 89)
+                                .addComponent(GenCur))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLabel2)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(FitTotal)))
+                        .addGap(0, 104, Short.MAX_VALUE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel4)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(BSDistanta))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel5)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(BSNrCamioane))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(BSGeneratia)))
+                .addContainerGap())
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(GenCur))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel2)
+                    .addComponent(FitTotal))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jButton1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel3)
+                    .addComponent(BSGeneratia))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel4)
+                    .addComponent(BSDistanta))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel5)
+                    .addComponent(BSNrCamioane))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 531, Short.MAX_VALUE)
+                .addContainerGap())
+        );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -190,46 +207,23 @@ public class MainFrame extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jSlider1, javax.swing.GroupLayout.PREFERRED_SIZE, 638, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 132, Short.MAX_VALUE))
-                    .addComponent(Panel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(layout.createSequentialGroup()
-                            .addComponent(jLabel1)
-                            .addGap(154, 154, 154)
-                            .addComponent(GenCur))
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 304, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jButton1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 137, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel2)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(FitTotal)))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(Panel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jSlider1, javax.swing.GroupLayout.DEFAULT_SIZE, 1096, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel1)
-                            .addComponent(GenCur))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(FitTotal, javax.swing.GroupLayout.Alignment.TRAILING)))
-                    .addComponent(Panel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jSlider1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton1, javax.swing.GroupLayout.Alignment.TRAILING))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(Panel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jSlider1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
@@ -371,12 +365,19 @@ public class MainFrame extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel BSDistanta;
+    private javax.swing.JLabel BSGeneratia;
+    private javax.swing.JLabel BSNrCamioane;
     private javax.swing.JLabel FitTotal;
     private javax.swing.JLabel GenCur;
     private javax.swing.JPanel Panel1;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSlider jSlider1;
     private javax.swing.JTable jTable1;
@@ -389,6 +390,93 @@ public class MainFrame extends javax.swing.JFrame {
     void setFit(Double total) {
         FitTotal.setText(""+total.intValue());
     }
+    
+    public void setBest(Individ i, int generatia) {
+        if(i!=null) {
+            best = i;
+            BSDistanta.setText(best.getFitnes()+"");
+            BSNrCamioane.setText(best.camioane.size()+"");
+            BSGeneratia.setText("("+generatia+")");
+        } else {
+            best = null;
+            BSDistanta.setText("");
+            BSNrCamioane.setText("");
+            BSGeneratia.setText("");
+        }
+        model.fireTableDataChanged();
+    }
+    
+    /**
+     *
+     * @param u the value of u
+     * @param d the value of d
+     * @return the double
+     */
+    public static double distanta(Client u, Client d) {
+        //https://www.movable-type.co.uk/scripts/latlong.html
+        double delta_lat = toRad(u.latitudine - d.latitudine); //latitudine
+        double delta_long = toRad(u.longitudine - d.longitudine);
+        double R = 6371; //km
+        double a = Math.sin(delta_lat / 2) * Math.sin(delta_lat / 2) + Math.cos(toRad(u.latitudine)) * Math.cos(toRad(d.latitudine)) * Math.sin(delta_long / 2) * Math.sin(delta_long / 2);
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
 
+    /**
+     *
+     */
+    private static void calculeaza_tablou_distante() {
+        distante = new Double[MainFrame.clienti.size()][MainFrame.clienti.size()];
+        for (int i = 0; i < MainFrame.clienti.size(); i++) {
+            for (int j = 0; j < MainFrame.clienti.size(); j++) {
+                MainFrame.distante[i][j] = distanta(MainFrame.clienti.get(i), MainFrame.clienti.get(j));
+            }
+        }
+    }
+
+    /**
+     *
+     */
+    public static void incarca_clienti() {
+        BufferedReader fin;
+        try {
+            fin = new BufferedReader(new FileReader("clienti.csv"));
+            MainFrame.clienti.clear();
+            String linie;
+            while ((linie = fin.readLine()) != null) {
+                //fiecare elev pe o linie, separat prin virgula
+                StringTokenizer t = new StringTokenizer(linie, ";");
+                MainFrame.clienti.add(new Client(t.nextToken(), Double.parseDouble(t.nextToken()), Double.parseDouble(t.nextToken()), Double.parseDouble(t.nextToken())));
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    /**
+     *
+     * @param unghi the value of unghi
+     * @return the double
+     */
+    public static double toRad(double unghi) {
+        return unghi * Math.PI / 180;
+    }
+
+    /**
+     *
+     */
+    private static void sterge_cele_mari() {
+        int i = 0;
+        int max = MainFrame.clienti.size();
+        while (i < max) {
+            Client c = MainFrame.clienti.get(i);
+            if (c.volum > 100) {
+                System.out.println("Sterg " + c);
+                MainFrame.clienti.remove(i);
+                max--;
+                i--;
+            }
+            i++;
+        }
+    }
     
 }

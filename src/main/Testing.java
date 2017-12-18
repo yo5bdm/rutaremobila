@@ -16,7 +16,7 @@ public class Testing {
     public Camion c = new Camion(110);
     private Random r = new Random();
     public void run() {
-        //CamionTest();
+        CamionTest();
         IndividTest();
     }
     

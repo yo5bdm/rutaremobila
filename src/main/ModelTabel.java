@@ -13,17 +13,18 @@ import static main.MainFrame.*;
  * @author yo5bdm
  */
 class ModelTabel extends AbstractTableModel {
-
     
-    String[] coloane = {"Fitnes"};
+    
+    
+    String[] coloane = {"Distanta","Ocupat","Opriri","OK"};
     private final Class[] columnClass = new Class[] {
-        Double.class
+        Double.class, Double.class, Integer.class, Boolean.class
     };
     
     @Override
     public int getRowCount() {
-        if(a==null || a.populatie ==null) return 0;
-        return a.populatie.size();
+        if(m==null || m.best ==null) return 0;
+        return m.best.camioane.size();
     }
 
     @Override
@@ -33,7 +34,17 @@ class ModelTabel extends AbstractTableModel {
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
-        return a.populatie.get(rowIndex).getFitnes();
+        Camion c = m.best.camioane.get(rowIndex);
+        switch(columnIndex) {
+            case 0:
+                return c.distanta;
+            case 1:
+                return c.ocupat(); 
+            case 2:
+                return c.opriri;
+            default:
+                return c.ok;
+        }
     }
     @Override
     public String getColumnName(int nr) {

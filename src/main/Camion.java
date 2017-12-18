@@ -67,6 +67,10 @@ public class Camion {
         return ret;
     }
     
+    public Double ocupat() {
+        return (ocupat/capacitate)*100;
+    }
+    
     public void add(int i) {
         pachete.add(i);
         calc_partial();
