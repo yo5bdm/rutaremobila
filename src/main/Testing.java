@@ -42,10 +42,7 @@ public class Testing {
     }
     
     private void IndividTest() {
-        Individ n = new Individ(clienti.size(),48);
-        for(int j=0;j<clienti.size();j++) {
-            n.cromozom[j] = r.nextInt(47);
-        }
+        Individ n = new Individ(clienti.size(),48,true);
         System.out.println("Fitnes total"+n.fitnes()); 
         for(Camion c:n.camioane) System.out.println(c);
         System.out.println("Neincarcabile = "+n.neincarcabile());
