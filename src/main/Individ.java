@@ -6,8 +6,8 @@
 package main;
 
 import java.util.ArrayList;
-import static main.AlgoritmGenetic.r;
 import static main.MainFrame.clienti;
+import static main.AlgoritmGenetic.R;
 
 /**
  *
@@ -17,7 +17,9 @@ public class Individ implements Comparable {
     private Double distanta_totala;
     private Double fitness; // media procentul de incarcare impartit la nr de camioane
     private Integer nr_camioane;
+    private int viata;
     public Integer[] cromozom; //indexul e obiectul, valoarea e camionul pe care e incarcat
+    public Integer[] cromozom2;
 
     ArrayList<Camion> camioane = new ArrayList();
     /**
@@ -27,11 +29,14 @@ public class Individ implements Comparable {
      */
     public Individ(int nr, int cam, boolean generare) {
         cromozom = new Integer[nr];
+        cromozom2 = new Integer[nr];
         nr_camioane = cam;
+        viata = 10;
         int capacitate;
         if(generare == true) {
             for(int j=0;j<nr;j++) {
-            cromozom[j] = r.nextInt(nr_camioane-1); //random in camioanele care pot duce marfa respectiva
+            cromozom[j] = R.nextInt(nr_camioane-1); //random in camioanele care pot duce marfa respectiva
+            cromozom2[j] = cromozom[j];
             //clienti.get(j).volum
             }
         }
@@ -57,6 +62,12 @@ public class Individ implements Comparable {
             }
         }
         nr_camioane = camioane.size();
+    }
+    
+    public void copiaza() { //copiaza cromozomul curent in cromozomul copie
+        for(int i=0;i<cromozom.length;i++){
+            cromozom2[i]=cromozom[i];
+        }
     }
     
     /**
@@ -177,13 +188,22 @@ public class Individ implements Comparable {
         //for(Camion c:camioane) System.out.println(c);
         return "";
     }
-    Object getFitnes() {
+    public Object getFitnes() {
         return fitness;
     }    
 
-    boolean ok() {
+    public boolean ok() {
         if(neincarcabile()>0 && neincarcate()>=0) return false;
         for(Camion c:camioane) if(c.ok==false) return false;
         return true;
+    }
+
+    public boolean selectabil() {
+        if(viata>0) return true;
+        else return false;
+    }
+
+    public void selecteaza() {
+        viata--;
     }
 }

@@ -61,7 +61,7 @@ public class MainFrame extends javax.swing.JFrame {
         dx /= clienti.size();
         dy /= clienti.size();
         g = Panel1.getGraphics();
-        t.run(); //testele
+        //t.run(); //testele
     }
     
     ActionListener listener = new ActionListener() {
@@ -291,14 +291,13 @@ public class MainFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jSlider1StateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_jSlider1StateChanged
-
         redraw();
     }//GEN-LAST:event_jSlider1StateChanged
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         int viteza = VitezaAlgoritm.getSelectedIndex();
         redraw();
-        a = new AlgoritmGenetic(clienti.size(),viteza);
+        a = new AlgoritmGenetic(clienti.size(),viteza,5);
         a.start();
     }//GEN-LAST:event_jButton1ActionPerformed
 
