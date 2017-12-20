@@ -6,8 +6,10 @@
 package main;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import static main.MainFrame.clienti;
 import static main.AlgoritmGenetic.R;
+import static main.MainFrame.hashDb;
 
 /**
  *
@@ -70,11 +72,20 @@ public class Individ implements Comparable {
         }
     }
     
+    public double getFitness() {
+        return fitness;
+    }
     /**
-     * Calculeaza fitnes-ul individului curent.
+     * Calculeaza fitness-ul individului curent.
      * @return 
      */
-    public double fitnes() {
+    public double calculeaza(boolean optimizeaza) {
+//        Nod n = hashDb.iaNod(this.hashCode());
+//        if(n!=null) {
+//            this.fitness = n.fitness;
+//            return fitness;
+//        }
+//        int hash = this.hashCode();
         int max=0;
         for(int i:cromozom) if(i>max) max=i; //gasim maxim
         nr_camioane = max+1;
@@ -86,7 +97,7 @@ public class Individ implements Comparable {
             if(cromozom[i]==-1) continue;
             camioane.get(cromozom[i]).add(i); //luat camionul cu nr gasit la indexul i si adaugam produsul in el
         }
-        optimize_loads();
+        if(optimizeaza) optimize_loads();
         fitness = 0.0;
         for (Camion camion : camioane) {
             fitness += camion.calc(); //distanta totala parcursa de toate camioanele
@@ -95,6 +106,7 @@ public class Individ implements Comparable {
         for(int i=0;i<neincarcabile();i++){
             fitness += 9999.0;
         }
+        //hashDb.adauga(hash,fitness);
         return fitness;
     }
     
@@ -174,8 +186,12 @@ public class Individ implements Comparable {
 
     @Override
     public int hashCode() {
-        return super.hashCode(); //To change body of generated methods, choose Tools | Templates.
+        int hash = 3;
+        hash = 59 * hash + Arrays.deepHashCode(this.cromozom);
+        return hash;
     }
+
+    
     
     public int compareTo(Object o) {
         Individ c = (Individ) o;
@@ -188,9 +204,6 @@ public class Individ implements Comparable {
         //for(Camion c:camioane) System.out.println(c);
         return "";
     }
-    public Object getFitnes() {
-        return fitness;
-    }    
 
     public boolean ok() {
         if(neincarcabile()>0 && neincarcate()>=0) return false;

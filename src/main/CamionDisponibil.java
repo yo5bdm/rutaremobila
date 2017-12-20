@@ -25,7 +25,15 @@ public class CamionDisponibil {
         Collections.sort(capacitati);
     }
     
-    
+    public int cautaLiber() {
+        for(CamDisp i: capacitati) {
+            if(i.disponibile>0) {
+                i.disponibile--;
+                return i.capacitate;
+            }
+        }
+        return -1;
+    }
 }
 
 class CamDisp implements Comparable {

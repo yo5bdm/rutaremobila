@@ -48,40 +48,48 @@ public class AlgoritmGenetic extends Thread {
         double total;
         genereaza_pop_initiala(nrIndivizi,nrCamioane);//
         for(Individ c:populatie) {
-            c.fitnes();
+            c.calculeaza(true);
         }
-        Individ best_fit, best;
+        Individ best_fit;
         Collections.sort(populatie);
         best_fit = populatie.get(0);
+        if(best == null) best=best_fit;
         for(int g=0;g<maxGeneratii;g++) {//
-            m.setGen(g);
+            if(g%10==0) {
+                System.out.println("Firul cu "+probabilitateMutatie+"% este la generatia "+g);
+            }
+            //m.setGen(g);
             recombinare();//
             mutatie();//
-            for(Individ i:popTemp) i.fitnes(); //calculam fitnessul pentru populatia temporara
+            for(Individ i:popTemp) i.calculeaza(true); //calculam fitnessul pentru populatia temporara
             selectie();//
-            total = fitnes_total();
-            m.setFit(total);
+            //total = fitnes_total();
+            //m.setFit(total);
             Collections.sort(populatie);
-            best = populatie.get(0);
-            if(best.fitnes()<best_fit.fitnes() && best.ok()==true) { //&& best.ok()==true
-                System.out.println("Am gasit unul mai bun...");
-                System.out.println(best);
-                best_fit = best;
-                m.setBest(best_fit,g);
+            best_fit = populatie.get(0);
+            synchronized(O) {
+                if(best_fit.getFitness()<best.getFitness() && best_fit.ok()==true) {
+                    System.out.println("Am gasit unul mai bun in firul cu "+probabilitateMutatie);
+                    System.out.println(best.getFitness()+" este acum");
+                    System.out.println(best_fit);
+                    //best = best_fit;
+                    m.setBest(best_fit,g,probabilitateMutatie);
+                }
+                O.notifyAll();
             }
+            
         }
-        System.out.println(best_fit);
     }
 
     private void genereaza_pop_initiala(int nr_indivizi, int nr_camioane) {
         for(int i=0;i<nr_indivizi;i++) {            
             populatie.add(new Individ(nrClienti,nr_camioane,true));
-        }
+        }        
     }
 
     private void recombinare() {
         popTemp.clear();
-        for(int k=0;k<nrIndivizi/2;k++){
+        while(popTemp.size()<nrIndivizi){
             Individ p1 = populatie.get(R.nextInt(populatie.size()));
             Individ p2 = populatie.get(R.nextInt(populatie.size()));
             
@@ -150,7 +158,6 @@ public class AlgoritmGenetic extends Thread {
                     c.cromozom[pos2] = temp;
                 }
             }
-            //c.copiaza(); //se copiaza cromozomul.
         }
     }
 
@@ -178,10 +185,10 @@ public class AlgoritmGenetic extends Thread {
     }
 
     private double fitnes_total() {
-        //System.out.println("Calculez fitnes total");
+        //System.out.println("Calculez calculeaza total");
         double tot=0.0;
         for(Individ i:populatie) {
-            tot += i.fitnes();
+            tot += i.calculeaza(true);
         }
         return tot;
     }

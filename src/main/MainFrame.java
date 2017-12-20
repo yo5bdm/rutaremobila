@@ -30,9 +30,11 @@ public class MainFrame extends javax.swing.JFrame {
     public static Double[] catre_casa;
     public static MainFrame m;
     public static ModelTabel model;
-    public static AlgoritmGenetic a;
+    public static AlgoritmGenetic a, b, c;
     public Testing t = new Testing();
     public static Individ best;
+    public static final Object O = new Object(); //syncronized
+    public static HashDB hashDb = new HashDB();
     
     private Timer paint;
     private Camion camion;
@@ -51,7 +53,7 @@ public class MainFrame extends javax.swing.JFrame {
         calculeaza_tablou_distante();
         m = this;
         model = new ModelTabel();
-        setBest(null,-1);
+        setBest(null,-1,-1);
         jTable1.setModel(model);
         camion = null;
         for(Client c:clienti) { 
@@ -75,7 +77,6 @@ public class MainFrame extends javax.swing.JFrame {
     private void redraw() {
         fs = (double)jSlider1.getValue();
         ploteaza_punctele();
-        //ploteaza_testul(fs);
     }
     
     /**
@@ -297,8 +298,12 @@ public class MainFrame extends javax.swing.JFrame {
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         int viteza = VitezaAlgoritm.getSelectedIndex();
         redraw();
-        a = new AlgoritmGenetic(clienti.size(),viteza,5);
+        a = new AlgoritmGenetic(clienti.size(),viteza,2); //3
+        b = new AlgoritmGenetic(clienti.size(),viteza,3); //5
+        c = new AlgoritmGenetic(clienti.size(),viteza,4); //7
         a.start();
+        b.start();
+        c.start();
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jTable1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable1MouseClicked
@@ -406,12 +411,14 @@ public class MainFrame extends javax.swing.JFrame {
         FitTotal.setText(""+total.intValue());
     }
     
-    public void setBest(Individ i, int generatia) {
+    public void setBest(Individ i, int generatia, int mutatie) {
         if(i!=null) {
+            int delta = Integer.MAX_VALUE;
+            if(best!=null) delta = (int)(best.getFitness()-i.getFitness());
             best = i;
-            BSDistanta.setText((int)((double)best.getFitnes())+" km");
+            BSDistanta.setText((int)((double)best.getFitness())+" km ("+delta+")");
             BSNrCamioane.setText(best.camioane.size()+"");
-            BSGeneratia.setText("("+generatia+")");
+            BSGeneratia.setText("(G"+generatia+"M"+mutatie+")");
         } else {
             best = null;
             BSDistanta.setText("");
@@ -421,20 +428,6 @@ public class MainFrame extends javax.swing.JFrame {
         model.fireTableDataChanged();
     }
     
-    /**
-     *
-     * @param u the value of u
-     * @param d the value of d
-     * @return the double
-     */
-    public static double distanta(Client u, Client d) {
-        //https://www.movable-type.co.uk/scripts/latlong.html
-        double delta_lat = toRad(u.latitudine - d.latitudine); //latitudine
-        double delta_long = toRad(u.longitudine - d.longitudine);
-        double R = 6371; //km
-        double a = Math.sin(delta_lat / 2) * Math.sin(delta_lat / 2) + Math.cos(toRad(u.latitudine)) * Math.cos(toRad(d.latitudine)) * Math.sin(delta_long / 2) * Math.sin(delta_long / 2);
-        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    }
 
     /**
      *
@@ -443,12 +436,12 @@ public class MainFrame extends javax.swing.JFrame {
         distante = new Double[clienti.size()][clienti.size()];
         for (int i = 0; i < clienti.size(); i++) {
             for (int j = 0; j < clienti.size(); j++) {
-                distante[i][j] = distanta(clienti.get(i), clienti.get(j));
+                distante[i][j] = Calcule.distanta(clienti.get(i), clienti.get(j));
             }
         }
         catre_casa = new Double[clienti.size()];
         for(int i=0;i<clienti.size();i++) {
-            catre_casa[i] = distanta(casa,clienti.get(i));
+            catre_casa[i] = Calcule.distanta(casa,clienti.get(i));
         }
     }
 

@@ -16,36 +16,38 @@ public class Testing {
     public Camion c = new Camion(110);
     private Random r = new Random();
     public void run() {
-        CamionTest();
+        System.out.println("System testing:");
+        //CamionTest();
         //IndividTest();
+        HashTest();
     }
     
     private int CamionTest() {
-        System.out.println("System testing:");
+        Individ n=new Individ(clienti.size(),1,false);
+        
         System.out.println("Adaug 10 pachete...");
-        for(int i=0;i<10;i++) c.pachete.add(3*i);
-        c.calc();
-        //if(c.ok==true) 
-        System.out.println("ok="+c.ok+" "+c.opriri+" "+c.pachete.size());
-        System.out.println("Ocupat "+c.ocupat+" = "+(c.ocupat/c.capacitate));
-        System.out.println("Distanta = "+c.distanta);
-//        System.out.println("Pachetele: ");
-//        for(Integer i:c.pachete) {
-//            System.out.println(i+" GPS="+clienti.get(i).latitudine+","+clienti.get(i).longitudine);
-//        }
-        System.out.println("Optimizez cu backtracking:");
-        c.optimizare();
-        System.out.println("ok="+c.ok+" "+c.opriri+" "+c.pachete.size());
-        System.out.println("Ocupat "+c.ocupat+" = "+(c.ocupat/c.capacitate));
-        System.out.println("Distanta = "+c.distanta);
+        for(int i=0;i<clienti.size();i++) n.cromozom[i]=-1;
+        for(int i=0;i<10;i++) {
+            n.cromozom[10*i]=0;
+        }
+        n.calculeaza(false);
+        //m.setBest(n,-20);      
         return 0;
     }
     
     private void IndividTest() {
         Individ n = new Individ(clienti.size(),48,true);
-        System.out.println("Fitnes total"+n.fitnes()); 
+        System.out.println("Fitnes total"+n.calculeaza(true)); 
         for(Camion c:n.camioane) System.out.println(c);
         System.out.println("Neincarcabile = "+n.neincarcabile());
+        //m.setBest(n,-10);
+    }
+
+    private void HashTest() {
+        Individ n = new Individ(clienti.size(),48,true);
+        Individ s = new Individ(clienti.size(),48,true);
+        System.out.println("n "+n.hashCode());
+        System.out.println("s "+s.hashCode());
     }
     
     
