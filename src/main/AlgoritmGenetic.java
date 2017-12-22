@@ -60,7 +60,7 @@ public class AlgoritmGenetic extends Thread {
         best_fit = populatie.get(0);
         if(best == null) best=best_fit;
         for(int g=0;g<maxGeneratii;g++) {//
-            if(g%10==0) {
+            if(g%5==0) {
                 m.setProgres(g);
             }
             recombinare();//
@@ -70,7 +70,7 @@ public class AlgoritmGenetic extends Thread {
             Collections.sort(populatie);
             best_fit = populatie.get(0);
             synchronized(O) {
-                if(best_fit.getFitness()<best.getFitness() && best_fit.ok()==true) {
+                if(best_fit.getFitness()<best.getFitness() && best_fit.ok()==true) { //
                     System.out.println("Am gasit unul mai bun in firul cu "+probabilitateMutatie);
                     System.out.println(best_fit);
                     m.setBest(best_fit,g,probabilitateMutatie);

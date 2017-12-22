@@ -9,35 +9,46 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import static main.MainFrame.clienti;
 import static main.AlgoritmGenetic.R;
-import static main.MainFrame.hashDb;
 
 /**
- *
- * @author yo5bd
+ * Individul folosit in algoritmul genetic.
+ * Functionarea: cromozomul tine toate datele astfel:
+ * Indexul reprezinta pachetul/clientul ce urmeaza sa fie livrat.
+ * Valoarea de la un anumit index reprezinta camionul in care este incarcat pachetul.
+ * Reprezentarea aceasta permite ca mai multe obiecte sa fie incarcate pe un camion, 
+ * dar un obiect nu poate fi incarcat pe mai multe camioane.
+ * cromozom2 - copia neoptimizata a cromozomului principal. Folosindu-se cromozomi
+ * diploizi, se ajunge la indivizi mai buni.
+ * Valori posibile:
+ * - orice valoare pozitiva, inclusiv zero: numarul camionului pe care urmeaza sa fie incarcat
+ * - -1: pachet neincarcat
+ * - -2: pachet neincarcabil, depaseste volumul camioanelor disponibile
+ * @author yo5bdm
  */
 public class Individ implements Comparable {
-    private Double distanta_totala;
-    private Double fitness; // media procentul de incarcare impartit la nr de camioane
+    //private Double distanta_totala;
+    private Double fitness; //distanta totala parcursa
     private Integer nr_camioane;
     private int viata;
+    private CamionDisponibil camionDisponibil;
+    
     public Integer[] cromozom; //indexul e obiectul, valoarea e camionul pe care e incarcat
     public Integer[] cromozom2;
-    private CamionDisponibil camionDisponibil;
-
-    ArrayList<Camion> camioane = new ArrayList();
+    public ArrayList<Camion> camioane = new ArrayList();
+    
+    public void setFitness(Double fitness) {
+        this.fitness = fitness;
+    }
+    
     /**
-     * 
+     * Constructor.
      * @param nr numarul de clienti (locatii)
      * @param cam numarul de camioane
-     */
+     */    
     public Individ(int nr, int cam, boolean generare) {
         cromozom = new Integer[nr];
         cromozom2 = new Integer[nr];
         camionDisponibil = new CamionDisponibil();
-        camionDisponibil.adaugaCapacitate(101,10);
-        camionDisponibil.adaugaCapacitate(91,15);
-        camionDisponibil.adaugaCapacitate(81,9999);
-        
         nr_camioane = cam;
         viata = 10;
         int capacitate;
@@ -53,7 +64,10 @@ public class Individ implements Comparable {
         }
         if(generare == true) optimize_loads();
     }
-    
+    /**
+     * Metoda pregateste o noua copiere din cromozom. Goleste toate camioanele 
+     * si ajusteaza numarul total, daca e necesar
+     */
     private void reset_camioane() {
         for(Camion c:camioane) c.reset();
         if(camioane.size()<nr_camioane) {
@@ -64,13 +78,18 @@ public class Individ implements Comparable {
         }
         nr_camioane = camioane.size();
     }
-    
+    /**
+     * face o copie a cromozomului in varianta neoptimizata
+     */
     public void copiaza() { //copiaza cromozomul curent in cromozomul copie
         for(int i=0;i<cromozom.length;i++){
             cromozom2[i]=cromozom[i];
         }
     }
-    
+    /**
+     * Returneaza fitness-ul populatiei.
+     * @return Double, valoarea fitness-ului total al populatiei
+     */
     public double getFitness() {
         return fitness;
     }
@@ -86,18 +105,22 @@ public class Individ implements Comparable {
 //        }
 //        int hash = this.hashCode();
         int max=0;
-        for(int i:cromozom) if(i>max) max=i; //gasim maxim
+        for(int i:cromozom) if(i>max) max=i; //gasim maxim, sa stim cate camioane avem nevoie.
         nr_camioane = max+1;
         reset_camioane();
-        for(int i=0;i<cromozom.length;i++) { //incercam sa plasam si neplasabilele
+        //incercam sa plasam si neplasabilele
+        for(int i=0;i<cromozom.length;i++) { 
             if(cromozom[i]==-2) cromozom[i]=-1;
         }
+        //se adauga pachetul curent in camionul aferent
         for(int i=0;i<cromozom.length;i++) {
             if(cromozom[i]==-1) continue;
             camioane.get(cromozom[i]).add(i); //luat camionul cu nr gasit la indexul i si adaugam produsul in el
         }
+        //se optimizeaza incarcarile
         if(optimizeaza) optimize_loads();
         fitness = 0.0;
+        //calculam datele fiecarui camion si fitness-ul total al generatiei
         for (Camion camion : camioane) {
             fitness += camion.calc(); //distanta totala parcursa de toate camioanele
         } 
@@ -108,7 +131,10 @@ public class Individ implements Comparable {
         //hashDb.adauga(hash,fitness);
         return fitness;
     }
-    
+    /**
+     * Numara pachetele neincarcate (cele cu -1)
+     * @return int - numarul de pachete neincarcate
+     */
     private int neincarcate() {
         int ret=0;
         for(int i:cromozom) {
@@ -118,7 +144,10 @@ public class Individ implements Comparable {
         }
         return ret;
     }
-    
+    /**
+     * Numara pachetele neincarcabile (cele cu -2)
+     * @return int - numarul de pachete neincarcabile
+     */
     public int neincarcabile() {
         int ret=0;
         for(int i:cromozom) {
@@ -130,6 +159,7 @@ public class Individ implements Comparable {
     }
     /**
      * Elimina pachetele ce nu incap intr-un camion anume si le incarca in alt camion mai gol.
+     * Daca nu reuseste cu un anumit pachet, il marcheaza ca neincarcabil (-2)
      */
     private void optimize_loads() {
         //golim camioanele suprapline
@@ -158,12 +188,14 @@ public class Individ implements Comparable {
                         }
                     }
                     //nu am reusit sa incarc produsul, volumul e mai mare decat camioanele disponibile
-                    if(incarcat==0 && clienti.get(i).volum>80) { //&& clienti.get(i).volum>80
+                    if(incarcat==0 && clienti.get(i).volum>80) {
                         cromozom[i]=-2; //il marcam ca atare
                     }
                 }
             }
-            //daca totusi nu reusim sa le incarcam toate, mai punem un camion in lista
+            //daca totusi nu reusim sa le incarcam toate si volumele sunt 
+            //mai mici decat camioanele disponibile, mai punem un camion 
+            //in lista si mai incercam odata sa optimizam
             if(neincarcate()!=0) {
                 Camion c = new Camion(camionDisponibil.cautaLiber());
                 c.calc();
@@ -172,7 +204,9 @@ public class Individ implements Comparable {
             }
         }
     }
-    
+    /**
+     * Metoda optimizeaza toate camioanele
+     */
     public void optimizare() {
         for(Camion c:camioane) c.optimizare();
     }
@@ -191,9 +225,8 @@ public class Individ implements Comparable {
         hash = 59 * hash - fitness.intValue();
         return hash;
     }
-
     
-    
+    @Override
     public int compareTo(Object o) {
         Individ c = (Individ) o;
         return this.fitness.compareTo(c.fitness);
@@ -205,18 +238,28 @@ public class Individ implements Comparable {
         //for(Camion c:camioane) System.out.println(c);
         return "";
     }
-
+    
+    /**
+     * Metoda de verificare a individului. 
+     * @return true daca nu exista pachete neincarcate, neincarcabile si toate camioanele sunt ok.
+     */
     public boolean ok() {
         if(neincarcabile()>0 && neincarcate()>=0) return false;
         for(Camion c:camioane) if(c.ok==false) return false;
         return true;
     }
-
+    
+    /**
+     * Indivizii au viata limitata. 
+     * @return true daca individul mai are generatii de trait.
+     */
     public boolean selectabil() {
-        if(viata>0) return true;
-        else return false;
+        return viata>0;
     }
-
+    
+    /**
+     * Decrementeaza viata individului. 
+     */
     public void selecteaza() {
         viata--;
     }

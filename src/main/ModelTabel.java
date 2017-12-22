@@ -9,7 +9,7 @@ import javax.swing.table.AbstractTableModel;
 import static main.MainFrame.*;
 
 /**
- *
+ * Clasa care ofera datele pentru tabelul de pe pagina principala
  * @author yo5bdm
  */
 class ModelTabel extends AbstractTableModel {

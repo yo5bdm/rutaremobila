@@ -6,8 +6,9 @@
 package main;
 
 /**
- *
- * @author yo5bd
+ * Clasa cuprinde toate datele clientului.
+ * 
+ * @author yo5bdm
  */
 public class Client {
     public String cod_client;
