@@ -22,6 +22,7 @@ public class Individ implements Comparable {
     private int viata;
     public Integer[] cromozom; //indexul e obiectul, valoarea e camionul pe care e incarcat
     public Integer[] cromozom2;
+    private CamionDisponibil camionDisponibil;
 
     ArrayList<Camion> camioane = new ArrayList();
     /**
@@ -32,6 +33,11 @@ public class Individ implements Comparable {
     public Individ(int nr, int cam, boolean generare) {
         cromozom = new Integer[nr];
         cromozom2 = new Integer[nr];
+        camionDisponibil = new CamionDisponibil();
+        camionDisponibil.adaugaCapacitate(101,10);
+        camionDisponibil.adaugaCapacitate(91,15);
+        camionDisponibil.adaugaCapacitate(81,9999);
+        
         nr_camioane = cam;
         viata = 10;
         int capacitate;
@@ -43,14 +49,7 @@ public class Individ implements Comparable {
             }
         }
         for(int i=0;i<nr_camioane;i++) {
-            if(i<=10) {
-                capacitate = 101;
-            } else if(i<=25) {
-                capacitate = 91;
-            } else {
-                capacitate = 81;
-            }
-            camioane.add(new Camion(capacitate));
+              camioane.add(new Camion(camionDisponibil.cautaLiber()));
         }
         if(generare == true) optimize_loads();
     }
@@ -60,7 +59,7 @@ public class Individ implements Comparable {
         if(camioane.size()<nr_camioane) {
             int nr = nr_camioane-camioane.size();
             for(int i=0;i<nr;i++) {
-                camioane.add(new Camion(81));
+                camioane.add(new Camion(camionDisponibil.cautaLiber()));
             }
         }
         nr_camioane = camioane.size();
@@ -166,7 +165,7 @@ public class Individ implements Comparable {
             }
             //daca totusi nu reusim sa le incarcam toate, mai punem un camion in lista
             if(neincarcate()!=0) {
-                Camion c = new Camion(81);
+                Camion c = new Camion(camionDisponibil.cautaLiber());
                 c.calc();
                 nr_camioane++;
                 camioane.add(c);
@@ -188,6 +187,8 @@ public class Individ implements Comparable {
     public int hashCode() {
         int hash = 3;
         hash = 59 * hash + Arrays.deepHashCode(this.cromozom);
+        hash = 59 * hash + Arrays.deepHashCode(this.cromozom2);
+        hash = 59 * hash - fitness.intValue();
         return hash;
     }
 

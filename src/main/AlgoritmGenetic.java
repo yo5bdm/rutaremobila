@@ -35,13 +35,18 @@ public class AlgoritmGenetic extends Thread {
         switch(viteza) {
             case 0: //rapid
                 maxGeneratii = 500;
+                break;
             case 1: //mediu
                 maxGeneratii = 2000;
+                break;
             case 2: //lent
                 maxGeneratii = 10000;
+                break;
             default: // case 3: infinit
                 maxGeneratii = Integer.MAX_VALUE;
+                break;
         }
+        m.initProgres(maxGeneratii);
     }
 
     public void run() {
@@ -56,29 +61,25 @@ public class AlgoritmGenetic extends Thread {
         if(best == null) best=best_fit;
         for(int g=0;g<maxGeneratii;g++) {//
             if(g%10==0) {
-                System.out.println("Firul cu "+probabilitateMutatie+"% este la generatia "+g);
+                m.setProgres(g);
             }
-            //m.setGen(g);
             recombinare();//
             mutatie();//
             for(Individ i:popTemp) i.calculeaza(true); //calculam fitnessul pentru populatia temporara
             selectie();//
-            //total = fitnes_total();
-            //m.setFit(total);
             Collections.sort(populatie);
             best_fit = populatie.get(0);
             synchronized(O) {
                 if(best_fit.getFitness()<best.getFitness() && best_fit.ok()==true) {
                     System.out.println("Am gasit unul mai bun in firul cu "+probabilitateMutatie);
-                    System.out.println(best.getFitness()+" este acum");
                     System.out.println(best_fit);
-                    //best = best_fit;
                     m.setBest(best_fit,g,probabilitateMutatie);
                 }
                 O.notifyAll();
             }
-            
         }
+        m.setProgres(maxGeneratii);
+        System.out.println("Firul "+probabilitateMutatie+"% a finalizat");
     }
 
     private void genereaza_pop_initiala(int nr_indivizi, int nr_camioane) {

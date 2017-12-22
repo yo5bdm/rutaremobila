@@ -10,13 +10,23 @@ import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JFileChooser;
 import javax.swing.Timer;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  *
@@ -66,13 +76,13 @@ public class MainFrame extends javax.swing.JFrame {
         //t.run(); //testele
     }
     
-    ActionListener listener = new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent event) {
-           Panel1.repaint();
-        }
-        
-    };
+//    ActionListener listener = new ActionListener() {
+//        @Override
+//        public void actionPerformed(ActionEvent event) {
+//           Panel1.repaint();
+//        }
+//        
+//    };
     
     private void redraw() {
         fs = (double)jSlider1.getValue();
@@ -99,10 +109,6 @@ public class MainFrame extends javax.swing.JFrame {
         };
         jSlider1 = new javax.swing.JSlider();
         jPanel1 = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
-        GenCur = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
-        FitTotal = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
         jButton1 = new javax.swing.JButton();
@@ -114,6 +120,8 @@ public class MainFrame extends javax.swing.JFrame {
         BSGeneratia = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
         VitezaAlgoritm = new javax.swing.JComboBox<>();
+        Progres = new javax.swing.JProgressBar();
+        SalveazaSolutia = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Rutare pachete");
@@ -139,14 +147,6 @@ public class MainFrame extends javax.swing.JFrame {
         });
 
         jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-
-        jLabel1.setText("Generatia curenta:");
-
-        GenCur.setText("-1");
-
-        jLabel2.setText("Fitnes total:");
-
-        FitTotal.setText("1");
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -190,6 +190,13 @@ public class MainFrame extends javax.swing.JFrame {
         VitezaAlgoritm.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Rapid", "Mediu", "Lent", "Infinit" }));
         VitezaAlgoritm.setSelectedIndex(2);
 
+        SalveazaSolutia.setText("Salveaza solutia");
+        SalveazaSolutia.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                SalveazaSolutiaActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -200,65 +207,52 @@ public class MainFrame extends javax.swing.JFrame {
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                     .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel6)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(VitezaAlgoritm, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(Progres, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 133, Short.MAX_VALUE)
+                        .addComponent(BSGeneratia))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel4)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(BSDistanta))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel6)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(VitezaAlgoritm, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel3)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(BSGeneratia))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jLabel1)
-                                .addGap(89, 89, 89)
-                                .addComponent(GenCur))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jLabel2)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(FitTotal)))
-                        .addGap(0, 104, Short.MAX_VALUE))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel5)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(BSNrCamioane)))
+                        .addComponent(BSNrCamioane))
+                    .addComponent(SalveazaSolutia, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1)
-                    .addComponent(GenCur))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel2)
-                    .addComponent(FitTotal))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel6)
                     .addComponent(VitezaAlgoritm, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(Progres, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
                     .addComponent(BSGeneratia))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(BSDistanta)
-                    .addComponent(jLabel4))
+                    .addComponent(jLabel4)
+                    .addComponent(BSDistanta))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5)
                     .addComponent(BSNrCamioane))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 503, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 484, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(SalveazaSolutia)
                 .addContainerGap())
         );
 
@@ -315,6 +309,48 @@ public class MainFrame extends javax.swing.JFrame {
         redraw();
     }//GEN-LAST:event_jTable1MouseClicked
 
+    private void SalveazaSolutiaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SalveazaSolutiaActionPerformed
+        
+        JFileChooser fileChooser = new JFileChooser(); //File curDir = din setari
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("Text File","txt");
+        fileChooser.setFileFilter(filter);
+        if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+            try {
+                File file = fileChooser.getSelectedFile();
+                System.out.println("salveaza "+file.getAbsolutePath()+" "+file.getName()+" "+file.toString());
+                List<String> lines = genereazaFisier();//Arrays.asList("The first line", "The second line");
+                Path f = Paths.get(file.getAbsolutePath());
+                Files.write(f, lines, Charset.forName("UTF-8"));
+            } catch (IOException ex) {
+                Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }        
+    }//GEN-LAST:event_SalveazaSolutiaActionPerformed
+    
+    private ArrayList genereazaFisier() {
+        Individ ind = best;
+        Client cli;
+        ArrayList<String> ret = new ArrayList();
+        ret.add("======================================");
+        ret.add("Distanta totala de parcurs: "+(int)ind.getFitness()+" km");
+        ret.add("Numar total de camioane folosite: "+ind.camioane.size());
+        for(Camion cam:ind.camioane) {
+            ret.add(" ");
+            ret.add("======================================");
+            ret.add("Camion volum "+(cam.capacitate-1)+", ocupat "+cam.ocupat+", opriri "+cam.opriri+", distanta totala "+(int)cam.distanta+" km;");
+            ret.add("Pachetele de incarcat:");
+            for(Integer i:cam.solutia) {
+                cli = clienti.get(i);
+                ret.add(cli.cod_client+" "+cli.ship_to+", GPS="+cli.latitudine+","+cli.longitudine+" vol="+cli.volum);
+            }
+        }
+        ret.add(" ");
+        ret.add("======================================");
+        ret.add("Fisier generat  "+LocalDateTime.now());
+        ret.add("======================================");
+        return ret;
+    }
+    
     private void ploteaza_punctele() {
         int max_x = Panel1.getWidth();
         int max_y = Panel1.getHeight();
@@ -386,13 +422,11 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JLabel BSDistanta;
     private javax.swing.JLabel BSGeneratia;
     private javax.swing.JLabel BSNrCamioane;
-    private javax.swing.JLabel FitTotal;
-    private javax.swing.JLabel GenCur;
     private javax.swing.JPanel Panel1;
+    private javax.swing.JProgressBar Progres;
+    private javax.swing.JButton SalveazaSolutia;
     private javax.swing.JComboBox<String> VitezaAlgoritm;
     private javax.swing.JButton jButton1;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
@@ -403,13 +437,6 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JTable jTable1;
     // End of variables declaration//GEN-END:variables
 
-    void setGen(int g) {
-        GenCur.setText(""+g);
-    }
-
-    void setFit(Double total) {
-        FitTotal.setText(""+total.intValue());
-    }
     
     public void setBest(Individ i, int generatia, int mutatie) {
         if(i!=null) {
@@ -464,15 +491,15 @@ public class MainFrame extends javax.swing.JFrame {
         }
     }
 
-    /**
-     *
-     * @param unghi the value of unghi
-     * @return the double
-     */
-    public static double toRad(double unghi) {
-        return unghi * Math.PI / 180;
+    public void initProgres(int max) {
+        Progres.setMaximum(max);
+        Progres.setValue(0);
+        Progres.setStringPainted(true);
     }
-
+    public void setProgres(int val) {
+        Progres.setValue(val);
+    }
+    
     /**
      *
      */

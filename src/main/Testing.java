@@ -18,8 +18,8 @@ public class Testing {
     public void run() {
         System.out.println("System testing:");
         //CamionTest();
-        //IndividTest();
-        HashTest();
+        IndividTest();
+        //HashTest();
     }
     
     private int CamionTest() {

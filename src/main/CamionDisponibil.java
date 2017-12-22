@@ -6,7 +6,6 @@
 package main;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 
 /**
@@ -28,9 +27,11 @@ public class CamionDisponibil {
     public int cautaLiber() {
         for(CamDisp i: capacitati) {
             if(i.disponibile>0) {
+                //System.out.println("Disponibil "+i.capacitate+", buc "+i.disponibile);
                 i.disponibile--;
                 return i.capacitate;
             }
+            //System.out.println(""+i.capacitate+" Nu e disponibil."+i.disponibile);
         }
         return -1;
     }
@@ -46,7 +47,7 @@ class CamDisp implements Comparable {
 
     public int compareTo(Object o) {
         CamDisp c = (CamDisp) o;
-        return this.capacitate.compareTo(c.capacitate);
+        return c.capacitate.compareTo(this.capacitate);
     }
     
 }
