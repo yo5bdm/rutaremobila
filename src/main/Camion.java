@@ -6,42 +6,60 @@
 package main;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import static main.MainFrame.*;
 
 /**
  * Clasa de lucru cu camioanele.
  * Include metoda de calcul a traseului optim intre puncte.
- * @author yo5bd
+ * In varianta actuala, calculul traseului optim se face dupa metoda OVRT,
+ * camionul porneste de la baza dar nu se intoarce la baza.
+ * @author yo5bdm
  * 
  */
 public class Camion {
     public double capacitate; //capacitatea camionului
     public double ocupat; //cat e ocupat din camion
-    public boolean ok;
-    public int opriri; //numarul de opriri efectuate (numarul de clienti
-    public ArrayList<Integer> pachete = new ArrayList();
-    public double distanta;
-    public ArrayList<Integer> solutia;
-    public int[] solutie;
-    
+    public boolean ok; //satisface camionul toate cerintele?
+    public int opriri; //numarul de opriri efectuate (numarul de clienti)
+    public ArrayList<Integer> pachete = new ArrayList(); //pachetele din camion
+    public double distanta; //distnata totala parcursa
+    public ArrayList<Integer> solutia; //ruta parcursa de camion. nu include pornirea (casa)
+    /**
+     * Constructor.
+     * @param capacitate Int capacitatea ce o va avea camionul
+     */
     public Camion(int capacitate) {
         this.capacitate = capacitate;
         numara_opriri();
     }
+    /**
+     * Resetarea camionului.
+     */
     public void reset() {
         pachete = new ArrayList();
         calc();
     }
+    /**
+     * Neimplementat
+     */
     public void optimizare() {
     }    
+    /**
+     * Metoda de calcul complet al camionului.
+     * Calculeaza numarul de opriri, volumul total ocupat de pachete, 
+     * traseul optim si distanta totala parcursa de camion.
+     * @return Double distanta totala parcursa de camion, incepand de la baza
+     */
     public double calc() {
         sort();
         calc_partial();
         calculeazaDistanta2();
         return distanta;
     }    
+    /**
+     * Sorteaza descendent dupa volum pachetele din camion.
+     */
     private void sort() {
         Comparator<Integer> cmprtr = (Integer u, Integer d) -> {
             if(MainFrame.clienti.get(u).volum < MainFrame.clienti.get(d).volum) return 1;
@@ -50,6 +68,9 @@ public class Camion {
         };
         pachete.sort(cmprtr);
     }    
+    /**
+     * Calculeaza numarul de opriri si volumul ocupat al pachetelor din camion.
+     */
     private void calc_partial() {
         numara_opriri();
         calculeaza_ocupat();
@@ -58,23 +79,44 @@ public class Camion {
         else 
             ok = false;
     }    
+    /**
+     * Sterge ultimul pachet din camion si returneaza indexul acestuia.
+     * In prealabil, pachetele au fost ordonate descrescator dupa volum, 
+     * deci ultimul pachet va fi cel mai mic ca volum.
+     * @return Int indexul din <i>MainFrame clienti</i> a pachetului eliminat.
+     */
     public int pop() {
         sort();
         int ret = pachete.remove(pachete.size()-1);
         calc_partial();
         return ret;
     }    
+    /**
+     * Returneaza procentul de ocupare al camionului.
+     * Util pentru afisare in lista din MainFrame
+     * @return Double procentul de ocupare.
+     */
     public Double ocupat() {
         return (ocupat/capacitate)*100;
     }    
+    /**
+     * Adauga un pachet in camion si actualizeaza volumul ocupat si numarul de opriri.
+     * @param i Indexul pachetului de adaugat. Corespunde pozitiei din <i>ArrayList clienti</i> din MainFrame
+     */
     public void add(int i) {
         pachete.add(i);
         calc_partial();
     }    
+    /**
+     * Numara opririle programate
+     */
     private void numara_opriri() {
         opriri = pachete.size();
         if(opriri<15) ok = true;
     }    
+    /**
+     * calculeaza volumul total al pachetelor din camion
+     */
     private void calculeaza_ocupat() {
         ocupat = 0.0;
         for(int i=0;i<pachete.size();i++) {
@@ -93,6 +135,11 @@ public class Camion {
     }
     // metodele de calculare a distantei optime dintre puncte
     
+    /**
+     * Metoda de calcul distanta totala optima si traseu cu metoda Greedy.
+     * OVRP, camionul nu se intoarce la baza. Se porneste de la baza si se 
+     * cauta cel mai apropiat punct. Procesul se reia pentru toate punctele.
+     */
     public void calculeazaDistanta() { //varianta greedy
         distanta = 0.0;
         solutia = new ArrayList();
@@ -143,7 +190,13 @@ public class Camion {
         //System.out.println(solutia);
     }
     
-    public void calculeazaDistanta2() { //varianta programare dinamica
+    /**
+     * Metoda de calcul distanta totala optima si traseu cu o metoda modificata a algoritmului Clarke-Wright.
+     * OVRP, camionul nu se intoarce la baza. Se porneste de la baza si se adauga 
+     * pachetele pe rand. La fiecare pas se calculeaza pozitia optima a pachetului de inserat
+     * astfel incat ruta totala sa fie cat mai scurta.
+     */
+    public void calculeazaDistanta2() { //varianta clarke-wright modificat
         distanta = 0.0; //initializare
         solutia = new ArrayList();
         if(pachete.isEmpty()) { //daca nu avem pachete in camion

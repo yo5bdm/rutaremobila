@@ -30,13 +30,21 @@ public class Testing {
         c2 = new Camion(100);
         System.out.println("Adaug 10 pachete...");
         for(int i=0;i<10;i++) {
-            c1.add(i*10+1);
-            c2.add(i*10+1);
+            c1.add(i*50+i);
+            c2.add(i*50+i);
         }
         System.out.println(c1);
         System.out.println(c2);
-        c1.calculeazaDistanta();
-        c2.calculeazaDistanta2();
+        for(int i=0;i<10000;i++) {  //warmup
+            c1.calculeazaDistanta();
+            c2.calculeazaDistanta2();
+        }
+        long start = System.nanoTime(); //time benchmark
+        for(int i=0;i<10000;i++) c1.calculeazaDistanta();
+        System.out.println("Greedy a terminat in "+((System.nanoTime() - start)/1000000)+" ms");
+        start = System.nanoTime();
+        for(int i=0;i<10000;i++) c2.calculeazaDistanta2();
+        System.out.println("Metoda 2 a terminat in "+((System.nanoTime() - start)/1000000)+" ms");
         n.camioane.add(c1);
         n.camioane.add(c2);
         n.setFitness(130.0);

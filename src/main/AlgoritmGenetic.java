@@ -11,27 +11,42 @@ import java.util.Random;
 import static main.MainFrame.*;
 
 /**
- *
- * @author yo5bd
+ * Algoritmul genetic.
+ * Initializarea se face cu nr de clienti, viteza (reprezentand numarul de 
+ * generatii) si probabilitatea de mutatie.
+ * Din teste, am observat ca probabilitatea de mutatie de 0% ofera cei mai 
+ * buni indivizi, per total.
+ * Clasa este implementata ca fir de executie, putandu-se rula mai multe fire 
+ * simultan, cu probabilitati de mutatie diferite.
+ * @author yo5bdm
  */
 public class AlgoritmGenetic extends Thread {
     
     private int nrClienti;
-    private int nrIndivizi=1000;
+    private int nrIndivizi=s.memorie;
     private int probabilitateMutatie; //5 = 5%
     private int maxGeneratii;
     private int nrCamioane=48; //pentru initializare
+    private boolean stop;
     
     public static final Random R = new Random();
     public final ArrayList<Individ> populatie = new ArrayList();
     private final ArrayList<Individ> popTemp = new ArrayList();
      
-    
+    /**
+     * Constructorul clasei.
+     * Se intializeaza clasa, dar nu se porneste algoritmul.
+     * Pornirea se face prin .start()
+     * @param size Int numarul de clienti.
+     * @param viteza Int intre 0 si 3, numarul de generatii (500, 2000, 10.000, Infinit)
+     * @param probMutatie Int probabilitatea de mutatie 5 => 5%
+     */
     public AlgoritmGenetic(int size,int viteza,int probMutatie) {
         this.nrClienti = size;
         this.probabilitateMutatie = probMutatie;
         populatie.clear();
         popTemp.clear();
+        stop = false;
         switch(viteza) {
             case 0: //rapid
                 maxGeneratii = 500;
@@ -48,7 +63,10 @@ public class AlgoritmGenetic extends Thread {
         }
         m.initProgres(maxGeneratii);
     }
-
+    /**
+     * Rularea algoritmului.
+     * Pornirea se face prin metoda .start() daca se doresc fire de executie.
+     */
     public void run() {
         double total;
         genereaza_pop_initiala(nrIndivizi,nrCamioane);//
@@ -59,19 +77,20 @@ public class AlgoritmGenetic extends Thread {
         Collections.sort(populatie);
         best_fit = populatie.get(0);
         if(best == null) best=best_fit;
-        for(int g=0;g<maxGeneratii;g++) {//
+        for(int g=0;g<maxGeneratii;g++) {//main loop
+            if(stop) break; //stop? atunci iesi din bucla
             if(g%5==0) {
                 m.setProgres(g);
             }
             recombinare();//
-            mutatie();//
+            if(probabilitateMutatie > 0) mutatie();//
             for(Individ i:popTemp) i.calculeaza(true); //calculam fitnessul pentru populatia temporara
             selectie();//
             Collections.sort(populatie);
             best_fit = populatie.get(0);
             synchronized(O) {
                 if(best_fit.getFitness()<best.getFitness() && best_fit.ok()==true) { //
-                    System.out.println("Am gasit unul mai bun in firul cu "+probabilitateMutatie);
+                    System.out.println("Mutatie "+probabilitateMutatie+", Generatia "+g);
                     System.out.println(best_fit);
                     m.setBest(best_fit,g,probabilitateMutatie);
                 }
@@ -81,13 +100,26 @@ public class AlgoritmGenetic extends Thread {
         m.setProgres(maxGeneratii);
         System.out.println("Firul "+probabilitateMutatie+"% a finalizat");
     }
-
+    /**
+     * Generarea populatiei initiale
+     * @param nr_indivizi Int numarul de indivizi doriti
+     * @param nr_camioane Int numarul initial de camioane
+     */
     private void genereaza_pop_initiala(int nr_indivizi, int nr_camioane) {
         for(int i=0;i<nr_indivizi;i++) {            
             populatie.add(new Individ(nrClienti,nr_camioane,true));
         }        
     }
-
+    /**
+     * Recombinarea.
+     * Avand in vedere ca se folosesc algoritmi diploizi, exista 2 cromozomi
+     * unul optimizat (.cromozom) si unul neoptimizat (.cromozom2)
+     * combinarea se face folosind acelasi punct de taiere si generand toate
+     * combinatiile posibile
+     * optimizat - optimizat
+     * neoptimizat - neoptimizat
+     * optimizat - neoptimizat
+     */
     private void recombinare() {
         popTemp.clear();
         while(popTemp.size()<nrIndivizi){
@@ -146,7 +178,10 @@ public class AlgoritmGenetic extends Thread {
             popTemp.add(p2p1_2);
         }       
     }
-
+    /**
+     * Mutatia.
+     * Se obtine facand swap random intre 2 pachete.
+     */
     private void mutatie() {
         for(Individ c:popTemp) { //pentru fiecare individ
             for(int i=0;i<nrClienti;i++) { //se ia fiecare cromozom
@@ -161,7 +196,12 @@ public class AlgoritmGenetic extends Thread {
             }
         }
     }
-
+    /**
+     * Selectia. 
+     * Se face Random Gaussian absolut (intre 0 si nr max de clienti). In
+     * prealabil populatia a fost ordonata descrescator in functie de fitness
+     * Prin random Gaussian se favorizeaza indivizii cu fitness mai mare.
+     */
     private void selectie() {
         popTemp.addAll(populatie); //includem si parintii?
         populatie.clear();
@@ -184,7 +224,10 @@ public class AlgoritmGenetic extends Thread {
             }
         }    
     }
-
+    /**
+     * Se calculeaza fitness-ul total al populatiei curente.
+     * @return Double fitness-ul total.
+     */
     private double fitnes_total() {
         //System.out.println("Calculez calculeaza total");
         double tot=0.0;
@@ -193,5 +236,8 @@ public class AlgoritmGenetic extends Thread {
         }
         return tot;
     }
-    
+
+    void opreste() {
+        stop = true;
+    }
 }

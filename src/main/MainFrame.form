@@ -129,7 +129,17 @@
                           <EmptySpace max="32767" attributes="0"/>
                           <Component id="BSNrCamioane" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <Component id="SalveazaSolutia" alignment="0" max="32767" attributes="0"/>
+                      <Group type="102" alignment="0" attributes="0">
+                          <Component id="SalveazaSolutia" max="32767" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="ButonSetari" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <Group type="102" alignment="0" attributes="0">
+                          <Component id="IncarcaCSV" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="FisierIncarcat" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                      </Group>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
@@ -138,6 +148,11 @@
         <DimensionLayout dim="1">
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="3" attributes="0">
+                      <Component id="IncarcaCSV" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="FisierIncarcat" alignment="3" min="-2" max="-2" attributes="0"/>
+                  </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Component id="jLabel6" min="-2" max="-2" attributes="0"/>
@@ -163,9 +178,12 @@
                       <Component id="BSNrCamioane" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="jScrollPane1" pref="484" max="32767" attributes="0"/>
+                  <Component id="jScrollPane1" pref="455" max="32767" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="SalveazaSolutia" min="-2" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="3" attributes="0">
+                      <Component id="SalveazaSolutia" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="ButonSetari" alignment="3" min="-2" max="-2" attributes="0"/>
+                  </Group>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>
@@ -264,6 +282,27 @@
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="SalveazaSolutiaActionPerformed"/>
           </Events>
+        </Component>
+        <Component class="javax.swing.JButton" name="ButonSetari">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Setari"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="ButonSetariActionPerformed"/>
+          </Events>
+        </Component>
+        <Component class="javax.swing.JButton" name="IncarcaCSV">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Incarca fisier CSV"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="IncarcaCSVActionPerformed"/>
+          </Events>
+        </Component>
+        <Component class="javax.swing.JLabel" name="FisierIncarcat">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Nici un fisier incarcat."/>
+          </Properties>
         </Component>
       </SubComponents>
     </Container>

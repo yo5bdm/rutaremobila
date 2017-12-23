@@ -12,10 +12,11 @@ package main;
 public class Calcule {
 
     /**
-     *
-     * @param u the value of u
-     * @param d the value of d
-     * @return the double
+     * Calculeaza distanta dintre 2 puncte geografice.
+     * Se foloseste de coordonatele GPS din obiectul Client.
+     * @param u Clientul 1
+     * @param d Clientul 2
+     * @return Double valoarea distantei in km reali! (km linie dreapta * 1.24)
      */
     public static double distanta(Client u, Client d) {
         //https://www.movable-type.co.uk/scripts/latlong.html
@@ -28,9 +29,9 @@ public class Calcule {
     }
 
     /**
-     *
-     * @param unghi the value of unghi
-     * @return the double
+     * Converteste unghiul in radiani.
+     * @param unghi unghiul de calculat
+     * @return Double valoarea in radiani
      */
     public static double toRad(double unghi) {
         return unghi * Math.PI / 180;
