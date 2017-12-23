@@ -357,14 +357,13 @@ public class MainFrame extends javax.swing.JFrame {
                 Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        
     }//GEN-LAST:event_PornesteGenerareaActionPerformed
 
     private void jTable1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable1MouseClicked
         int[] selection = jTable1.getSelectedRows();
         ArrayList<String> listaCnp = new ArrayList();
         selection[0] = jTable1.convertRowIndexToModel(selection[0]);
-        
+        //luam in seama doar primul selectat
         camion = best.camioane.get(selection[0]);
         redraw();
     }//GEN-LAST:event_jTable1MouseClicked
