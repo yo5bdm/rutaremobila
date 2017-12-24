@@ -7,7 +7,6 @@ package main;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import static main.MainFrame.*;
 
 /**
  * Clasa de lucru cu camioanele.
@@ -62,8 +61,8 @@ public class Camion {
      */
     private void sort() {
         Comparator<Integer> cmprtr = (Integer u, Integer d) -> {
-            if(MainFrame.clienti.get(u).volum < MainFrame.clienti.get(d).volum) return 1;
-            else if(MainFrame.clienti.get(u).volum > MainFrame.clienti.get(d).volum) return -1;
+            if(Client.clienti.get(u).volum < Client.clienti.get(d).volum) return 1;
+            else if(Client.clienti.get(u).volum > Client.clienti.get(d).volum) return -1;
             else return 0;
         };
         pachete.sort(cmprtr);
@@ -108,20 +107,20 @@ public class Camion {
         calc_partial();
     }    
     /**
-     * Numara opririle programate
+     * Numara opririle programate.
      */
     private void numara_opriri() {
         opriri = pachete.size();
         if(opriri<15) ok = true;
     }    
     /**
-     * calculeaza volumul total al pachetelor din camion
+     * calculeaza volumul total al pachetelor din camion.
      */
     private void calculeaza_ocupat() {
         ocupat = 0.0;
         for(int i=0;i<pachete.size();i++) {
             int p = pachete.get(i);
-            ocupat += clienti.get(p).volum;
+            ocupat += Client.clienti.get(p).volum;
         }
     }
 
@@ -129,12 +128,11 @@ public class Camion {
     public String toString() {
         String obiecte="";
         for(int i:pachete) {
-            obiecte += " "+i+":"+clienti.get(i).volum+",";
+            obiecte += " "+i+":"+Client.clienti.get(i).volum+",";
         }
         return "Camion{ ok=" +ok+ ", capacitate=" + capacitate + ", ocupat=" + ocupat + ", opriri=" + opriri + ", distanta=" + distanta + ", obiecte= "+obiecte+" }";
     }
-    // metodele de calculare a distantei optime dintre puncte
-    
+       
     /**
      * Metoda de calcul distanta totala optima si traseu cu metoda Greedy.
      * OVRP, camionul nu se intoarce la baza. Se porneste de la baza si se 
@@ -155,10 +153,8 @@ public class Camion {
             closest = -1; //reset general
             min_dist = Double.MAX_VALUE;
             if(solutia.isEmpty()) { //calculam cel mai apropiat de casa
-                //System.out.println("Se alege distanta cea mai scurta de acasa... "+pacheteBak.size());
                 for(int j=0;j<pacheteBak.size();j++){
-                    cur_dist = catre_casa[pacheteBak.get(j)]; 
-                    //System.out.println(cur_dist);
+                    cur_dist = Client.catreCasa(pacheteBak.get(j)); 
                     if(cur_dist < min_dist) {
                         min_dist = cur_dist;
                         closest = j;
@@ -166,28 +162,22 @@ public class Camion {
                 }  
             } else { //pachetul cel mai apropiat de cel curent
                 i = solutia.size()-1;
-                //System.out.println("Se alege urmatorul punct... "+i+" size "+solutia.size());
                 for(int j=0;j<pacheteBak.size();j++) {
-                    cur_dist = distante[solutia.get(i)][pacheteBak.get(j)];
-                    //if(cur_dist==0.0) System.out.println("solutia "+solutia.get(i)+", pachete "+pachete.get(j)+", distanta "+cur_dist);
-                    //System.out.println(cur_dist);
+                    cur_dist = Client.distanta(solutia.get(i),pacheteBak.get(j));
                     if(cur_dist<min_dist) {
                         closest = j;
                         min_dist = cur_dist;
                     }
                 }
             }
-            //System.out.println("Ales "+closest+", la distanta "+min_dist);
             solutia.add(pacheteBak.get(closest));
             pacheteBak.remove(closest);
         }
-        Double dist = catre_casa[solutia.get(0)]; //distanta(casa,clienti.get(solutia.get(0))); //dsitanta initiala de la casa
+        Double dist = Client.catreCasa(solutia.get(0));
         for(int j=0;j<solutia.size()-1;j++) { //restul distantei
-            //System.out.println(solutia.get(j)+" "+solutia.get(j+1)+" = "+distante[solutia.get(j)][solutia.get(j+1)]);
-            dist += distante[solutia.get(j)][solutia.get(j+1)];
+            dist += Client.distanta(solutia.get(j),solutia.get(j+1));
         }
         distanta = dist;
-        //System.out.println(solutia);
     }
     
     /**
@@ -221,9 +211,9 @@ public class Camion {
                     solTemp.addAll(solutia);
                     solTemp.add(i,pachet);
                     for(int j=0;j<solTemp.size();j++) {
-                        if(j==0) dist = catre_casa[solTemp.get(j)];
+                        if(j==0) dist = Client.catreCasa(solTemp.get(j));
                         else {
-                            dist += distante[solTemp.get(j-1)][solTemp.get(j)];
+                            dist += Client.distanta(solTemp.get(j-1),solTemp.get(j));
                         }
                     }
                     if(minDist > dist) {
@@ -235,10 +225,9 @@ public class Camion {
                 solutia.add(pos,pachet);
             }
         }
-        distanta = catre_casa[solutia.get(0)];
+        distanta = Client.catreCasa(solutia.get(0));
         for(int i=0;i<solutia.size()-1;i++) {
-            distanta+=distante[solutia.get(i)][solutia.get(i+1)];
+            distanta+=Client.distanta(solutia.get(i),solutia.get(i+1));
         }
-        //System.out.println(solutia);
     }
 }

@@ -39,7 +39,7 @@ public class AlgoritmGenetic extends Thread {
      * Pornirea se face prin .start()
      * @param size Int numarul de clienti.
      * @param viteza Int intre 0 si 3, numarul de generatii (500, 2000, 10.000, Infinit)
-     * @param probMutatie Int probabilitatea de mutatie 5 => 5%
+     * @param probMutatie Int probabilitatea de mutatie 5 reprezinta 5%
      */
     public AlgoritmGenetic(int size,int viteza,int probMutatie) {
         this.nrClienti = size;
@@ -76,11 +76,12 @@ public class AlgoritmGenetic extends Thread {
         Individ best_fit;
         Collections.sort(populatie);
         best_fit = populatie.get(0);
-        if(best == null) best=best_fit;
+        if(Individ.best == null) Individ.best=best_fit;
         for(int g=0;g<maxGeneratii;g++) {//main loop
             if(stop) break; //stop? atunci iesi din bucla
             if(g%5==0) {
                 m.setProgres(g);
+                System.out.println("Firul "+probabilitateMutatie+" gen "+g);
             }
             recombinare();//
             if(probabilitateMutatie > 0) mutatie();//
@@ -89,7 +90,7 @@ public class AlgoritmGenetic extends Thread {
             Collections.sort(populatie);
             best_fit = populatie.get(0);
             synchronized(O) {
-                if(best_fit.getFitness()<best.getFitness() && best_fit.ok()==true) { //
+                if(best_fit.getFitness()<Individ.best.getFitness() && best_fit.ok()==true) { //
                     System.out.println("Mutatie "+probabilitateMutatie+", Generatia "+g);
                     System.out.println(best_fit);
                     m.setBest(best_fit,g,probabilitateMutatie);
@@ -122,6 +123,10 @@ public class AlgoritmGenetic extends Thread {
      */
     private void recombinare() {
         popTemp.clear();
+        if(probabilitateMutatie>20) { //nu mai facem recombinare in cazul asta
+            popTemp.addAll(populatie);
+            return;
+        }        
         while(popTemp.size()<nrIndivizi){
             Individ p1 = populatie.get(R.nextInt(populatie.size()));
             Individ p2 = populatie.get(R.nextInt(populatie.size()));
@@ -192,6 +197,7 @@ public class AlgoritmGenetic extends Thread {
                     int temp = c.cromozom[i];
                     c.cromozom[i] = c.cromozom[pos2];
                     c.cromozom[pos2] = temp;
+                    //System.out.println("Mutatie...");
                 }
             }
         }
@@ -208,6 +214,9 @@ public class AlgoritmGenetic extends Thread {
         Individ selectat;
         boolean sel;
         Collections.sort(popTemp);
+//        for(int i=0;i<nrIndivizi;i++){
+//            populatie.add(popTemp.get(i));
+//        }
         for(int i=0;i<this.nrIndivizi;i++) {
             sel=false;
             while(sel == false) {
@@ -222,7 +231,7 @@ public class AlgoritmGenetic extends Thread {
                     sel=true;
                 }
             }
-        }    
+        }
     }
     /**
      * Se calculeaza fitness-ul total al populatiei curente.

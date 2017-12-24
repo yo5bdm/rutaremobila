@@ -7,19 +7,14 @@ package main;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
@@ -31,38 +26,24 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  * @author yo5bdm
  */
 public class MainFrame extends javax.swing.JFrame {
-    //lista de clienti/puncte unde trebuie sa ajunga marfa
-    public static ArrayList<Client> clienti = new ArrayList();
-    //punctul de unde vor pleca camioanele
-    public static Client casa = new Client("ACASA", 47.075866, 21.901441, 0.0);
-    //distantele intre puncte
-    public static Double[][] distante;
-    //distantele de la casa la fiecare punct
-    public static Double[] catre_casa;
     public static MainFrame m;
     public static ModelTabel model;
-    //individul cel mai bun ajunge aici
-    public static Individ best;
     //folosit la accestul individului best din firele de executie
     public static final Object O = new Object(); //syncronized
-    //public static HashDB hashDb = new HashDB();
-    //pachetele mari care nu incap in camioane
-    public static ArrayList<String> celeMari = new ArrayList();
-    public static double celeMariDist;
-    public static int celeMariNrCamioane;
     public static Setari s; //setarile aplicatiei
     
     //privati
     private Testing t = new Testing();
     private Timer paint;
-    private Camion camion;
     //pentru desenare
+    private Camion camion;
     private double dx, dy;
     private double factorScalare;
     private Graphics g;
     private int[] probabilitati;
     private boolean ruleaza=false;
     private ArrayList<AlgoritmGenetic> listaFire;
+    private final int[] intProbMutatii = new int[] {0,0,0,0,0,0,0}; //valorile folosite ca probabilitati de mutatie
     
     
     /**
@@ -80,6 +61,7 @@ public class MainFrame extends javax.swing.JFrame {
         g = Panel1.getGraphics();
         PornesteGenerarea.setEnabled(false);
         SalveazaSolutia.setEnabled(false);
+        VitezaAlgoritm.setEnabled(false);
     }
     
     /**
@@ -187,6 +169,7 @@ public class MainFrame extends javax.swing.JFrame {
 
         VitezaAlgoritm.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Rapid", "Mediu", "Lent", "Infinit" }));
         VitezaAlgoritm.setSelectedIndex(2);
+        VitezaAlgoritm.setToolTipText("<htmll>Selecteaza modul de lucru al algoritmului.<br>\nRapid - algoritmul merge o perioada scurta de timp inainte sa se opreasca (500 de pasi)<br>\nMediu - algoritmul functioneaza o perioada medie de timp (2000 de pasi)<br>\nLent - algoritmul functioneaza o perioada lunga de timp (10.000 de pasi)<br>\nInfinit - algoritmul functioneaza o perioada extrem de lunga de timp. Ideal daca doriti sa lasati calculatorul pornit o perioada lunga de timp</html>");
 
         SalveazaSolutia.setText("Salveaza solutia");
         SalveazaSolutia.addActionListener(new java.awt.event.ActionListener() {
@@ -318,31 +301,51 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_jSlider1StateChanged
 
     private void PornesteGenerareaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_PornesteGenerareaActionPerformed
-        
         if(!ruleaza) {
-            IncarcaCSV.setEnabled(false);
-            ButonSetari.setEnabled(false);
-            calculeaza_tablou_distante();
-            CamionDisponibil.adaugaCapacitate(101,10);
-            CamionDisponibil.adaugaCapacitate(91,15);
-            CamionDisponibil.adaugaCapacitate(81,9999);
-            //t.run(); //testele
-            rezolvaCeleMari();
-            int viteza = VitezaAlgoritm.getSelectedIndex();
-            redraw();
-            int[] intProbMutatii = new int[] {0,3,6,9,12}; //valorile folosite ca probabilitati de mutatie
-            listaFire = new ArrayList();
-            AlgoritmGenetic a;
-            probabilitati = new int[(1+intProbMutatii[intProbMutatii.length-1])];
-            for(int i:probabilitati) i=0;
-            for(int i=0;i<=(intProbMutatii.length-1);i++) { //probabilitatea de mutatie intre 2 si 7
-                a = new AlgoritmGenetic(clienti.size(),viteza,intProbMutatii[i]);
-                a.setPriority(s.prioritate);
-                a.start();
-                listaFire.add(a);
-            }
-            PornesteGenerarea.setText("Opreste generarea");
-            ruleaza = true;
+            new Thread(){
+                public void run() {
+                    IncarcaCSV.setEnabled(false);
+                    ButonSetari.setEnabled(false);
+                    VitezaAlgoritm.setEnabled(false);
+                    CamionDisponibil.adaugaCapacitate(101,10);
+                    CamionDisponibil.adaugaCapacitate(91,15);
+                    CamionDisponibil.adaugaCapacitate(81,9999);
+                    //t.run(); //testele
+                    Client.clienti.clear();
+                    for(Client c:Client.clientiBak) { //copiaza datele din backup
+                        Client.clienti.add(new Client(c));
+                    }
+                    Client.calculeazaTablouDistante();
+                    Client.rezolvaCeleMari();
+                    int viteza = VitezaAlgoritm.getSelectedIndex();
+                    redraw();
+                    listaFire = new ArrayList();
+                    AlgoritmGenetic a;
+                    probabilitati = new int[(1+intProbMutatii[intProbMutatii.length-1])];
+                    for(int i:probabilitati) i=0;
+                    for(int i=0;i<=(intProbMutatii.length-1);i++) { //probabilitatea de mutatie intre 2 si 7
+                        a = new AlgoritmGenetic(Client.clienti.size(),viteza,intProbMutatii[i]);
+                        a.setPriority(s.prioritate);
+                        a.start();
+                        listaFire.add(a);
+                    }
+                    PornesteGenerarea.setText("Opreste generarea");
+                    ruleaza = true;
+                    for(Thread t:listaFire) {
+                        try {
+                            t.join();
+                        } catch (InterruptedException ex) {
+                            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+                    IncarcaCSV.setEnabled(true);
+                    ButonSetari.setEnabled(true);
+                    VitezaAlgoritm.setEnabled(true);
+                    PornesteGenerarea.setText("Porneste generarea");
+                    ruleaza = false;
+                }
+            }.start();
+            
         } else  {
             try {
                 for(AlgoritmGenetic a:listaFire) {
@@ -351,6 +354,7 @@ public class MainFrame extends javax.swing.JFrame {
                 }
                 IncarcaCSV.setEnabled(true);
                 ButonSetari.setEnabled(true);
+                VitezaAlgoritm.setEnabled(true);
                 PornesteGenerarea.setText("Porneste generarea");
                 ruleaza = false;
             } catch (InterruptedException ex) {
@@ -364,7 +368,7 @@ public class MainFrame extends javax.swing.JFrame {
         ArrayList<String> listaCnp = new ArrayList();
         selection[0] = jTable1.convertRowIndexToModel(selection[0]);
         //luam in seama doar primul selectat
-        camion = best.camioane.get(selection[0]);
+        camion = Individ.best.camioane.get(selection[0]);
         redraw();
     }//GEN-LAST:event_jTable1MouseClicked
 
@@ -375,7 +379,7 @@ public class MainFrame extends javax.swing.JFrame {
         if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
             try {
                 File file = fileChooser.getSelectedFile();
-                List<String> lines = genereazaFisier();//Arrays.asList("The first line", "The second line");
+                List<String> lines = Fisier.genereazaFisier(Individ.best);//Arrays.asList("The first line", "The second line");
                 Path f = Paths.get(file.getAbsolutePath());
                 Files.write(f, lines, Charset.forName("UTF-8"));
             } catch (IOException ex) {
@@ -385,25 +389,26 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_SalveazaSolutiaActionPerformed
 
     private void IncarcaCSVActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_IncarcaCSVActionPerformed
-        incarca_clienti();
-        if(clienti.size()>0) {
+        Client.incarcaClienti("clienti.csv");
+        if(Client.clienti.size()>0) {
             PornesteGenerarea.setEnabled(true);
             SalveazaSolutia.setEnabled(false);
-            for(Client c:clienti) { 
+            VitezaAlgoritm.setEnabled(true);
+            for(Client c:Client.clienti) { 
                 dx += (c.longitudine);
                 dy += (c.latitudine);
             }
-            dx /= clienti.size();
-            dy /= clienti.size();
+            dx /= Client.clienti.size();
+            dy /= Client.clienti.size();
         } else {
             PornesteGenerarea.setEnabled(false);
             SalveazaSolutia.setEnabled(false);
+            VitezaAlgoritm.setEnabled(false);
         }
-        FisierIncarcat.setText("Nr clienti = "+clienti.size());
+        FisierIncarcat.setText("Nr clienti = "+Client.clienti.size());
     }//GEN-LAST:event_IncarcaCSVActionPerformed
 
     private void ButonSetariActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ButonSetariActionPerformed
-        
         s.setVisible(true);
     }//GEN-LAST:event_ButonSetariActionPerformed
     
@@ -481,117 +486,38 @@ public class MainFrame extends javax.swing.JFrame {
     /**
      * Seteaza cea mai buna solutie din firul de executie, pentru afisare.
      * @param i individul ce urmeaza sa fie setat ca solutie noua cea mai buna
-     * @param generatia
-     * @param mutatie 
+     * @param generatia Int generatia la care a fost gasit cel mai bun
+     * @param mutatie Int procentul probabilitatii de mutatie (de ex 5 reprezinta 5%)
      */
     public void setBest(Individ i, int generatia, int mutatie) {
         if(i!=null) {
             int delta = Integer.MAX_VALUE;
-            if(best!=null) delta = (int)(best.getFitness()-i.getFitness());
-            best = i;
-            BSDistanta.setText((int)((double)best.getFitness()+celeMariDist)+" km (-"+delta+")");
-            BSNrCamioane.setText((best.camioane.size()+celeMariNrCamioane)+"");
+            if(Individ.best!=null) delta = (int)(Individ.best.getFitness()-i.getFitness());
+            Individ.best = i;
+            BSDistanta.setText((int)((double)Individ.best.getFitness()+Individ.celeMariDist)+" km (-"+delta+")");
+            BSNrCamioane.setText((Individ.best.camioane.size()+Individ.celeMariNrCamioane)+"");
             BSGeneratia.setText("(G"+generatia+"M"+mutatie+")");
             probabilitati[mutatie]++;
             SalveazaSolutia.setEnabled(true);
         } else {
-            best = null;
+            Individ.best = null;
             BSDistanta.setText("");
             BSNrCamioane.setText("");
             BSGeneratia.setText("");
             SalveazaSolutia.setEnabled(false);
         }
         model.fireTableDataChanged();
-        System.out.println("Procentele ce au gasit indivizi:");
-        System.out.println(Arrays.toString(probabilitati));
-        System.out.println("-----------------------------");
-    }
-    
-    private static void calculeaza_tablou_distante() {
-        distante = new Double[clienti.size()][clienti.size()];
-        for (int i = 0; i < clienti.size(); i++) {
-            for (int j = 0; j < clienti.size(); j++) {
-                distante[i][j] = Calcule.distanta(clienti.get(i), clienti.get(j));
-            }
-        }
-        catre_casa = new Double[clienti.size()];
-        for(int i=0;i<clienti.size();i++) {
-            catre_casa[i] = Calcule.distanta(casa,clienti.get(i));
-        }
-    }
-    private static void incarca_clienti() {
-        BufferedReader fin;
-        try {
-            fin = new BufferedReader(new FileReader("clienti.csv"));
-            MainFrame.clienti.clear();
-            String linie;
-            while ((linie = fin.readLine()) != null) {
-                //fiecare elev pe o linie, separat prin virgula
-                StringTokenizer t = new StringTokenizer(linie, ";");
-                MainFrame.clienti.add(new Client(t.nextToken(), Double.parseDouble(t.nextToken()), Double.parseDouble(t.nextToken()), Double.parseDouble(t.nextToken())));
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-    private static void rezolvaCeleMari() {
-        ArrayList<Client> temp = new ArrayList();
-        celeMari.clear();
-        celeMariDist = 0.0;
-        celeMariNrCamioane=0;
-        double dist;
-        System.out.println("Nr Clienti "+clienti.size());
-        for (Client c:clienti) {
-            if(c.volum > CamionDisponibil.getMaxSize()) {
-                System.out.println("Rezolv " + c);
-                while(c.volum>CamionDisponibil.getMaxSize()) {
-                    int volum = CamionDisponibil.scadeLiber();
-                    //System.out.println("Camion "+volum);
-                    c.volum -= volum;
-                    //System.out.println("Ramas"+c.volum);
-                    dist = Calcule.distanta(casa,c);
-                    celeMariDist += dist;
-                    celeMariNrCamioane++;
-                    celeMari.add(" ");
-                    celeMari.add("======================================");
-                    celeMari.add("Camion volum "+volum+", ocupat "+volum+", opriri 1, distanta totala "+(int)dist+" km;");
-                    celeMari.add(c.cod_client+" "+c.ship_to+", GPS="+c.latitudine+","+c.longitudine+" vol="+volum);
-                }
-                temp.add(c);
-            }
-        }
-    }
-    private ArrayList genereazaFisier() {
-        Individ ind = best;
-        Client cli;
-        ArrayList<String> ret = new ArrayList();
         
-        ret.add("======================================");
-        ret.add("Distanta totala de parcurs: "+(int)(ind.getFitness()+celeMariDist)+" km");
-        ret.add("Numar total de camioane folosite: "+(ind.camioane.size()+celeMariNrCamioane));
-        ret.addAll(celeMari);
-        for(Camion cam:ind.camioane) {
-            ret.add(" ");
-            ret.add("======================================");
-            ret.add("Camion volum "+(cam.capacitate-1)+", ocupat "+cam.ocupat+", opriri "+cam.opriri+", distanta totala "+(int)cam.distanta+" km;");
-            ret.add("Pachetele de incarcat:");
-            for(Integer i:cam.solutia) {
-                cli = clienti.get(i);
-                ret.add(cli.cod_client+" "+cli.ship_to+", GPS="+cli.latitudine+","+cli.longitudine+" vol="+cli.volum);
-            }
-        }
-        ret.add(" ");
-        ret.add("======================================");
-        ret.add("Fisier generat  "+LocalDateTime.now());
-        ret.add("======================================");
-        return ret;
     }
-    
+    /**
+     * Metoda de redesenare a jPanel-ului de pe MainFrame
+     */
     public void redraw() {
         factorScalare = (double)jSlider1.getValue();
-        ploteaza_punctele();
+        ploteazaPunctele();
     }
-    private void ploteaza_punctele() {
+    
+    private void ploteazaPunctele() {
         int max_x = Panel1.getWidth();
         int max_y = Panel1.getHeight();
         
@@ -600,7 +526,7 @@ public class MainFrame extends javax.swing.JFrame {
         
         g.setColor(Color.black);
         int x, y;
-        for(Client c:clienti) {
+        for(Client c:Client.clienti) {
             x = max_x/2 + ((int)(((c.longitudine-dx)*factorScalare))); 
             y = max_y/2 - ((int)(((c.latitudine-dy)*factorScalare)));
             g.drawOval(x,y,3,3);
@@ -610,19 +536,19 @@ public class MainFrame extends javax.swing.JFrame {
             int x2,y2;
             //linia de acasa pana la primul:
             g.setColor(Color.BLUE);
-            x = max_x/2 + ((int)(((casa.longitudine-dx)*factorScalare))); 
-            y = max_y/2 - ((int)(((casa.latitudine-dy)*factorScalare)));
-            x2 = max_x/2 + ((int)(((clienti.get(camion.solutia.get(0)).longitudine-dx)*factorScalare))); 
-            y2 = max_y/2 - ((int)(((clienti.get(camion.solutia.get(0)).latitudine-dy)*factorScalare)));
+            x = max_x/2 + ((int)(((Client.casa.longitudine-dx)*factorScalare))); 
+            y = max_y/2 - ((int)(((Client.casa.latitudine-dy)*factorScalare)));
+            x2 = max_x/2 + ((int)(((Client.clienti.get(camion.solutia.get(0)).longitudine-dx)*factorScalare))); 
+            y2 = max_y/2 - ((int)(((Client.clienti.get(camion.solutia.get(0)).latitudine-dy)*factorScalare)));
             g.drawLine(x,y,x2,y2);
             g.setColor(Color.black);
             for(int i=0;i<camion.solutia.size()-1;i++) {
                 int i1 = camion.solutia.get(i);
                 int i2 = camion.solutia.get(i+1);
-                x = max_x/2 + ((int)(((clienti.get(i1).longitudine-dx)*factorScalare))); 
-                y = max_y/2 - ((int)(((clienti.get(i1).latitudine-dy)*factorScalare)));
-                x2 = max_x/2 + ((int)(((clienti.get(i2).longitudine-dx)*factorScalare))); 
-                y2 = max_y/2 - ((int)(((clienti.get(i2).latitudine-dy)*factorScalare)));
+                x = max_x/2 + ((int)(((Client.clienti.get(i1).longitudine-dx)*factorScalare))); 
+                y = max_y/2 - ((int)(((Client.clienti.get(i1).latitudine-dy)*factorScalare)));
+                x2 = max_x/2 + ((int)(((Client.clienti.get(i2).longitudine-dx)*factorScalare))); 
+                y2 = max_y/2 - ((int)(((Client.clienti.get(i2).latitudine-dy)*factorScalare)));
                 g.drawLine(x,y,x2,y2);
             }
         }

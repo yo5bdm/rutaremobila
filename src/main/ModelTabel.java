@@ -16,37 +16,35 @@ class ModelTabel extends AbstractTableModel {
 
     String[] coloane = {"Distanta","Ocupat","Opriri","OK"};
     private final Class[] columnClass = new Class[] {
-        Integer.class, Integer.class, Integer.class, Boolean.class
+        String.class, String.class, Integer.class, String.class
     };
     
     @Override
     public int getRowCount() {
-        if(m==null || m.best ==null) return 0;
-        return m.best.camioane.size();
+        if(m==null || Individ.best ==null) return 0;
+        return Individ.best.camioane.size();
     }
-
     @Override
     public int getColumnCount() {
         return coloane.length;
     }
-
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
-        Camion c = m.best.camioane.get(rowIndex);
+        Camion c = Individ.best.camioane.get(rowIndex);
         switch(columnIndex) {
             case 0:
-                return (int)c.distanta;
+                return (int)c.distanta+" km";
             case 1:
-                return c.ocupat().intValue(); 
+                return c.ocupat().intValue()+" %"; 
             case 2:
                 return c.opriri;
             default:
-                return c.ok;
+                if(c.ok) return "Da";
+                else return "Nu";
         }
     }
     @Override
     public String getColumnName(int nr) {
         return coloane[nr];
     }
-    
 }

@@ -24,7 +24,7 @@ public class Testing {
     
     private void CamionTest(boolean executa) {
         if(executa = false) return;
-        Individ n=new Individ(clienti.size(),0,false);
+        Individ n=new Individ(Client.clienti.size(),0,false);
         Camion c1, c2;
         c1 = new Camion(100);
         c2 = new Camion(100);
@@ -47,24 +47,16 @@ public class Testing {
         System.out.println("Metoda 2 a terminat in "+((System.nanoTime() - start)/1000000)+" ms");
         n.camioane.add(c1);
         n.camioane.add(c2);
-        n.setFitness(130.0);
+        //n.setFitness(130.0);
         m.setBest(n,-20,-30); 
     }
     
     private void IndividTest(boolean executa) {
         if(executa = false) return;
-        Individ n = new Individ(clienti.size(),48,true);
+        Individ n = new Individ(Client.clienti.size(),48,true);
         System.out.println("Fitnes total"+n.calculeaza(true)); 
         for(Camion c:n.camioane) System.out.println(c);
         System.out.println("Neincarcabile = "+n.neincarcabile());
-        //m.setBest(n,-10);
-    }
-
-    private void HashTest(boolean executa) {
-        if(executa = false) return;
-        Individ n = new Individ(clienti.size(),48,true);
-        Individ s = new Individ(clienti.size(),48,true);
-        System.out.println("n "+n.hashCode());
-        System.out.println("s "+s.hashCode());
+        m.setBest(n,-10,-20);
     }
 }

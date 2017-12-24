@@ -14,6 +14,8 @@ public class Setari extends javax.swing.JDialog {
     public int memorie=1000;
     /**
      * Creates new form Setari
+     * @param parent parintele
+     * @param modal boolean fereastra modala
      */
     public Setari(java.awt.Frame parent, boolean modal) {
         super(parent, modal);

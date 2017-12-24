@@ -7,7 +7,6 @@ package main;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import static main.MainFrame.clienti;
 import static main.AlgoritmGenetic.R;
 
 /**
@@ -19,6 +18,9 @@ import static main.AlgoritmGenetic.R;
  * dar un obiect nu poate fi incarcat pe mai multe camioane.
  * cromozom2 - copia neoptimizata a cromozomului principal. Folosindu-se cromozomi
  * diploizi, se ajunge la indivizi mai buni.
+ * Am implementat limitarea vietii indivizilor buni, fiecare poate "trai"
+ * maxim <i>"viata"</i> generatii.
+ * Primele teste au fost facute la viata de 10 generatii
  * Valori posibile:
  * - orice valoare pozitiva, inclusiv zero: numarul camionului pe care urmeaza sa fie incarcat
  * - -1: pachet neincarcat
@@ -26,31 +28,37 @@ import static main.AlgoritmGenetic.R;
  * @author yo5bdm
  */
 public class Individ implements Comparable {
-    //private Double distanta_totala;
-    private Double fitness; //distanta totala parcursa
-    private Integer nr_camioane;
-    private int viata;
-    private CamionDisponibil camionDisponibil;
-    
+    /* PUBLIC STATIC */
+    //individul cel mai bun ajunge aici
+    public static Individ best;
+    public static int celeMariNrCamioane;
+    public static double celeMariDist;
+    //pachetele mari care nu incap in camioane
+    public static ArrayList<String> celeMari = new ArrayList(); //String-urile folosite la imprimare in fisier
+    /* PUBLIC NESTATIC */
     public Integer[] cromozom; //indexul e obiectul, valoarea e camionul pe care e incarcat
     public Integer[] cromozom2;
     public ArrayList<Camion> camioane = new ArrayList();
     
-    public void setFitness(Double fitness) {
-        this.fitness = fitness;
-    }
     
+    /* PRIVATE */
+    //private Double distanta_totala;
+    private Double fitness; //distanta totala parcursa
+    private Integer nr_camioane;
+    private int viata = 50; //50 de generatii
+    private CamionDisponibil camionDisponibil; //obiectul folosit pentru aflarea a ce camion e disponibil
+            
     /**
      * Constructor.
      * @param nr numarul de clienti (locatii)
      * @param cam numarul de camioane
+     * @param generare Boolean true daca se doreste generarea random a individului
      */    
     public Individ(int nr, int cam, boolean generare) {
         cromozom = new Integer[nr];
         cromozom2 = new Integer[nr];
         camionDisponibil = new CamionDisponibil();
         nr_camioane = cam;
-        viata = 10;
         int capacitate;
         if(generare == true) {
             for(int j=0;j<nr;j++) {
@@ -95,7 +103,8 @@ public class Individ implements Comparable {
     }
     /**
      * Calculeaza fitness-ul individului curent.
-     * @return 
+     * @param optimizeaza Boolean true daca se doreste optimizarea
+     * @return Double fitness-ul individului
      */
     public double calculeaza(boolean optimizeaza) {
 //        Nod n = hashDb.iaNod(this.hashCode());
@@ -180,7 +189,7 @@ public class Individ implements Comparable {
                     camioane: for(int j=0;j<camioane.size();j++) {
                         Camion c = camioane.get(j);
                         if(c.opriri>=15) continue;
-                        if((c.capacitate - c.ocupat)>=clienti.get(i).volum) {
+                        if((c.capacitate - c.ocupat)>=Client.clienti.get(i).volum) {
                             cromozom[i] = j;
                             c.add(i);
                             incarcat=1;
@@ -188,7 +197,7 @@ public class Individ implements Comparable {
                         }
                     }
                     //nu am reusit sa incarc produsul, volumul e mai mare decat camioanele disponibile
-                    if(incarcat==0 && clienti.get(i).volum>80) {
+                    if(incarcat==0 && Client.clienti.get(i).volum>80) {
                         cromozom[i]=-2; //il marcam ca atare
                     }
                 }
