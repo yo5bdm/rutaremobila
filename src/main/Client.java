@@ -5,25 +5,18 @@
  */
 package main;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.StringTokenizer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import static main.MainFrame.O;
 
 /**
  * Clasa cuprinde toate datele clientului.
- * 
  * @author yo5bdm
  */
 public class Client {
 
-    
+    /* STATICE */
     //lista de clienti/puncte unde trebuie sa ajunga marfa
     public static ArrayList<Client> clienti = new ArrayList();
+    //backupul listei de clienti, va fi folosita pentru a restaura lista la restartarea algoritmului
     public static ArrayList<Client> clientiBak = new ArrayList();
     //punctul de unde vor pleca camioanele
     public static Client casa = new Client("ACASA", 47.075866, 21.901441, 0.0);
@@ -32,14 +25,16 @@ public class Client {
     //distantele intre puncte
     private static Double[][] distante;
     
-
-    
+    /* NESTATICE */
     public String cod_client;
     public String ship_to;
     public Double latitudine;
     public Double longitudine;
     public Double volum;
-
+    /**
+     * Constructorul de copiere
+     * @param a Clientul ce va fi copiat
+     */
     public Client(Client a) {
         this.cod_client = a.cod_client;
         this.ship_to = a.ship_to;
@@ -47,7 +42,14 @@ public class Client {
         this.longitudine = a.longitudine;
         this.volum = a.volum;
     }
-    
+    /**
+     * Constructorul complet.
+     * @param cod_client Codul clientului
+     * @param ship_to Codul locatiei la care se trimit pachetele
+     * @param GPS1 Latitudine
+     * @param GPS2 Longitudine
+     * @param volum Volumul pachetelor ce se vor incarca pe camion
+     */
     public Client(String cod_client, String ship_to, Double GPS1, Double GPS2, Double volum) {
         this.cod_client = cod_client;
         this.ship_to = ship_to;
@@ -55,41 +57,23 @@ public class Client {
         this.longitudine = GPS2;
         this.volum = volum;
     }
-
+    /**
+     * Constructorul incomplet.
+     * @param cod_client Codul clietului
+     * @param GPS1 Latitudine
+     * @param GPS2 Longitudine
+     * @param volum Volumul pachetelor ce se vor incarca pe camion
+     */
     public Client(String cod_client, Double GPS1, Double GPS2, Double volum) {
         this.cod_client = cod_client;
         this.latitudine = GPS1;
         this.longitudine = GPS2;
         this.volum = volum;
     }
-    
-
     @Override
     public String toString() {
         return "Client{" + "cod_client=" + cod_client + ", GPS1=" + latitudine + "," + longitudine + ", volum=" + volum + '}';
     }
-    
-    /**
-     * Metoda de incarcare clienti din fisier.
-     */
-    public static void incarcaClienti(String fisier) {
-        BufferedReader fin;
-        try {
-            fin = new BufferedReader(new FileReader(fisier));
-            clientiBak.clear();
-            String linie;
-            while ((linie = fin.readLine()) != null) {
-                //fiecare elev pe o linie, separat prin virgula
-                StringTokenizer t = new StringTokenizer(linie, ";");
-                Client c = new Client(t.nextToken(), Double.parseDouble(t.nextToken()), Double.parseDouble(t.nextToken()), Double.parseDouble(t.nextToken()));
-                clienti.add(c);
-                clientiBak.add(c);
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
     /**
      * Daca exista clienti cu volum mai mare decat capacitatea camioanelor, aici se trateaza.
      */
@@ -99,15 +83,11 @@ public class Client {
         Individ.celeMariDist = 0.0;
         Individ.celeMariNrCamioane = 0;
         double dist;
-        System.out.println("Nr Clienti " + clienti.size());
         for (Client c : clienti) {
             if (c.volum > CamionDisponibil.getMaxSize()) {
-                System.out.println("Rezolv " + c);
                 while (c.volum > CamionDisponibil.getMaxSize()) {
                     int volum = CamionDisponibil.scadeLiber();
-                    //System.out.println("Camion "+volum);
                     c.volum -= volum;
-                    //System.out.println("Ramas"+c.volum);
                     dist = Calcule.distanta(casa, c);
                     Individ.celeMariDist += dist;
                     Individ.celeMariNrCamioane++;
@@ -119,17 +99,30 @@ public class Client {
                 temp.add(c);
             }
         }
-        System.out.println("Cele mari distnata " + Individ.celeMariDist);
-        System.out.println("Cele mari nr camioane " + Individ.celeMariNrCamioane);
     }
-    
+    /**
+     * Returneaza distanta dintre 2 clienti.
+     * @param a Int indexul clientului 1
+     * @param b Int indexul clientului 2
+     * @return Double distanta dintre cei doi clienti
+     */
     public static double distanta(Integer a, Integer b) {
         return distante[a][b];
     }
-    
+    /**
+     * Returneaza distanta de la orice punct catre casa
+     * @param a Int indexul clientului
+     * @return Double distanta dintre client si casa
+     */
     public static double catreCasa(Integer a) {
         return spreCasa[a];
     }
+    /**
+     * Calculeaza tablourile de distante din care se vor lua datele.
+     * Aplicatia lucreaza cu 2 tablouri:
+     * 1 - distanta de la fiecare punct catre casa (metoda catreCasa())
+     * 2 - distanta dintre oricare doua puncte (metoda distanta())
+     */
     public static void calculeazaTablouDistante() {
         distante = new Double[clienti.size()][clienti.size()];
         for (int i = 0; i < clienti.size(); i++) {
@@ -140,6 +133,17 @@ public class Client {
         spreCasa = new Double[clienti.size()];
         for (int i = 0; i < clienti.size(); i++) {
             spreCasa[i] = Calcule.distanta(casa, clienti.get(i));
+        }
+    }
+    /**
+     * Restaureaza lista de clienti din lista de backup.
+     * Utila pentru resetarea listei la restartarea algoritmului 
+     * cu aceeasi clienti, fara o reincarcare a fisierului.
+     */
+    public static void restore() {
+        clienti.clear();
+        for(Client c:clientiBak) { //copiaza datele din backup
+            clienti.add(new Client(c));
         }
     }
 }

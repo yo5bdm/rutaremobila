@@ -69,8 +69,12 @@
           </Border>
         </Property>
       </Properties>
+      <Events>
+        <EventHandler event="mouseDragged" listener="java.awt.event.MouseMotionListener" parameters="java.awt.event.MouseEvent" handler="Panel1MouseDragged"/>
+        <EventHandler event="mousePressed" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="Panel1MousePressed"/>
+      </Events>
       <AuxValues>
-        <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new javax.swing.JPanel() {&#xa;    @Override&#xa;    public void paintComponent(Graphics g) {&#xa;        super.paintComponent(g);&#xa;        redraw();&#xa;&#xa;    }&#xa;&#xa;}"/>
+        <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new javax.swing.JPanel() {&#xa;    @Override&#xa;    public void paintComponent(Graphics g) {&#xa;        super.paintComponent(g);&#xa;        Graphics2D g2 = (Graphics2D)g;&#xa;        deseneaza(g2);&#xa;    }&#xa;}"/>
       </AuxValues>
 
       <Layout>
@@ -87,9 +91,10 @@
       </Layout>
     </Container>
     <Component class="javax.swing.JSlider" name="jSlider1">
-      <Events>
-        <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="jSlider1StateChanged"/>
-      </Events>
+      <Properties>
+        <Property name="maximum" type="int" value="300"/>
+        <Property name="minimum" type="int" value="1"/>
+      </Properties>
     </Component>
     <Container class="javax.swing.JPanel" name="jPanel1">
       <Properties>
