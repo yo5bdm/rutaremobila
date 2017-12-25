@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.Timer;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -112,6 +113,7 @@ public class MainFrame extends javax.swing.JFrame {
         ButonSetari = new javax.swing.JButton();
         IncarcaCSV = new javax.swing.JButton();
         FisierIncarcat = new javax.swing.JLabel();
+        jLabel1 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Rutare pachete");
@@ -221,15 +223,10 @@ public class MainFrame extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(PornesteGenerarea, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel6)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(VitezaAlgoritm, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addComponent(Progres, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel3)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 133, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(BSGeneratia))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel4)
@@ -247,7 +244,13 @@ public class MainFrame extends javax.swing.JFrame {
                         .addComponent(IncarcaCSV)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(FisierIncarcat)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(0, 35, Short.MAX_VALUE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel6)
+                            .addComponent(VitezaAlgoritm, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(PornesteGenerarea, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -259,10 +262,11 @@ public class MainFrame extends javax.swing.JFrame {
                     .addComponent(FisierIncarcat))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel6)
-                    .addComponent(VitezaAlgoritm, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(PornesteGenerarea)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel6)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(VitezaAlgoritm, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(PornesteGenerarea, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(Progres, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -278,13 +282,15 @@ public class MainFrame extends javax.swing.JFrame {
                     .addComponent(jLabel5)
                     .addComponent(BSNrCamioane))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 455, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 440, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(SalveazaSolutia)
-                    .addComponent(ButonSetari))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(SalveazaSolutia, javax.swing.GroupLayout.DEFAULT_SIZE, 38, Short.MAX_VALUE)
+                    .addComponent(ButonSetari, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
+
+        jLabel1.setText("Zoom harta");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -295,8 +301,11 @@ public class MainFrame extends javax.swing.JFrame {
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(Panel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jSlider1, javax.swing.GroupLayout.DEFAULT_SIZE, 1096, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jSlider1, javax.swing.GroupLayout.DEFAULT_SIZE, 1049, Short.MAX_VALUE))
+                    .addComponent(Panel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -307,7 +316,9 @@ public class MainFrame extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(Panel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jSlider1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jSlider1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel1)))
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -397,23 +408,24 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_SalveazaSolutiaActionPerformed
 
     private void IncarcaCSVActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_IncarcaCSVActionPerformed
-        Fisier.incarcaClienti("clienti.csv");
-        if(Client.clienti.size()>0) {
-            PornesteGenerarea.setEnabled(true);
-            SalveazaSolutia.setEnabled(false);
-            VitezaAlgoritm.setEnabled(true);
-            for(Client c:Client.clienti) { 
-                dx += (c.longitudine);
-                dy += (c.latitudine);
+        if(Fisier.incarcaClienti("clienti.csv")) {
+            if(Client.clienti.size()>0) {
+                PornesteGenerarea.setEnabled(true);
+                SalveazaSolutia.setEnabled(false);
+                VitezaAlgoritm.setEnabled(true);
+                for(Client c:Client.clienti) { 
+                    dx += (c.longitudine);
+                    dy += (c.latitudine);
+                }
+                dx /= Client.clienti.size();
+                dy /= Client.clienti.size();
+            } else {
+                PornesteGenerarea.setEnabled(false);
+                SalveazaSolutia.setEnabled(false);
+                VitezaAlgoritm.setEnabled(false);
             }
-            dx /= Client.clienti.size();
-            dy /= Client.clienti.size();
-        } else {
-            PornesteGenerarea.setEnabled(false);
-            SalveazaSolutia.setEnabled(false);
-            VitezaAlgoritm.setEnabled(false);
+            FisierIncarcat.setText("Nr clienti = "+Client.clienti.size());
         }
-        FisierIncarcat.setText("Nr clienti = "+Client.clienti.size());
     }//GEN-LAST:event_IncarcaCSVActionPerformed
 
     private void ButonSetariActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ButonSetariActionPerformed
@@ -478,6 +490,7 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JProgressBar Progres;
     private javax.swing.JButton SalveazaSolutia;
     private javax.swing.JComboBox<String> VitezaAlgoritm;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
@@ -573,5 +586,21 @@ public class MainFrame extends javax.swing.JFrame {
                 g.draw(new Line2D.Double(x, y, x2, y2));
             }
         }
+    }
+    /**
+     * Afisare mesaj eroare.
+     * Metoda statica pentru afisare mesaj de eroare de oriunde
+     * @param msg String cu mesajul dorit
+     */
+    public static void mesajEroare(String msg) {
+        JOptionPane.showMessageDialog(null, msg, "Eroare!", JOptionPane.ERROR_MESSAGE);
+    }
+    /**
+     * Afisare mesaj de atentionare.
+     * Metoda statica pentru afisare mesaj de atentionare
+     * @param msg String cu mesajul dorit
+     */
+    public static void mesajAtentie(String msg) {
+        JOptionPane.showMessageDialog(null, msg, "Atentie!", JOptionPane.WARNING_MESSAGE);
     }
 }

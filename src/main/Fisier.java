@@ -5,18 +5,19 @@
  */
 package main;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.StringTokenizer;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static main.CSVUtils.*;
+import static main.MainFrame.*;
 
 /**
- *
- * @author yo5bd
+ * Clasa de lucru cu fisierele
+ * @author yo5bdm
  */
 public class Fisier {
 
@@ -24,6 +25,8 @@ public class Fisier {
      * Genereaza un ArrayList din individul dat pentru a putea fi salvat.
      * @param ind Individul ce se doreste a fi salvat in fisier
      * @return ArrayList de formatul String
+     * 
+     * @todo Optiune scriere fisier text, csv sau html.
      */
     public static ArrayList genereazaFisier(Individ ind) {
         Client cli;
@@ -52,26 +55,63 @@ public class Fisier {
     /**
      * Metoda de incarcare a unui fisier in ArrayListurile statice din clasa Clienti.
      * @param fisier String cu numele fisierului ce contine datele
+     * @return Boolean true daca fisierul a fost incarcat cu succes, false daca nu.
+     * 
+     * @todo Incarcare fisier csv in functie de nr de coloane. 
+     * @todo Eventual dam clientului ocazia sa aleaga ce tip de fisier este, ce inseamna coloanele
      */
-    public static void incarcaClienti(String fisier) {
-        /*https://stackoverflow.com/questions/14274259/read-csv-with-scanner
+    public static boolean incarcaClienti(String fisier) {
+        /*
+        https://stackoverflow.com/questions/14274259/read-csv-with-scanner
         https://www.mkyong.com/java/how-to-read-and-parse-csv-file-in-java/
          */
-        BufferedReader fin;
+        Scanner scanner;
         try {
-            fin = new BufferedReader(new FileReader(fisier));
-            Client.clientiBak.clear();
-            String linie;
-            while ((linie = fin.readLine()) != null) {
-                //fiecare elev pe o linie, separat prin virgula
-                StringTokenizer t = new StringTokenizer(linie, ";");
-                Client c = new Client(t.nextToken(), Double.parseDouble(t.nextToken()), Double.parseDouble(t.nextToken()), Double.parseDouble(t.nextToken()));
-                Client.clienti.add(c);
-                Client.clientiBak.add(c);
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+            scanner = new Scanner(new File(fisier));
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(Fisier.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
         }
+        Client c;
+        while (scanner.hasNext()) {
+            ArrayList<String> line = parseLine(scanner.nextLine());
+            switch (line.size()) {
+                case 4:
+                    //constructorul cu 4
+                    c = new Client(line.get(0),Double.parseDouble(line.get(1)),Double.parseDouble(line.get(2)),Double.parseDouble(line.get(3)));
+                    Client.clienti.add(c);
+                    Client.clientiBak.add(c);
+                    break;
+                case 5:
+                    //constructorul cu 5
+                    c = new Client(line.get(0),line.get(1),Double.parseDouble(line.get(2)),Double.parseDouble(line.get(3)),Double.parseDouble(line.get(4)));
+                    Client.clienti.add(c);
+                    Client.clientiBak.add(c);
+                    break;
+                default:
+                    mesajEroare("Fisierul CSV nu are un format suportat!");
+                    return false;
+            }
+        }
+        scanner.close();
+        return true;
     }
     
 }
+
+//        old way
+//        BufferedReader fin;
+//        try {
+//            fin = new BufferedReader(new FileReader(fisier));
+//            Client.clientiBak.clear();
+//            String linie;
+//            while ((linie = fin.readLine()) != null) {
+//                //fiecare elev pe o linie, separat prin virgula
+//                StringTokenizer t = new StringTokenizer(linie, ";");
+//                Client c = new Client(t.nextToken(), Double.parseDouble(t.nextToken()), Double.parseDouble(t.nextToken()), Double.parseDouble(t.nextToken()));
+//                Client.clienti.add(c);
+//                Client.clientiBak.add(c);
+//            }
+//        } catch (IOException ex) {
+//            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+//        }
