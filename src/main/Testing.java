@@ -19,12 +19,11 @@ public class Testing {
         System.out.println("System testing:");
         CamionTest(true);
         //IndividTest(false);
-        //HashTest(false);
     }
     
     private void CamionTest(boolean executa) {
         if(executa = false) return;
-        Individ n=new Individ(Client.clienti.size(),0,false);
+        Individ n=new Individ(Client.clienti.size(),0,100,false);
         Camion c1, c2;
         c1 = new Camion(100);
         c2 = new Camion(100);
@@ -48,15 +47,15 @@ public class Testing {
         n.camioane.add(c1);
         n.camioane.add(c2);
         //n.setFitness(130.0);
-        m.setBest(n,-20,-30); 
+        m.setBest(n,"TESTING"); 
     }
     
     private void IndividTest(boolean executa) {
-        if(executa = false) return;
-        Individ n = new Individ(Client.clienti.size(),48,true);
+        if(executa == false) return;
+        Individ n = new Individ(Client.clienti.size(),48,100,true);
         System.out.println("Fitnes total"+n.calculeaza(true)); 
-        for(Camion c:n.camioane) System.out.println(c);
+        for(Camion cam:n.camioane) System.out.println(cam);
         System.out.println("Neincarcabile = "+n.neincarcabile());
-        m.setBest(n,-10,-20);
+        m.setBest(n,"TESTING");
     }
 }

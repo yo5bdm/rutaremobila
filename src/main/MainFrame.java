@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -37,8 +38,10 @@ public class MainFrame extends javax.swing.JFrame {
     //folosit la accestul individului best din firele de executie
     public static final Object O = new Object(); //syncronized
     public static Setari s; //setarile aplicatiei
+    public static AlgoritmMutatie mut; //firul cu algoritm de mutatie, aici nu exista viata, insereaza firelele celelalte indivizii buni
+    public static int[] procente;
     
-    //privati
+//privati
     private Testing t = new Testing();
     private Timer paint;
     //pentru desenare
@@ -50,6 +53,8 @@ public class MainFrame extends javax.swing.JFrame {
     //runtime
     private boolean ruleaza=false;
     private ArrayList<AlgoritmGenetic> listaFire;
+    
+    private final int[] viataIndivid = new int[] {10,20,30,40,50,60,70};
     private final int[] intProbMutatii = new int[] {0,0,0,0,0,0,0}; //valorile folosite ca probabilitati de mutatie
     Timer timer = new Timer(50, new ActionListener() { // 50ms, adica vreo 20fps
         @Override
@@ -69,7 +74,7 @@ public class MainFrame extends javax.swing.JFrame {
         s = new Setari(this,true);
         m = this;
         model = new ModelTabel();
-        setBest(null,-1,-1);
+        setBest(null,"");
         jTable1.setModel(model);
         camion = null;
         PornesteGenerarea.setEnabled(false);
@@ -342,13 +347,17 @@ public class MainFrame extends javax.swing.JFrame {
                     Client.rezolvaCeleMari();
                     int viteza = VitezaAlgoritm.getSelectedIndex();
                     listaFire = new ArrayList();
+                    procente = new int[intProbMutatii.length+1];
                     AlgoritmGenetic a;
                     for(int i=0;i<=(intProbMutatii.length-1);i++) { //probabilitatea de mutatie intre 2 si 7
-                        a = new AlgoritmGenetic(Client.clienti.size(),viteza,intProbMutatii[i]);
+                        a = new AlgoritmGenetic(i,viteza,intProbMutatii[i],viataIndivid[i],s.memorie);
                         a.setPriority(s.prioritate);
                         a.start();
                         listaFire.add(a);
                     }
+                    mut = new AlgoritmMutatie(intProbMutatii.length,viteza,20); //algoritm bazat doar pe mutatie
+                    mut.start();
+                    listaFire.add(mut);
                     PornesteGenerarea.setText("Opreste generarea");
                     ruleaza = true;
                     for(Thread t:listaFire) {
@@ -514,23 +523,27 @@ public class MainFrame extends javax.swing.JFrame {
      * Seteaza valoarea curenta a progresului pe ProgressBar-ul de pe pagina principala.
      * @param val Valoarea curenta a progresului
      */
-    public void setProgres(int val) {
-        Progres.setValue(val);
+    public void setProgres(int index, int val) {
+        procente[index] = val;
+        int media=0;
+        for(int i:procente) media+=i;
+        media/=procente.length;
+        Progres.setValue(media);
+        if(media%10==0) System.out.println(Arrays.toString(procente));
     }
     /**
      * Seteaza cea mai buna solutie din firul de executie, pentru afisare.
      * @param i individul ce urmeaza sa fie setat ca solutie noua cea mai buna
-     * @param generatia Int generatia la care a fost gasit cel mai bun
-     * @param mutatie Int procentul probabilitatii de mutatie (de ex 5 reprezinta 5%)
+     * @param text String cu textul ce urmeaza sa fie afisat, cod de debugging
      */
-    public void setBest(Individ i, int generatia, int mutatie) {
+    public void setBest(Individ i, String text) {
         if(i!=null) {
             int delta = Integer.MAX_VALUE;
             if(Individ.best!=null) delta = (int)(Individ.best.getFitness()-i.getFitness());
             Individ.best = i;
             BSDistanta.setText((int)((double)Individ.best.getFitness()+Individ.celeMariDist)+" km (-"+delta+")");
             BSNrCamioane.setText((Individ.best.camioane.size()+Individ.celeMariNrCamioane)+"");
-            BSGeneratia.setText("(G"+generatia+"M"+mutatie+")");
+            BSGeneratia.setText("("+text+")");
             SalveazaSolutia.setEnabled(true);
         } else {
             Individ.best = null;

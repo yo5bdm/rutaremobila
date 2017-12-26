@@ -10,8 +10,8 @@ package main;
  * @author yo5bd
  */
 public class Setari extends javax.swing.JDialog {
-    public int prioritate=5;
-    public int memorie=1000;
+    public int prioritate=5; //prioritatea folosita de firele de executie
+    public int memorie=1000; //numarul de indivizi per generatie.
     /**
      * Creates new form Setari
      * @param parent parintele

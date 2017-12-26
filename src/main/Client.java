@@ -66,6 +66,7 @@ public class Client {
      */
     public Client(String cod_client, Double GPS1, Double GPS2, Double volum) {
         this.cod_client = cod_client;
+        this.ship_to = "";
         this.latitudine = GPS1;
         this.longitudine = GPS2;
         this.volum = volum;

@@ -54,12 +54,12 @@ public class Individ implements Comparable {
      * @param cam numarul de camioane
      * @param generare Boolean true daca se doreste generarea random a individului
      */    
-    public Individ(int nr, int cam, boolean generare) {
+    public Individ(int nr, int cam, int viataIndivid, boolean generare) {
+        this.viata = viataIndivid;
         cromozom = new Integer[nr];
         cromozom2 = new Integer[nr];
         camionDisponibil = new CamionDisponibil();
         nr_camioane = cam;
-        int capacitate;
         if(generare == true) {
             for(int j=0;j<nr;j++) {
             cromozom[j] = R.nextInt(nr_camioane-1); //random in camioanele care pot duce marfa respectiva
@@ -71,6 +71,24 @@ public class Individ implements Comparable {
               camioane.add(new Camion(camionDisponibil.cautaLiber()));
         }
         if(generare == true) optimize_loads();
+    }
+    /**
+     * Constructorul de copiere.
+     * @param b Individul (obiectul) de copiat
+     */
+    Individ(Individ b) {
+        this.viata = Integer.MAX_VALUE;
+        cromozom = new Integer[b.cromozom.length];
+        cromozom2 = new Integer[b.cromozom.length];
+        camionDisponibil = new CamionDisponibil();
+        for(int i=0;i<b.cromozom.length;i++) {
+            this.cromozom[i] = b.cromozom[i];
+            this.cromozom2[i] = b.cromozom2[i];
+        }
+        for(Camion c:b.camioane) {
+            this.camioane.add(new Camion(c));
+        }
+        this.calculeaza(true);
     }
     /**
      * Metoda pregateste o noua copiere din cromozom. Goleste toate camioanele 

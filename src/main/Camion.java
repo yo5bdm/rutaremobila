@@ -33,6 +33,21 @@ public class Camion {
         numara_opriri();
     }
     /**
+     * Constructorul de copiere.
+     * @param c Camionul (obiectul) de copiat
+     */
+    Camion(Camion c) {
+        this.capacitate = c.capacitate;
+        this.ocupat = c.ocupat;
+        this.ok = c.ok;
+        this.opriri = c.opriri;
+        this.distanta = c.distanta;
+        this.pachete = new ArrayList();
+        this.solutia = new ArrayList();
+        if(c.pachete!=null && c.pachete.size()>0) for(int i:c.pachete) this.pachete.add(i);
+        if(c.solutia!=null && c.solutia.size()>0) for(int i:c.solutia) this.solutia.add(i);
+    }
+    /**
      * Resetarea camionului.
      */
     public void reset() {
