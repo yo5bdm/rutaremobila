@@ -19,7 +19,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -37,12 +36,12 @@ public class MainFrame extends javax.swing.JFrame {
     public static ModelTabel model;
     //folosit la accestul individului best din firele de executie
     public static final Object O = new Object(); //syncronized
-    public static Setari s; //setarile aplicatiei
-    public static AlgoritmMutatie mut; //firul cu algoritm de mutatie, aici nu exista viata, insereaza firelele celelalte indivizii buni
+    public static Setari s; //setarile aplicate
     public static int[] procente;
+    public static Analiza analiza;
     
 //privati
-    private Testing t = new Testing();
+    private final Testing t = new Testing();
     private Timer paint;
     //pentru desenare
     private Camion camion;
@@ -53,10 +52,10 @@ public class MainFrame extends javax.swing.JFrame {
     //runtime
     private boolean ruleaza=false;
     private ArrayList<AlgoritmGenetic> listaFire;
-    
-    private final int[] viataIndivid = new int[] {10,20,30,40,50,60,70};
-    private final int[] intProbMutatii = new int[] {0,0,0,0,0,0,0}; //valorile folosite ca probabilitati de mutatie
-    Timer timer = new Timer(50, new ActionListener() { // 50ms, adica vreo 20fps
+    private final int nrIndivizi=1000;
+    private final int[] viataIndivid = new int[] {24,26,28,30,32,34,36};
+    private final int[] intProbMutatii = new int[] {0,0,0,0,0,0,5,5,5,5}; //valorile folosite ca probabilitati de mutatie
+    private final Timer timer = new Timer(50, new ActionListener() { // 50ms, adica vreo 20fps
         @Override
         public void actionPerformed(ActionEvent e) {
             m.repaint(); //main frame repaint
@@ -73,14 +72,19 @@ public class MainFrame extends javax.swing.JFrame {
         initComponents();
         s = new Setari(this,true);
         m = this;
+        analiza = new Analiza();
         model = new ModelTabel();
-        setBest(null,"");
+        setBest(null,0,"");
         jTable1.setModel(model);
+        jTable1.setAutoCreateRowSorter(true); //
         camion = null;
         PornesteGenerarea.setEnabled(false);
-        SalveazaSolutia.setEnabled(false);
+        disableSalveaza();
         VitezaAlgoritm.setEnabled(false);
         timer.start();
+        CamionDisponibil.adaugaCapacitate(101,10);
+        CamionDisponibil.adaugaCapacitate(91,15);
+        CamionDisponibil.adaugaCapacitate(81,9999);
     }
     
     /**
@@ -114,11 +118,17 @@ public class MainFrame extends javax.swing.JFrame {
         jLabel6 = new javax.swing.JLabel();
         VitezaAlgoritm = new javax.swing.JComboBox<>();
         Progres = new javax.swing.JProgressBar();
-        SalveazaSolutia = new javax.swing.JButton();
-        ButonSetari = new javax.swing.JButton();
-        IncarcaCSV = new javax.swing.JButton();
         FisierIncarcat = new javax.swing.JLabel();
         jLabel1 = new javax.swing.JLabel();
+        jMenuBar1 = new javax.swing.JMenuBar();
+        MeniuFisier = new javax.swing.JMenu();
+        MeniuIncarcaCSV = new javax.swing.JMenuItem();
+        jSeparator1 = new javax.swing.JPopupMenu.Separator();
+        SalveazaCSV = new javax.swing.JMenuItem();
+        SalveazaTXT = new javax.swing.JMenuItem();
+        SalveazaHTML = new javax.swing.JMenuItem();
+        jMenu2 = new javax.swing.JMenu();
+        MeniuSetari = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Rutare pachete");
@@ -197,27 +207,6 @@ public class MainFrame extends javax.swing.JFrame {
         VitezaAlgoritm.setSelectedIndex(2);
         VitezaAlgoritm.setToolTipText("<htmll>Selecteaza modul de lucru al algoritmului.<br>\nRapid - algoritmul merge o perioada scurta de timp inainte sa se opreasca (500 de pasi)<br>\nMediu - algoritmul functioneaza o perioada medie de timp (2000 de pasi)<br>\nLent - algoritmul functioneaza o perioada lunga de timp (10.000 de pasi)<br>\nInfinit - algoritmul functioneaza o perioada extrem de lunga de timp. Ideal daca doriti sa lasati calculatorul pornit o perioada lunga de timp</html>");
 
-        SalveazaSolutia.setText("Salveaza solutia");
-        SalveazaSolutia.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                SalveazaSolutiaActionPerformed(evt);
-            }
-        });
-
-        ButonSetari.setText("Setari");
-        ButonSetari.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                ButonSetariActionPerformed(evt);
-            }
-        });
-
-        IncarcaCSV.setText("Incarca fisier CSV");
-        IncarcaCSV.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                IncarcaCSVActionPerformed(evt);
-            }
-        });
-
         FisierIncarcat.setText("Nici un fisier incarcat.");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
@@ -242,36 +231,26 @@ public class MainFrame extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(BSNrCamioane))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(SalveazaSolutia, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(ButonSetari))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(IncarcaCSV)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(FisierIncarcat)
-                        .addGap(0, 35, Short.MAX_VALUE))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel6)
-                            .addComponent(VitezaAlgoritm, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(VitezaAlgoritm, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(FisierIncarcat, javax.swing.GroupLayout.DEFAULT_SIZE, 123, Short.MAX_VALUE)
+                            .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(PornesteGenerarea, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(PornesteGenerarea)))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(IncarcaCSV)
-                    .addComponent(FisierIncarcat))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel6)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(FisierIncarcat)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(VitezaAlgoritm, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(PornesteGenerarea, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(PornesteGenerarea, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel6)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(Progres, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -287,15 +266,52 @@ public class MainFrame extends javax.swing.JFrame {
                     .addComponent(jLabel5)
                     .addComponent(BSNrCamioane))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 440, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(SalveazaSolutia, javax.swing.GroupLayout.DEFAULT_SIZE, 38, Short.MAX_VALUE)
-                    .addComponent(ButonSetari, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 226, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
         jLabel1.setText("Zoom harta");
+
+        MeniuFisier.setText("Fisier");
+
+        MeniuIncarcaCSV.setText("Incarca fisier CSV");
+        MeniuIncarcaCSV.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                MeniuIncarcaCSVActionPerformed(evt);
+            }
+        });
+        MeniuFisier.add(MeniuIncarcaCSV);
+        MeniuFisier.add(jSeparator1);
+
+        SalveazaCSV.setText("Salveaza solutia (CSV)");
+        MeniuFisier.add(SalveazaCSV);
+
+        SalveazaTXT.setText("Salveaza solutia (TXT)");
+        SalveazaTXT.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                SalveazaTXTActionPerformed(evt);
+            }
+        });
+        MeniuFisier.add(SalveazaTXT);
+
+        SalveazaHTML.setText("Salveaza solutia (HTML)");
+        MeniuFisier.add(SalveazaHTML);
+
+        jMenuBar1.add(MeniuFisier);
+
+        jMenu2.setText("Setari");
+
+        MeniuSetari.setText("Setari");
+        MeniuSetari.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                MeniuSetariActionPerformed(evt);
+            }
+        });
+        jMenu2.add(MeniuSetari);
+
+        jMenuBar1.add(jMenu2);
+
+        setJMenuBar(jMenuBar1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -309,7 +325,7 @@ public class MainFrame extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jSlider1, javax.swing.GroupLayout.DEFAULT_SIZE, 1049, Short.MAX_VALUE))
+                        .addComponent(jSlider1, javax.swing.GroupLayout.DEFAULT_SIZE, 540, Short.MAX_VALUE))
                     .addComponent(Panel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -334,30 +350,26 @@ public class MainFrame extends javax.swing.JFrame {
     private void PornesteGenerareaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_PornesteGenerareaActionPerformed
         if(!ruleaza) {
             new Thread(){
+                @Override
                 public void run() {
-                    IncarcaCSV.setEnabled(false);
-                    ButonSetari.setEnabled(false);
+                    MeniuIncarcaCSV.setEnabled(false);
+                    MeniuSetari.setEnabled(false);
                     VitezaAlgoritm.setEnabled(false);
-                    CamionDisponibil.adaugaCapacitate(101,10);
-                    CamionDisponibil.adaugaCapacitate(91,15);
-                    CamionDisponibil.adaugaCapacitate(81,9999);
                     //t.run(); //testele
+                    CamionDisponibil.resetDisponibile();
                     Client.restore();
                     Client.calculeazaTablouDistante();
                     Client.rezolvaCeleMari();
                     int viteza = VitezaAlgoritm.getSelectedIndex();
                     listaFire = new ArrayList();
-                    procente = new int[intProbMutatii.length+1];
+                    procente = new int[s.memorie];
                     AlgoritmGenetic a;
-                    for(int i=0;i<=(intProbMutatii.length-1);i++) { //probabilitatea de mutatie intre 2 si 7
-                        a = new AlgoritmGenetic(i,viteza,intProbMutatii[i],viataIndivid[i],s.memorie);
+                    for(int i=0;i<s.memorie;i++) {
+                        a = new AlgoritmGenetic(i,viteza,intProbMutatii[i%intProbMutatii.length],viataIndivid[i%viataIndivid.length],nrIndivizi);
                         a.setPriority(s.prioritate);
                         a.start();
                         listaFire.add(a);
                     }
-                    mut = new AlgoritmMutatie(intProbMutatii.length,viteza,20); //algoritm bazat doar pe mutatie
-                    mut.start();
-                    listaFire.add(mut);
                     PornesteGenerarea.setText("Opreste generarea");
                     ruleaza = true;
                     for(Thread t:listaFire) {
@@ -367,8 +379,9 @@ public class MainFrame extends javax.swing.JFrame {
                             Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     }
-                    IncarcaCSV.setEnabled(true);
-                    ButonSetari.setEnabled(true);
+                    analiza.saveFile();
+                    MeniuIncarcaCSV.setEnabled(true);
+                    MeniuSetari.setEnabled(true);
                     VitezaAlgoritm.setEnabled(true);
                     PornesteGenerarea.setText("Porneste generarea");
                     ruleaza = false;
@@ -381,8 +394,9 @@ public class MainFrame extends javax.swing.JFrame {
                     a.opreste();
                     a.join();
                 }
-                IncarcaCSV.setEnabled(true);
-                ButonSetari.setEnabled(true);
+                analiza.saveFile();
+                MeniuIncarcaCSV.setEnabled(true);
+                MeniuSetari.setEnabled(true);
                 VitezaAlgoritm.setEnabled(true);
                 PornesteGenerarea.setText("Porneste generarea");
                 ruleaza = false;
@@ -400,47 +414,6 @@ public class MainFrame extends javax.swing.JFrame {
         camion = Individ.best.camioane.get(selection[0]);
     }//GEN-LAST:event_jTable1MouseClicked
 
-    private void SalveazaSolutiaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SalveazaSolutiaActionPerformed
-        JFileChooser fileChooser = new JFileChooser(); //File curDir = din setari
-        FileNameExtensionFilter filter = new FileNameExtensionFilter("Text File","txt");
-        fileChooser.setFileFilter(filter);
-        if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-            try {
-                File file = fileChooser.getSelectedFile();
-                List<String> lines = Fisier.genereazaFisier(Individ.best);//Arrays.asList("The first line", "The second line");
-                Path f = Paths.get(file.getAbsolutePath());
-                Files.write(f, lines, Charset.forName("UTF-8"));
-            } catch (IOException ex) {
-                Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }        
-    }//GEN-LAST:event_SalveazaSolutiaActionPerformed
-
-    private void IncarcaCSVActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_IncarcaCSVActionPerformed
-        if(Fisier.incarcaClienti("clienti.csv")) {
-            if(Client.clienti.size()>0) {
-                PornesteGenerarea.setEnabled(true);
-                SalveazaSolutia.setEnabled(false);
-                VitezaAlgoritm.setEnabled(true);
-                for(Client c:Client.clienti) { 
-                    dx += (c.longitudine);
-                    dy += (c.latitudine);
-                }
-                dx /= Client.clienti.size();
-                dy /= Client.clienti.size();
-            } else {
-                PornesteGenerarea.setEnabled(false);
-                SalveazaSolutia.setEnabled(false);
-                VitezaAlgoritm.setEnabled(false);
-            }
-            FisierIncarcat.setText("Nr clienti = "+Client.clienti.size());
-        }
-    }//GEN-LAST:event_IncarcaCSVActionPerformed
-
-    private void ButonSetariActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ButonSetariActionPerformed
-        s.setVisible(true);
-    }//GEN-LAST:event_ButonSetariActionPerformed
-
     private void Panel1MousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_Panel1MousePressed
         //salvam coordonatele mouseului
         mX = evt.getX();
@@ -455,6 +428,47 @@ public class MainFrame extends javax.swing.JFrame {
         mX = evt.getX();
         mY = evt.getY();
     }//GEN-LAST:event_Panel1MouseDragged
+
+    private void MeniuIncarcaCSVActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MeniuIncarcaCSVActionPerformed
+        if(Fisier.incarcaClienti("clienti.csv")) {
+            if(Client.clienti.size()>0) {
+                PornesteGenerarea.setEnabled(true);
+                enableSalveaza();
+                VitezaAlgoritm.setEnabled(true);
+                for(Client c:Client.clienti) { 
+                    dx += (c.longitudine);
+                    dy += (c.latitudine);
+                }
+                dx /= Client.clienti.size();
+                dy /= Client.clienti.size();
+            } else {
+                PornesteGenerarea.setEnabled(false);
+                disableSalveaza();
+                VitezaAlgoritm.setEnabled(false);
+            }
+            FisierIncarcat.setText("Nr clienti = "+Client.clienti.size());
+        }
+    }//GEN-LAST:event_MeniuIncarcaCSVActionPerformed
+
+    private void MeniuSetariActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MeniuSetariActionPerformed
+        s.setVisible(true);
+    }//GEN-LAST:event_MeniuSetariActionPerformed
+
+    private void SalveazaTXTActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SalveazaTXTActionPerformed
+        JFileChooser fileChooser = new JFileChooser(); //File curDir = din setari
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("Text File","txt");
+        fileChooser.setFileFilter(filter);
+        if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+            try {
+                File file = fileChooser.getSelectedFile();
+                List<String> lines = Fisier.genereazaFisier(Individ.best);//Arrays.asList("The first line", "The second line");
+                Path f = Paths.get(file.getAbsolutePath());
+                Files.write(f, lines, Charset.forName("UTF-8"));
+            } catch (IOException ex) {
+                Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }        
+    }//GEN-LAST:event_SalveazaTXTActionPerformed
     
     /**
      * @param args the command line arguments
@@ -491,21 +505,27 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JLabel BSDistanta;
     private javax.swing.JLabel BSGeneratia;
     private javax.swing.JLabel BSNrCamioane;
-    private javax.swing.JButton ButonSetari;
     private javax.swing.JLabel FisierIncarcat;
-    private javax.swing.JButton IncarcaCSV;
+    private javax.swing.JMenu MeniuFisier;
+    private javax.swing.JMenuItem MeniuIncarcaCSV;
+    private javax.swing.JMenuItem MeniuSetari;
     private javax.swing.JPanel Panel1;
     private javax.swing.JButton PornesteGenerarea;
     private javax.swing.JProgressBar Progres;
-    private javax.swing.JButton SalveazaSolutia;
+    private javax.swing.JMenuItem SalveazaCSV;
+    private javax.swing.JMenuItem SalveazaHTML;
+    private javax.swing.JMenuItem SalveazaTXT;
     private javax.swing.JComboBox<String> VitezaAlgoritm;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JMenu jMenu2;
+    private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JSlider jSlider1;
     private javax.swing.JTable jTable1;
     // End of variables declaration//GEN-END:variables
@@ -517,10 +537,12 @@ public class MainFrame extends javax.swing.JFrame {
     public void initProgres(int max) {
         Progres.setMaximum(max);
         Progres.setValue(0);
+        for(int i=0;i<procente.length;i++) procente[i]=0;
         Progres.setStringPainted(true);
     }
     /**
      * Seteaza valoarea curenta a progresului pe ProgressBar-ul de pe pagina principala.
+     * @param index Int - id-ul thread-ului care face actualizarea
      * @param val Valoarea curenta a progresului
      */
     public void setProgres(int index, int val) {
@@ -529,14 +551,14 @@ public class MainFrame extends javax.swing.JFrame {
         for(int i:procente) media+=i;
         media/=procente.length;
         Progres.setValue(media);
-        if(media%10==0) System.out.println(Arrays.toString(procente));
     }
     /**
      * Seteaza cea mai buna solutie din firul de executie, pentru afisare.
      * @param i individul ce urmeaza sa fie setat ca solutie noua cea mai buna
+     * @param id int id-ul thread-ului care face actualizarea
      * @param text String cu textul ce urmeaza sa fie afisat, cod de debugging
      */
-    public void setBest(Individ i, String text) {
+    public void setBest(Individ i, int id, String text) {
         if(i!=null) {
             int delta = Integer.MAX_VALUE;
             if(Individ.best!=null) delta = (int)(Individ.best.getFitness()-i.getFitness());
@@ -544,13 +566,13 @@ public class MainFrame extends javax.swing.JFrame {
             BSDistanta.setText((int)((double)Individ.best.getFitness()+Individ.celeMariDist)+" km (-"+delta+")");
             BSNrCamioane.setText((Individ.best.camioane.size()+Individ.celeMariNrCamioane)+"");
             BSGeneratia.setText("("+text+")");
-            SalveazaSolutia.setEnabled(true);
+            enableSalveaza();
         } else {
             Individ.best = null;
             BSDistanta.setText("");
             BSNrCamioane.setText("");
             BSGeneratia.setText("");
-            SalveazaSolutia.setEnabled(false);
+            disableSalveaza();
         }
         model.fireTableDataChanged();
     }
@@ -559,7 +581,6 @@ public class MainFrame extends javax.swing.JFrame {
      * @param g Graphics2D trimis de catre jPanel.repaint()
      */
     public void deseneaza(Graphics2D g)  {
-        
         factorScalare = (double)jSlider1.getValue();
         double max_x = Panel1.getWidth();
         double max_y = Panel1.getHeight();
@@ -615,5 +636,21 @@ public class MainFrame extends javax.swing.JFrame {
      */
     public static void mesajAtentie(String msg) {
         JOptionPane.showMessageDialog(null, msg, "Atentie!", JOptionPane.WARNING_MESSAGE);
+    }
+    /**
+     * Activeaza optiunile de salvare din meniu.
+     */
+    private void enableSalveaza() {
+        SalveazaCSV.setEnabled(true);
+        SalveazaTXT.setEnabled(true);
+        SalveazaHTML.setEnabled(true);
+    }
+    /**
+     * Dezactiveaza optiunile de salvare din meniu.
+     */
+    private void disableSalveaza() {
+        SalveazaCSV.setEnabled(false);
+        SalveazaTXT.setEnabled(false);
+        SalveazaHTML.setEnabled(false);
     }
 }

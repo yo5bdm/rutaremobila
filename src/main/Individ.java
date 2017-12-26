@@ -20,7 +20,6 @@ import static main.AlgoritmGenetic.R;
  * diploizi, se ajunge la indivizi mai buni.
  * Am implementat limitarea vietii indivizilor buni, fiecare poate "trai"
  * maxim <i>"viata"</i> generatii.
- * Primele teste au fost facute la viata de 10 generatii
  * Valori posibile:
  * - orice valoare pozitiva, inclusiv zero: numarul camionului pe care urmeaza sa fie incarcat
  * - -1: pachet neincarcat
@@ -35,11 +34,12 @@ public class Individ implements Comparable {
     public static double celeMariDist;
     //pachetele mari care nu incap in camioane
     public static ArrayList<String> celeMari = new ArrayList(); //String-urile folosite la imprimare in fisier
+    
     /* PUBLIC NESTATIC */
     public Integer[] cromozom; //indexul e obiectul, valoarea e camionul pe care e incarcat
     public Integer[] cromozom2;
     public ArrayList<Camion> camioane = new ArrayList();
-    
+    public int viataGen;
     
     /* PRIVATE */
     //private Double distanta_totala;
@@ -50,18 +50,20 @@ public class Individ implements Comparable {
             
     /**
      * Constructor.
-     * @param nr numarul de clienti (locatii)
+     * @param nrClienti int nr de clienti
+     * @param viataIndivid int numarul de generatii ce va fi selectabil individul
      * @param cam numarul de camioane
      * @param generare Boolean true daca se doreste generarea random a individului
      */    
-    public Individ(int nr, int cam, int viataIndivid, boolean generare) {
+    public Individ(int nrClienti, int cam, int viataIndivid, boolean generare) {
         this.viata = viataIndivid;
-        cromozom = new Integer[nr];
-        cromozom2 = new Integer[nr];
+        this.viataGen = viataIndivid;
+        cromozom = new Integer[nrClienti];
+        cromozom2 = new Integer[nrClienti];
         camionDisponibil = new CamionDisponibil();
         nr_camioane = cam;
         if(generare == true) {
-            for(int j=0;j<nr;j++) {
+            for(int j=0;j<nrClienti;j++) {
             cromozom[j] = R.nextInt(nr_camioane-1); //random in camioanele care pot duce marfa respectiva
             cromozom2[j] = cromozom[j];
             //clienti.get(j).volum
@@ -77,18 +79,15 @@ public class Individ implements Comparable {
      * @param b Individul (obiectul) de copiat
      */
     Individ(Individ b) {
-        this.viata = Integer.MAX_VALUE;
-        cromozom = new Integer[b.cromozom.length];
-        cromozom2 = new Integer[b.cromozom.length];
-        camionDisponibil = new CamionDisponibil();
+        this(b.cromozom.length, b.nr_camioane, b.viataGen, false);
+        //cromozom = new Integer[b.cromozom.length];
+        //cromozom2 = new Integer[b.cromozom.length];
+        //camionDisponibil = new CamionDisponibil();
         for(int i=0;i<b.cromozom.length;i++) {
             this.cromozom[i] = b.cromozom[i];
             this.cromozom2[i] = b.cromozom2[i];
         }
-        for(Camion c:b.camioane) {
-            this.camioane.add(new Camion(c));
-        }
-        this.calculeaza(true);
+        //this.calculeaza(true);
     }
     /**
      * Metoda pregateste o noua copiere din cromozom. Goleste toate camioanele 
@@ -232,7 +231,7 @@ public class Individ implements Comparable {
         }
     }
     /**
-     * Metoda optimizeaza toate camioanele
+     * Metoda optimizeaza toate camioanele.
      */
     public void optimizare() {
         for(Camion c:camioane) c.optimizare();

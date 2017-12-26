@@ -47,7 +47,7 @@ public class Testing {
         n.camioane.add(c1);
         n.camioane.add(c2);
         //n.setFitness(130.0);
-        m.setBest(n,"TESTING"); 
+        m.setBest(n,0,"TESTING"); 
     }
     
     private void IndividTest(boolean executa) {
@@ -56,6 +56,6 @@ public class Testing {
         System.out.println("Fitnes total"+n.calculeaza(true)); 
         for(Camion cam:n.camioane) System.out.println(cam);
         System.out.println("Neincarcabile = "+n.neincarcabile());
-        m.setBest(n,"TESTING");
+        m.setBest(n,0,"TESTING");
     }
 }

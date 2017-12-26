@@ -14,7 +14,8 @@ import java.util.Collections;
  * @author yo5bdm
  */
 public class CamionDisponibil {
-    private static ArrayList<CamDisp> disponibil=new ArrayList();
+    public static ArrayList<CamDisp> disponibil=new ArrayList();
+    protected static ArrayList<CamDisp> dispBak=new ArrayList();
     private ArrayList<CamDisp> capacitati;
     private static double maxSize=0;
     //metodele obiectuale
@@ -53,8 +54,14 @@ public class CamionDisponibil {
      */
     public static void adaugaCapacitate(int cap, int nrCamioane) {
         disponibil.add(new CamDisp(cap,nrCamioane));
+        dispBak.add(new CamDisp(cap,nrCamioane));
         Collections.sort(disponibil);
         if(cap>maxSize) maxSize = (double)cap;
+    }
+    
+    public static void resetDisponibile() {
+        disponibil.clear();
+        for(CamDisp i:dispBak) disponibil.add(new CamDisp(i));
     }
     /**
      * Metoda statica de returnare a unui camion disponibil.
@@ -89,6 +96,11 @@ class CamDisp implements Comparable {
     public CamDisp(int capacitate, int disponibile) {
         this.capacitate = capacitate;
         this.disponibile = disponibile;
+    }
+
+    CamDisp(CamDisp i) {
+        this.capacitate = i.capacitate;
+        this.disponibile = i.disponibile;
     }
     public int compareTo(Object o) {
         CamDisp c = (CamDisp) o;

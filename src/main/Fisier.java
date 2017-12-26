@@ -25,10 +25,10 @@ public class Fisier {
      * Genereaza un ArrayList din individul dat pentru a putea fi salvat.
      * @param ind Individul ce se doreste a fi salvat in fisier
      * @return ArrayList de formatul String
-     * 
-     * @todo Optiune scriere fisier text, csv sau html.
      */
     public static ArrayList genereazaFisier(Individ ind) {
+        //todo Optiune scriere fisier text, csv sau html.
+        //todo imbunatatire aspect txt
         Client cli;
         ArrayList<String> ret = new ArrayList();
         ret.add("======================================");
@@ -56,12 +56,10 @@ public class Fisier {
      * Metoda de incarcare a unui fisier in ArrayListurile statice din clasa Clienti.
      * @param fisier String cu numele fisierului ce contine datele
      * @return Boolean true daca fisierul a fost incarcat cu succes, false daca nu.
-     * 
-     * @todo Incarcare fisier csv in functie de nr de coloane. 
-     * @todo Eventual dam clientului ocazia sa aleaga ce tip de fisier este, ce inseamna coloanele
      */
     public static boolean incarcaClienti(String fisier) {
         /*
+        @todo Eventual dam clientului ocazia sa aleaga ce tip de fisier este, ce inseamna coloanele
         https://stackoverflow.com/questions/14274259/read-csv-with-scanner
         https://www.mkyong.com/java/how-to-read-and-parse-csv-file-in-java/
          */
@@ -98,20 +96,3 @@ public class Fisier {
     }
     
 }
-
-//        old way
-//        BufferedReader fin;
-//        try {
-//            fin = new BufferedReader(new FileReader(fisier));
-//            Client.clientiBak.clear();
-//            String linie;
-//            while ((linie = fin.readLine()) != null) {
-//                //fiecare elev pe o linie, separat prin virgula
-//                StringTokenizer t = new StringTokenizer(linie, ";");
-//                Client c = new Client(t.nextToken(), Double.parseDouble(t.nextToken()), Double.parseDouble(t.nextToken()), Double.parseDouble(t.nextToken()));
-//                Client.clienti.add(c);
-//                Client.clientiBak.add(c);
-//            }
-//        } catch (IOException ex) {
-//            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
-//        }

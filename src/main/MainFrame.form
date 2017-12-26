@@ -1,6 +1,62 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
 <Form version="1.3" maxVersion="1.9" type="org.netbeans.modules.form.forminfo.JFrameFormInfo">
+  <NonVisualComponents>
+    <Menu class="javax.swing.JMenuBar" name="jMenuBar1">
+      <SubComponents>
+        <Menu class="javax.swing.JMenu" name="MeniuFisier">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Fisier"/>
+          </Properties>
+          <SubComponents>
+            <MenuItem class="javax.swing.JMenuItem" name="MeniuIncarcaCSV">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Incarca fisier CSV"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="MeniuIncarcaCSVActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator1">
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="SalveazaCSV">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Salveaza solutia (CSV)"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="SalveazaTXT">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Salveaza solutia (TXT)"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="SalveazaTXTActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="SalveazaHTML">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Salveaza solutia (HTML)"/>
+              </Properties>
+            </MenuItem>
+          </SubComponents>
+        </Menu>
+        <Menu class="javax.swing.JMenu" name="jMenu2">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Setari"/>
+          </Properties>
+          <SubComponents>
+            <MenuItem class="javax.swing.JMenuItem" name="MeniuSetari">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Setari"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="MeniuSetariActionPerformed"/>
+              </Events>
+            </MenuItem>
+          </SubComponents>
+        </Menu>
+      </SubComponents>
+    </Menu>
+  </NonVisualComponents>
   <Properties>
     <Property name="defaultCloseOperation" type="int" value="3"/>
     <Property name="title" type="java.lang.String" value="Rutare pachete"/>
@@ -10,6 +66,7 @@
     <Property name="locationByPlatform" type="boolean" value="true"/>
   </Properties>
   <SyntheticProperties>
+    <SyntheticProperty name="menuBar" type="java.lang.String" value="jMenuBar1"/>
     <SyntheticProperty name="formSizePolicy" type="int" value="1"/>
     <SyntheticProperty name="generateCenter" type="boolean" value="false"/>
   </SyntheticProperties>
@@ -36,7 +93,7 @@
                   <Group type="102" attributes="0">
                       <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="jSlider1" pref="1049" max="32767" attributes="0"/>
+                      <Component id="jSlider1" pref="540" max="32767" attributes="0"/>
                   </Group>
                   <Component id="Panel1" max="32767" attributes="0"/>
               </Group>
@@ -135,24 +192,14 @@
                           <EmptySpace max="32767" attributes="0"/>
                           <Component id="BSNrCamioane" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <Group type="102" alignment="0" attributes="0">
-                          <Component id="SalveazaSolutia" max="32767" attributes="0"/>
-                          <EmptySpace max="-2" attributes="0"/>
-                          <Component id="ButonSetari" min="-2" max="-2" attributes="0"/>
-                      </Group>
                       <Group type="102" attributes="0">
-                          <Component id="IncarcaCSV" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace max="-2" attributes="0"/>
-                          <Component id="FisierIncarcat" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace min="0" pref="35" max="32767" attributes="0"/>
-                      </Group>
-                      <Group type="102" alignment="0" attributes="0">
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="jLabel6" alignment="0" min="-2" max="-2" attributes="0"/>
-                              <Component id="VitezaAlgoritm" alignment="0" min="-2" pref="85" max="-2" attributes="0"/>
+                              <Component id="VitezaAlgoritm" alignment="0" max="32767" attributes="0"/>
+                              <Component id="FisierIncarcat" alignment="0" pref="123" max="32767" attributes="0"/>
+                              <Component id="jLabel6" alignment="0" max="32767" attributes="0"/>
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="PornesteGenerarea" max="32767" attributes="0"/>
+                          <Component id="PornesteGenerarea" min="-2" max="-2" attributes="0"/>
                       </Group>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
@@ -163,18 +210,16 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="3" attributes="0">
-                      <Component id="IncarcaCSV" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="FisierIncarcat" alignment="3" min="-2" max="-2" attributes="0"/>
-                  </Group>
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="0" attributes="0">
+                  <Group type="103" groupAlignment="0" max="-2" attributes="0">
                       <Group type="102" attributes="0">
-                          <Component id="jLabel6" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="FisierIncarcat" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="32767" attributes="0"/>
                           <Component id="VitezaAlgoritm" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <Component id="PornesteGenerarea" min="-2" pref="49" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="3" attributes="0">
+                          <Component id="PornesteGenerarea" alignment="3" min="-2" pref="69" max="-2" attributes="0"/>
+                          <Component id="jLabel6" alignment="3" min="-2" max="-2" attributes="0"/>
+                      </Group>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="Progres" min="-2" pref="30" max="-2" attributes="0"/>
@@ -194,12 +239,7 @@
                       <Component id="BSNrCamioane" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="jScrollPane1" pref="440" max="32767" attributes="0"/>
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                      <Component id="SalveazaSolutia" pref="38" max="32767" attributes="0"/>
-                      <Component id="ButonSetari" max="32767" attributes="0"/>
-                  </Group>
+                  <Component id="jScrollPane1" pref="226" max="32767" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>
@@ -291,30 +331,6 @@
           </AuxValues>
         </Component>
         <Component class="javax.swing.JProgressBar" name="Progres">
-        </Component>
-        <Component class="javax.swing.JButton" name="SalveazaSolutia">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Salveaza solutia"/>
-          </Properties>
-          <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="SalveazaSolutiaActionPerformed"/>
-          </Events>
-        </Component>
-        <Component class="javax.swing.JButton" name="ButonSetari">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Setari"/>
-          </Properties>
-          <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="ButonSetariActionPerformed"/>
-          </Events>
-        </Component>
-        <Component class="javax.swing.JButton" name="IncarcaCSV">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Incarca fisier CSV"/>
-          </Properties>
-          <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="IncarcaCSVActionPerformed"/>
-          </Events>
         </Component>
         <Component class="javax.swing.JLabel" name="FisierIncarcat">
           <Properties>

@@ -24,9 +24,10 @@ public class AlgoritmGenetic extends Thread {
     
     protected int id;
     protected int nrClienti;
-    protected int nrIndivizi=s.memorie;
+    protected int nrIndivizi;
     protected int probabilitateMutatie; //5 = 5%
     protected int maxGeneratii;
+    protected boolean rapid=false; //metoda de selectie true = primele cele mai bune, false = random gaussian
     protected int nrCamioane=48; //pentru initializare
     protected int viataIndivid;
     protected int viataInd; //teste/printare
@@ -40,9 +41,11 @@ public class AlgoritmGenetic extends Thread {
      * Constructorul clasei.
      * Se intializeaza clasa, dar nu se porneste algoritmul.
      * Pornirea se face prin .start()
-     * @param size Int numarul de clienti.
+     * @param id Int id-ul firului de executie, util pentru afisare si analize
      * @param viteza Int intre 0 si 3, numarul de generatii (500, 2000, 10.000, Infinit)
      * @param probMutatie Int probabilitatea de mutatie 5 reprezinta 5%
+     * @param viataIndivid int numarul de generatii cat va fi selectabil individul
+     * @param nrIndivizi int nr de indivizi per generatie
      */
     public AlgoritmGenetic(int id, int viteza, int probMutatie, int viataIndivid, int nrIndivizi) {
         this.id = id;
@@ -56,13 +59,13 @@ public class AlgoritmGenetic extends Thread {
         stop = false;
         switch(viteza) {
             case 0: //rapid
-                maxGeneratii = 500; break;
+                maxGeneratii = 500; rapid = true; break;
             case 1: //mediu
-                maxGeneratii = 2000; break;
+                maxGeneratii = 2000; rapid = false; break;
             case 2: //lent
-                maxGeneratii = 10000; break;
+                maxGeneratii = 10000; rapid = false; break;
             default: // case 3: infinit
-                maxGeneratii = Integer.MAX_VALUE; break;
+                maxGeneratii = Integer.MAX_VALUE; rapid = false; break;
         }
         m.initProgres(maxGeneratii);
     }
@@ -94,19 +97,17 @@ public class AlgoritmGenetic extends Thread {
             if(probabilitateMutatie > 0) mutatie();//
             for(Individ i:popTemp) i.calculeaza(true); //calculam fitnessul pentru populatia temporara
             selectie();//
-            Collections.sort(populatie);
             best_fit = populatie.get(0);
             synchronized(O) {
                 if(best_fit.getFitness()<Individ.best.getFitness() && best_fit.ok()==true) { //
-                    System.out.println("S G "+g+"; V "+viataInd+"; F "+(int)best_fit.getFitness());
-                    m.setBest(best_fit,"SG"+g+"V"+viataInd);
-                    mut.adauga(best_fit);
+                    m.setBest(best_fit,id,id+"G"+g);
+                    analiza.adauga(g,viataInd,nrIndivizi,probabilitateMutatie,best_fit.getFitness());
                 }
                 O.notifyAll();
             }
         }
         m.setProgres(id,maxGeneratii);
-        System.out.println("Firul "+probabilitateMutatie+"% a finalizat");
+        System.out.println("Firul "+id+" a finalizat");
     }
     /**
      * Generarea populatiei initiale.
@@ -192,20 +193,30 @@ public class AlgoritmGenetic extends Thread {
      * Mutatia.
      * Se obtine facand swap random intre 2 pachete.
      */
-    protected void mutatie() {
+    protected void mutatie() { //mutatia se aplica pe o copie a individului, raman ambele variante
+        ArrayList<Individ> temps = new ArrayList();
+        boolean mutat; //a fost executata mutatie asupra individului?
         for(Individ c:popTemp) { //pentru fiecare individ
+            Individ n = new Individ(c);
+            mutat = false;
             for(int i=0;i<nrClienti;i++) { //se ia fiecare cromozom
                 if(R.nextInt(100)<probabilitateMutatie) {
                     //se selecteaza random o alta pozitie din cromozom
                     int pos2 = R.nextInt(nrClienti-1); 
                     //si se face swap
-                    int temp = c.cromozom[i];
-                    c.cromozom[i] = c.cromozom[pos2];
-                    c.cromozom[pos2] = temp;
+                    int temp = n.cromozom[i];
+                    n.cromozom[i] = n.cromozom[pos2];
+                    n.cromozom[pos2] = temp;
+                    mutat=true; //da
                     //System.out.println("Mutatie...");
                 }
             }
+            if(mutat) {
+                n.copiaza();
+                temps.add(n);
+            } //daca avem mutatie, il adaugam in lista
         }
+        popTemp.addAll(temps); //ii adaugam in lista de temporari
     }
     /**
      * Selectia. 
@@ -219,33 +230,36 @@ public class AlgoritmGenetic extends Thread {
         Individ selectat;
         boolean sel;
         Collections.sort(popTemp);
-        int i=0;
-        while(populatie.size()<nrIndivizi){ //ii luam doar pe cei mai buni
-            selectat = popTemp.get(i);
-            if(selectat.selectabil()==true) { //mai are viata disponibila
-                selectat.selecteaza(); //va fi selectat
-                populatie.add(selectat);
-                popTemp.remove(i);
-                sel=true;
-                i--;
+        if(rapid) {
+            int i=0;
+            while(populatie.size()<nrIndivizi) {
+                Individ c = popTemp.get(i);
+                if(c.selectabil()==true) { //mai are viata disponibila
+                    c.selecteaza(); //va fi selectat
+                    populatie.add(c);
+                }
+                i++;
             }
-            i++;
-        }
-        /*for(int i=0;i<this.nrIndivizi;i++) {
-            sel=false;
-            while(sel == false) {
-                //random gausian absolut intre 0 si nrIndivizi
-                int rnd = (int)Math.abs((double)popTemp.size()*R.nextGaussian())%popTemp.size(); 
-                //selecteaza individul dupa randomul de mai sus si adauga in pop temp
-                selectat = popTemp.get(rnd);
-                if(selectat.selectabil()==true) { //mai are viata disponibila
-                    selectat.selecteaza(); //va fi selectat
-                    populatie.add(selectat);
+            popTemp.clear();
+        } else {
+            for(int i=0;i<this.nrIndivizi;i++) {
+                sel=false;
+                while(sel == false) {
+                    //random gausian absolut intre 0 si nrIndivizi
+                    int rnd = (int)Math.abs((double)popTemp.size()*R.nextGaussian())%popTemp.size(); 
+                    //selecteaza individul dupa randomul de mai sus si adauga in pop temp
+                    selectat = popTemp.get(rnd);
+                    if(selectat.selectabil()==true) { //mai are viata disponibila
+                        selectat.selecteaza(); //va fi selectat
+                        populatie.add(selectat);
+                        sel=true;
+                    } 
                     popTemp.remove(rnd);
-                    sel=true;
                 }
             }
-        }*/
+            popTemp.clear();
+        }
+        Collections.sort(populatie);
     }
     /**
      * Se calculeaza fitness-ul total al populatiei curente.
