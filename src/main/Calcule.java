@@ -6,8 +6,8 @@
 package main;
 
 /**
- *
- * @author yo5bd
+ * Clasa de calcule.
+ * @author yo5bdm
  */
 public class Calcule {
 

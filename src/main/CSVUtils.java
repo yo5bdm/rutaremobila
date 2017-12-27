@@ -8,7 +8,7 @@ package main;
 import java.util.ArrayList;
 
 /**
- *
+ * Clasa de parsat fisierele CSV.
  * @author yo5bd
  */
 public class CSVUtils {
@@ -16,27 +16,32 @@ public class CSVUtils {
     private static final char DEFAULT_SEPARATOR = ',';
     private static final char DEFAULT_QUOTE = '"';
 
-//    public static void main(String[] args) throws Exception {
-//
-//        String csvFile = "/Users/mkyong/csv/country2.csv";
-//
-//        Scanner scanner = new Scanner(new File(csvFile));
-//        while (scanner.hasNext()) {
-//            ArrayList<String> line = parseLine(scanner.nextLine());
-//            System.out.println("Country [id= " + line.get(0) + ", code= " + line.get(1) + " , name=" + line.get(2) + "]");
-//        }
-//        scanner.close();
-//
-//    }
-
+    /**
+     * Imparte linia in functie de separatorul default.
+     * @param cvsLine Linia de procesat
+     * @return Lista ArrayList cu elementele
+     */
     public static ArrayList<String> parseLine(String cvsLine) {
         return parseLine(cvsLine, DEFAULT_SEPARATOR, DEFAULT_QUOTE);
     }
-
+    
+    /**
+     * Imparte linia in functie de separatorul dorit.
+     * @param cvsLine Linia de procesat.
+     * @param separators separatorul de folosit.
+     * @return Lista ArrayList cu elementele
+     */
     public static ArrayList<String> parseLine(String cvsLine, char separators) {
         return parseLine(cvsLine, separators, DEFAULT_QUOTE);
     }
-
+    
+    /**
+     * Imparte linia in functie de separatorul dorit si tine cont de semne diferite de quote.
+     * @param cvsLine Linia de procesat.
+     * @param separators separatorul de folosit.
+     * @param customQuote semnul de quote folosit
+     * @return Lista ArrayList cu elementele
+     */
     public static ArrayList<String> parseLine(String cvsLine, char separators, char customQuote) {
 
         ArrayList<String> result = new ArrayList();

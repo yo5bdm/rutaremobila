@@ -18,6 +18,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -28,16 +29,41 @@ import javax.swing.Timer;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
- *
+ * Pagina principala a aplicatiei.
  * @author yo5bdm
  */
 public class MainFrame extends javax.swing.JFrame {
+
+    /**
+     * Permite accesul la MainFrame.
+     */
     public static MainFrame m;
+
+    /**
+     * Permite accesul la model.
+     */
     public static ModelTabel model;
-    //folosit la accestul individului best din firele de executie
+
+    /**
+     * Folosit la accestul individului best din firele de executie. 
+     * Obiectul monitor pe care se face sincronizarea.
+     */
     public static final Object O = new Object(); //syncronized
+
+    /**
+     * Setarile aplicatiei.
+     */
     public static Setari s; //setarile aplicate
+
+    /**
+     * Aici se salveaza numarul de generatii la care a ajuns un anumit fir.
+     * Calculul procentului de pe MainFrame se face facand media acestor valori.
+     */
     public static int[] procente;
+
+    /**
+     * Clasa Analiza.
+     */
     public static Analiza analiza;
     
 //privati
@@ -45,6 +71,7 @@ public class MainFrame extends javax.swing.JFrame {
     private Timer paint;
     //pentru desenare
     private Camion camion;
+    private double startFitness;
     private double dx, dy;
     private double cenX, cenY;
     private int mX, mY;
@@ -52,9 +79,7 @@ public class MainFrame extends javax.swing.JFrame {
     //runtime
     private boolean ruleaza=false;
     private ArrayList<AlgoritmGenetic> listaFire;
-    private final int nrIndivizi=1000;
-    private final int[] viataIndivid = new int[] {24,26,28,30,32,34,36};
-    private final int[] intProbMutatii = new int[] {0,0,0,0,0,0,5,5,5,5}; //valorile folosite ca probabilitati de mutatie
+    private final int[] viataIndivid = new int[] {18,20,22,24,26,28,30};
     private final Timer timer = new Timer(50, new ActionListener() { // 50ms, adica vreo 20fps
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -204,8 +229,10 @@ public class MainFrame extends javax.swing.JFrame {
         jLabel6.setText("Tip generare:");
 
         VitezaAlgoritm.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Rapid", "Mediu", "Lent", "Infinit" }));
-        VitezaAlgoritm.setSelectedIndex(2);
+        VitezaAlgoritm.setSelectedIndex(1);
         VitezaAlgoritm.setToolTipText("<htmll>Selecteaza modul de lucru al algoritmului.<br>\nRapid - algoritmul merge o perioada scurta de timp inainte sa se opreasca (500 de pasi)<br>\nMediu - algoritmul functioneaza o perioada medie de timp (2000 de pasi)<br>\nLent - algoritmul functioneaza o perioada lunga de timp (10.000 de pasi)<br>\nInfinit - algoritmul functioneaza o perioada extrem de lunga de timp. Ideal daca doriti sa lasati calculatorul pornit o perioada lunga de timp</html>");
+
+        Progres.setStringPainted(true);
 
         FisierIncarcat.setText("Nici un fisier incarcat.");
 
@@ -360,12 +387,13 @@ public class MainFrame extends javax.swing.JFrame {
                     Client.restore();
                     Client.calculeazaTablouDistante();
                     Client.rezolvaCeleMari();
+                    //todo de adaugat mod ultrarapid, un singur fir, 4000 populatia, 500 de generatii
                     int viteza = VitezaAlgoritm.getSelectedIndex();
                     listaFire = new ArrayList();
                     procente = new int[s.memorie];
                     AlgoritmGenetic a;
                     for(int i=0;i<s.memorie;i++) {
-                        a = new AlgoritmGenetic(i,viteza,intProbMutatii[i%intProbMutatii.length],viataIndivid[i%viataIndivid.length],nrIndivizi);
+                        a = new AlgoritmGenetic(i,viteza,viataIndivid[i%viataIndivid.length],s.nrIndivizi);
                         a.setPriority(s.prioritate);
                         a.start();
                         listaFire.add(a);
@@ -547,10 +575,12 @@ public class MainFrame extends javax.swing.JFrame {
      */
     public void setProgres(int index, int val) {
         procente[index] = val;
-        int media=0;
+        double media=0;
         for(int i:procente) media+=i;
         media/=procente.length;
-        Progres.setValue(media);
+        //todo https://stackoverflow.com/questions/6579789/jprogressbar-with-double-value
+        //Progres.setString(NumberFormat.getPercentInstance().format(media/Progres.getMaximum()));
+        Progres.setValue((int)media);
     }
     /**
      * Seteaza cea mai buna solutie din firul de executie, pentru afisare.
@@ -560,10 +590,18 @@ public class MainFrame extends javax.swing.JFrame {
      */
     public void setBest(Individ i, int id, String text) {
         if(i!=null) {
-            int delta = Integer.MAX_VALUE;
-            if(Individ.best!=null) delta = (int)(Individ.best.getFitness()-i.getFitness());
+            Double delta=0.0;
+            if(Individ.best!=null) {
+                delta = ((startFitness-i.getFitness())/startFitness)*100;
+                if(delta == Double.POSITIVE_INFINITY || delta == Double.NEGATIVE_INFINITY) {
+                    startFitness = i.getFitness();
+                    delta = 0.0;
+                }
+            } else {
+                startFitness = i.getFitness();
+            }
             Individ.best = i;
-            BSDistanta.setText((int)((double)Individ.best.getFitness()+Individ.celeMariDist)+" km (-"+delta+")");
+            BSDistanta.setText((int)((double)Individ.best.getFitness()+Individ.celeMariDist)+" km (-"+delta.intValue()+"%)");
             BSNrCamioane.setText((Individ.best.camioane.size()+Individ.celeMariNrCamioane)+"");
             BSGeneratia.setText("("+text+")");
             enableSalveaza();

@@ -14,11 +14,17 @@ import java.util.Collections;
  * @author yo5bdm
  */
 public class CamionDisponibil {
+
+    /**
+     * Lista de camioane disponibile.
+     */
     public static ArrayList<CamDisp> disponibil=new ArrayList();
+    /**
+     * Backup la lista de disponibile. Necesar pentru resetare.
+     */
     protected static ArrayList<CamDisp> dispBak=new ArrayList();
     private ArrayList<CamDisp> capacitati;
     private static double maxSize=0;
-    //metodele obiectuale
     /**
      * Constructorul clasei. Isi ia datele din proprietatile statice ale clasei
      * Genereaza un obiect cu camioanele ce au mai ramas dupa eliminarea pachetelor mari
@@ -46,7 +52,6 @@ public class CamionDisponibil {
         }
         return -1;
     }
-    //metode statice
     /**
      * Metoda statica de adaugat camioane disponibile
      * @param cap Capacitatea camionului disponibil
@@ -58,7 +63,9 @@ public class CamionDisponibil {
         Collections.sort(disponibil);
         if(cap>maxSize) maxSize = (double)cap;
     }
-    
+    /**
+     * Reseteaza camioanele disponibile. Se foloseste la restartarea algoritmului.
+     */
     public static void resetDisponibile() {
         disponibil.clear();
         for(CamDisp i:dispBak) disponibil.add(new CamDisp(i));

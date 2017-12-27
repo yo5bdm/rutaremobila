@@ -14,9 +14,9 @@ import static main.MainFrame.*;
  */
 class ModelTabel extends AbstractTableModel {
 
-    String[] coloane = {"Distanta","Ocupat","Opriri","OK"};
+    String[] coloane = {"Distanta","Capacitate","Ocupat","Opriri","OK"};
     private final Class[] columnClass = new Class[] {
-        String.class, String.class, Integer.class, String.class
+        String.class, Integer.class, String.class, Integer.class, String.class
     };
     
     @Override
@@ -35,8 +35,10 @@ class ModelTabel extends AbstractTableModel {
             case 0:
                 return (int)c.distanta+" km";
             case 1:
-                return c.ocupat().intValue()+" %"; 
+                return c.capacitate;
             case 2:
+                return c.ocupat().intValue()+" %"; 
+            case 3:
                 return c.opriri;
             default:
                 if(c.ok) return "Da";

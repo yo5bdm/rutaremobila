@@ -18,28 +18,37 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static main.MainFrame.s;
 
 /**
- *
+ * Clasa pentru analizarea functionarii algoritmului.
  * @author yo5bd
  */
 public class Analiza {
     private final ArrayList<Obiect> obiecte;
+    private final ArrayList<String> evolutie;
     private final String D = ";";
-
+    private final String formatDataText = "yyyy/MM/dd HH:mm";
+    private final String formatDataFisier = "yyyy-MM-dd-HH-mm";
+    private final String numeFisier = "Analiza";
+    private final String extensieFisier = ".csv";
+    /**
+     * Constructorul clasei. Initializeaza lista de obiecte.
+     */
     public Analiza() {
         obiecte = new ArrayList();
+        evolutie = new ArrayList();
+        evolutie.add("Generatia"+D+"Nr indivizi"+D+"Viata"+D+"Fitness");
     }
     /**
      * Metoda de adaugare date in analiza.
      * @param generatia int generatia in care s-a gasit rezultatul
      * @param viata int viata generatiei
      * @param nrIndivizi int numarul de indivizi ai firului
-     * @param probMutatie int probabilitatea de mutatie a firului
      * @param bestSolutie double fitness-ul celei mai bune solutii gasite
      */
-    public void adauga(int generatia, int viata, int nrIndivizi, int probMutatie, double bestSolutie) {
-        Obiect c = new Obiect(viata,nrIndivizi,probMutatie);
+    public void adauga(int generatia, int viata, int nrIndivizi, double bestSolutie) {
+        Obiect c = new Obiect(viata,nrIndivizi,D);
         boolean mod=false;
         for(Obiect o:obiecte) { //daca exista, actualizam
             if(c.equals(o)) {
@@ -51,24 +60,32 @@ public class Analiza {
             c.actualizeaza(generatia, bestSolutie);
             obiecte.add(c);
         }
-        System.out.println("G"+generatia+";I"+nrIndivizi+";V"+viata+";M"+probMutatie+";F"+(int)bestSolutie);
+        evolutie.add(+generatia+D+nrIndivizi+D+viata+D+(int)bestSolutie);
+        System.out.println("G"+generatia+";I"+nrIndivizi+";V"+viata+";F"+(int)bestSolutie);
     }
-    
+    /**
+     * Genereaza formatul textului pentru export.
+     * @return 
+     */
     private ArrayList genereazaFisier() {
         ArrayList<String> fis = new ArrayList();
-        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm"); //2016/11/16 12:08
+        DateFormat dateFormat = new SimpleDateFormat(formatDataText);
         Date date = new Date();
+        fis.add(s.toString());
         fis.add("Fisier generat in "+dateFormat.format(date));
         fis.add("Probabilitate Mutatie"+D+"Nr Indivizi"+D+"Viata"+D+"Nr Solutii Gasite"+D+"Generatia"+D+"Best Solutie");
         for(Obiect o:obiecte) fis.add(o.toString());
+        for(String s:evolutie) fis.add(s);
         return fis;
     }
-    
+    /**
+     * Salveaza fisierul generat de clasa.
+     */
     public void saveFile() {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm"); //2016/11/16 12:08:43
+        DateFormat dateFormat = new SimpleDateFormat(formatDataFisier); //2016/11/16 12:08:43
         Date date = new Date();
         try {
-            File file = new File("Analiza-"+dateFormat.format(date)+".csv");
+            File file = new File(numeFisier+"-"+dateFormat.format(date)+extensieFisier);
             List<String> lines = genereazaFisier();
             Path f = Paths.get(file.getAbsolutePath());
             Files.write(f, lines, Charset.forName("UTF-8"));
@@ -76,26 +93,26 @@ public class Analiza {
             Logger.getLogger(Analiza.class.getName()).log(Level.SEVERE, null, ex);
         }
         obiecte.clear();
+        evolutie.clear();
     }
             
 }
 
 class Obiect {
-    //nu se schimba 
+    //nu se schimba, folosite la identificarea obiectului.
     public int viata;
     public int nrIndivizi;
-    public int probMutatie;
-    //se actualizeaza
+    //se actualizeaza la fiecare inserare
     public int generatia;
     public int nrSolutiiGasite;
     public double bestSolutie;
-    //intern
-    private final String D = ";";
+    //intern, separatorul folosit
+    private final String D;
 
-    public Obiect(int viata, int nrIndivizi, int probMutatie) {
+    public Obiect(int viata, int nrIndivizi, String separator) {
+        this.D = separator;
         this.viata = viata;
         this.nrIndivizi = nrIndivizi;
-        this.probMutatie = probMutatie;
         this.nrSolutiiGasite =0;
     }
     
@@ -107,13 +124,13 @@ class Obiect {
 
     @Override
     public String toString() {
-        return probMutatie+D+nrIndivizi+D+viata+D+nrSolutiiGasite+D+generatia+D+(int)bestSolutie;
+        return nrIndivizi+D+viata+D+nrSolutiiGasite+D+generatia+D+(int)bestSolutie;
     }
 
     @Override
     public boolean equals(Object o) {
         Obiect c = (Obiect) o;
-        return this.viata == c.viata && this.nrIndivizi == c.nrIndivizi && this.probMutatie == c.probMutatie;
+        return this.viata == c.viata && this.nrIndivizi == c.nrIndivizi;
     }
 
     @Override
@@ -121,7 +138,6 @@ class Obiect {
         int hash = 7;
         hash = 97 * hash + this.viata;
         hash = 97 * hash + this.nrIndivizi;
-        hash = 97 * hash + this.probMutatie;
         return hash;
     }
     

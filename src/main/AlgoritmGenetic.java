@@ -22,20 +22,61 @@ import static main.MainFrame.*;
  */
 public class AlgoritmGenetic extends Thread {
     
+    /**
+     * ID-ul thread-ului in care ruleaza algoritmul. In productie, algoritmul va rula in mai multe thread-uri paralele.
+     */
     protected int id;
+    /**
+     * Numarul de clienti. Optimizare, pentru a nu accesa intruna <i>Client.clienti.size()</i>.
+     */
     protected int nrClienti;
+    /**
+     * Numarul de indivizi per generatie.
+     */
     protected int nrIndivizi;
-    protected int probabilitateMutatie; //5 = 5%
+    /**
+     * Maximul de generatii ce va rula algoritmul.
+     */
     protected int maxGeneratii;
-    protected boolean rapid=false; //metoda de selectie true = primele cele mai bune, false = random gaussian
+    /**
+     * Metoda de selectie.
+     * true = se iau primii cei mai buni indivizi, 
+     * false = random gaussian dintre cei mai buni indivizi
+     */
+    protected boolean rapid;
+    /**
+     * Numarul de camioane. Se initializeaza cu o valoare mai mica, calculata in clasa client
+     */
+    //todo de mutat calculul si initializarea acestui camp in clasa Client ca metoda statica.
     protected int nrCamioane=48; //pentru initializare
+
+    /**
+     * Viata initiala a indivizilor. Fiecare individ va fi selectabil un anumit numar de generatii
+     */
     protected int viataIndivid;
+
+    /**
+     * Viata initiala a indivizilor. Cu acest camp se initializeaza indivizii si se foloseste la analiza.
+     */
     protected int viataInd; //teste/printare
+
+    /**
+     * Semnalizeaza firului curent sa se opreasca
+     */
     protected boolean stop;
     
+    /**
+     * Obiectul folosit la obtinerea numerelor random necesare.
+     */
     public static final Random R = new Random();
-    public final ArrayList<Individ> populatie = new ArrayList();
-    protected final ArrayList<Individ> popTemp = new ArrayList();
+    /**
+     * Populatia folosita in algoritm.
+     */
+    public final ArrayList<Individ> populatie;
+    /**
+     * Populatie temporara. Folosit in anumite parti a algoritmului.
+     */
+    protected final ArrayList<Individ> popTemp;
      
     /**
      * Constructorul clasei.
@@ -43,29 +84,28 @@ public class AlgoritmGenetic extends Thread {
      * Pornirea se face prin .start()
      * @param id Int id-ul firului de executie, util pentru afisare si analize
      * @param viteza Int intre 0 si 3, numarul de generatii (500, 2000, 10.000, Infinit)
-     * @param probMutatie Int probabilitatea de mutatie 5 reprezinta 5%
      * @param viataIndivid int numarul de generatii cat va fi selectabil individul
      * @param nrIndivizi int nr de indivizi per generatie
      */
-    public AlgoritmGenetic(int id, int viteza, int probMutatie, int viataIndivid, int nrIndivizi) {
+    public AlgoritmGenetic(int id, int viteza, int viataIndivid, int nrIndivizi) {
+        this.popTemp = new ArrayList();
+        this.populatie = new ArrayList();
         this.id = id;
         this.nrIndivizi = nrIndivizi;
         this.viataIndivid = viataIndivid;
         this.viataInd = viataIndivid; //folosit pentru teste/printare
         this.nrClienti = Client.clienti.size();
-        this.probabilitateMutatie = probMutatie;
-        populatie.clear();
-        popTemp.clear();
-        stop = false;
+        this.stop = false;
+        this.rapid = false;
         switch(viteza) {
             case 0: //rapid
                 maxGeneratii = 500; rapid = true; break;
             case 1: //mediu
-                maxGeneratii = 2000; rapid = false; break;
+                maxGeneratii = 2000; rapid = true; break;
             case 2: //lent
-                maxGeneratii = 10000; rapid = false; break;
+                maxGeneratii = 10000; rapid = true; break;
             default: // case 3: infinit
-                maxGeneratii = Integer.MAX_VALUE; rapid = false; break;
+                maxGeneratii = Integer.MAX_VALUE; rapid = true; break;
         }
         m.initProgres(maxGeneratii);
     }
@@ -94,14 +134,14 @@ public class AlgoritmGenetic extends Thread {
                 //System.out.println("F "+probabilitateMutatie+"; G "+g);
             }
             recombinare();//
-            if(probabilitateMutatie > 0) mutatie();//
+            mutatie();//
             for(Individ i:popTemp) i.calculeaza(true); //calculam fitnessul pentru populatia temporara
             selectie();//
             best_fit = populatie.get(0);
             synchronized(O) {
                 if(best_fit.getFitness()<Individ.best.getFitness() && best_fit.ok()==true) { //
                     m.setBest(best_fit,id,id+"G"+g);
-                    analiza.adauga(g,viataInd,nrIndivizi,probabilitateMutatie,best_fit.getFitness());
+                    analiza.adauga(g,viataInd,nrIndivizi,best_fit.getFitness());
                 }
                 O.notifyAll();
             }
@@ -128,11 +168,7 @@ public class AlgoritmGenetic extends Thread {
      * optimizat - neoptimizat
      */
     protected void recombinare() {
-        popTemp.clear();
-        if(probabilitateMutatie>20) { //nu mai facem recombinare in cazul asta
-            popTemp.addAll(populatie);
-            return;
-        }        
+        popTemp.clear();   
         while(popTemp.size()<nrIndivizi){
             Individ p1 = populatie.get(R.nextInt(populatie.size()));
             Individ p2 = populatie.get(R.nextInt(populatie.size()));
@@ -195,26 +231,21 @@ public class AlgoritmGenetic extends Thread {
      */
     protected void mutatie() { //mutatia se aplica pe o copie a individului, raman ambele variante
         ArrayList<Individ> temps = new ArrayList();
-        boolean mutat; //a fost executata mutatie asupra individului?
-        for(Individ c:popTemp) { //pentru fiecare individ
-            Individ n = new Individ(c);
-            mutat = false;
-            for(int i=0;i<nrClienti;i++) { //se ia fiecare cromozom
-                if(R.nextInt(100)<probabilitateMutatie) {
-                    //se selecteaza random o alta pozitie din cromozom
-                    int pos2 = R.nextInt(nrClienti-1); 
-                    //si se face swap
-                    int temp = n.cromozom[i];
-                    n.cromozom[i] = n.cromozom[pos2];
+        int pm;
+        for(int i=0;i<popTemp.size();i++) { //pentru fiecare individ
+            Individ n = new Individ(popTemp.get(i));
+            pm = procMut(i); //probabilitatea de mutatie
+            if(R.nextInt(100)<procMut(i)) {
+                for(int j=0;j<(pm/Setari.procMutatie[0]);j++) { //nr de mutatii depind de probabilitate
+                    int pos1 = R.nextInt(nrClienti-1);
+                    int pos2 = R.nextInt(nrClienti-1);
+                    int temp = n.cromozom[pos1];
+                    n.cromozom[pos1] = n.cromozom[pos2];
                     n.cromozom[pos2] = temp;
-                    mutat=true; //da
-                    //System.out.println("Mutatie...");
+                    n.copiaza();
+                    temps.add(n);
                 }
             }
-            if(mutat) {
-                n.copiaza();
-                temps.add(n);
-            } //daca avem mutatie, il adaugam in lista
         }
         popTemp.addAll(temps); //ii adaugam in lista de temporari
     }
@@ -273,8 +304,19 @@ public class AlgoritmGenetic extends Thread {
         }
         return tot;
     }
-
+    /**
+     * Semnalizeaza Thread-ului curent sa se opreasca.
+     */
     public void opreste() {
         stop = true;
+    }
+    /**
+     * Returneaza procentul de mutatie pentru indivizul curent.
+     * Algoritm Genetic Autoadaptiv (AGA).
+     * @param i int Indexul elementului curent
+     * @return int procentul de mutatie
+     */
+    private int procMut(int i) {
+        return Setari.procMutatie[((i / popTemp.size())*Setari.procMutatie.length)];
     }
 }

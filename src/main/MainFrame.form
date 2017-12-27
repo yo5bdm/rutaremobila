@@ -323,7 +323,7 @@
                 <StringItem index="3" value="Infinit"/>
               </StringArray>
             </Property>
-            <Property name="selectedIndex" type="int" value="2"/>
+            <Property name="selectedIndex" type="int" value="1"/>
             <Property name="toolTipText" type="java.lang.String" value="&lt;htmll&gt;Selecteaza modul de lucru al algoritmului.&lt;br&gt;&#xa;Rapid - algoritmul merge o perioada scurta de timp inainte sa se opreasca (500 de pasi)&lt;br&gt;&#xa;Mediu - algoritmul functioneaza o perioada medie de timp (2000 de pasi)&lt;br&gt;&#xa;Lent - algoritmul functioneaza o perioada lunga de timp (10.000 de pasi)&lt;br&gt;&#xa;Infinit - algoritmul functioneaza o perioada extrem de lunga de timp. Ideal daca doriti sa lasati calculatorul pornit o perioada lunga de timp&lt;/html&gt;"/>
           </Properties>
           <AuxValues>
@@ -331,6 +331,9 @@
           </AuxValues>
         </Component>
         <Component class="javax.swing.JProgressBar" name="Progres">
+          <Properties>
+            <Property name="stringPainted" type="boolean" value="true"/>
+          </Properties>
         </Component>
         <Component class="javax.swing.JLabel" name="FisierIncarcat">
           <Properties>

@@ -17,13 +17,41 @@ import java.util.Comparator;
  * 
  */
 public class Camion {
-    public double capacitate; //capacitatea camionului
-    public double ocupat; //cat e ocupat din camion
-    public boolean ok; //satisface camionul toate cerintele?
-    public int opriri; //numarul de opriri efectuate (numarul de clienti)
-    public ArrayList<Integer> pachete = new ArrayList(); //pachetele din camion
+
+    /**
+     * Capacitatea camionului.
+     */
+    public double capacitate; 
+
+    /**
+     * Volumul total ocupat din camion. Nu e procentul, e volumul total.
+     */
+    public double ocupat; 
+
+    /**
+     * True daca satisface camionul toate cerintele.
+     */
+    public boolean ok; 
+
+    /**
+     * Numarul de opriri/descarcari efectuate (numarul de clienti).
+     */
+    public int opriri; 
+
+    /**
+     * Pachetele din camion.
+     */
+    public ArrayList<Integer> pachete = new ArrayList(); 
+
+    /**
+     * Distanta totala parcursa de camion. Depinde de modul de calcul, daca se intoarce acasa sau nu.
+     */
     public double distanta; //distnata totala parcursa
-    public ArrayList<Integer> solutia; //ruta parcursa de camion. nu include pornirea (casa)
+
+    /**
+     * Ordinea de descarcare optima.
+     */
+    public ArrayList<Integer> solutia;
     /**
      * Constructor.
      * @param capacitate Int capacitatea ce o va avea camionul
@@ -55,7 +83,7 @@ public class Camion {
         calc();
     }
     /**
-     * Neimplementat
+     * Neimplementat.
      */
     public void optimizare() {
     }    
@@ -139,6 +167,10 @@ public class Camion {
         }
     }
 
+    /**
+     * Metoda toString().
+     * @return String.
+     */
     @Override
     public String toString() {
         String obiecte="";
@@ -153,7 +185,7 @@ public class Camion {
      * OVRP, camionul nu se intoarce la baza. Se porneste de la baza si se 
      * cauta cel mai apropiat punct. Procesul se reia pentru toate punctele.
      */
-    public void calculeazaDistanta() { //varianta greedy
+    public void calculeazaDistanta() {
         distanta = 0.0;
         solutia = new ArrayList();
         if(pachete.isEmpty()) { //daca nu avem pachete in camion

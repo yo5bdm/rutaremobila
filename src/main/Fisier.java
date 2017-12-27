@@ -42,7 +42,7 @@ public class Fisier {
             ret.add("Pachetele de incarcat:");
             for (Integer i : cam.solutia) {
                 cli = Client.clienti.get(i);
-                ret.add(cli.cod_client + " " + cli.ship_to + ", GPS=" + cli.latitudine + "," + cli.longitudine + " vol=" + cli.volum);
+                ret.add(cli.codClient + " " + cli.shipTo + ", GPS=" + cli.latitudine + "," + cli.longitudine + " vol=" + cli.volum);
             }
         }
         ret.add(" ");

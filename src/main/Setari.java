@@ -6,19 +6,49 @@
 package main;
 
 /**
- *
- * @author yo5bd
+ * Clasa de interfatare cu utilizatorul a setarilor.
+ * @author yo5bdm
  */
 public class Setari extends javax.swing.JDialog {
     /*
     @todo de salvat setarile in fisier
     @todo de incarcat setarile din fisier
+    @todo de rezolvat "ajunge acasa"
     */
-    public int prioritate = 5; //prioritatea folosita de firele de executie
-    public int memorie = 7; //numarul de thread-uri folosite la generare
+
+    /**
+     * Prioritatea folosita de thread-uri.
+     */
+    public int prioritate = 5;
+
+    /**
+     * Numarul de thread-uri folosite la generare. 
+     */
+    public int memorie = 7;
+
+    /**
+     * Maximul numarului de descarcari.
+     */
     public int nrDescarcari = 15;
+
+    /**
+     * Camionul, la finalul descarcarilor trebuie sa ajunga acasa sau nu. OVRP vs TVRP.
+     */
     public boolean ajungeAcasa=false;
+
+    /**
+     * Numarul de indivizi folositi la generare.
+     */
+    public final int nrIndivizi = 2000;
+
+    /**
+     * Algoritm Genetic Autoadaptiv (AGA). 
+     * Algoritmul foloseste un procent mai mic de mutatie pentru indivizii buni 
+     * si unul mai mare pentru indivizii mai putin buni
+     */
+    public static final int[] procMutatie = new int[] {2,4,6,8,10,12,14,16,18,40};
     private ModelCamioane m = new ModelCamioane();
+    
     /**
      * Creates new form Setari
      * @param parent parintele
@@ -36,6 +66,12 @@ public class Setari extends javax.swing.JDialog {
         AjungeAcasa.setSelected(ajungeAcasa);
     }
 
+    @Override
+    public String toString() {
+        return "Setari{" + "prioritate=" + prioritate + " memorie=" + memorie + " nrDescarcari=" + nrDescarcari + " ajungeAcasa=" + ajungeAcasa + " nrIndivizi=" + nrIndivizi + '}';
+    }
+    
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -45,15 +81,6 @@ public class Setari extends javax.swing.JDialog {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jPanel1 = new javax.swing.JPanel();
-        ComPrioritate = new javax.swing.JLabel();
-        jLabel1 = new javax.swing.JLabel();
-        LabelPrioritate = new javax.swing.JLabel();
-        SliderPrioritate = new javax.swing.JSlider();
-        ComMemorie = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
-        LabelMem = new javax.swing.JLabel();
-        SliderMemorie = new javax.swing.JSlider();
         jPanel2 = new javax.swing.JPanel();
         jLabel3 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -64,96 +91,15 @@ public class Setari extends javax.swing.JDialog {
         jLabel4 = new javax.swing.JLabel();
         NrIncarcari = new javax.swing.JTextField();
         AjungeAcasa = new javax.swing.JCheckBox();
+        jLabel1 = new javax.swing.JLabel();
+        LabelPrioritate = new javax.swing.JLabel();
+        SliderPrioritate = new javax.swing.JSlider();
+        jLabel2 = new javax.swing.JLabel();
+        LabelMem = new javax.swing.JLabel();
+        SliderMemorie = new javax.swing.JSlider();
         jButton3 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-
-        jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-
-        ComPrioritate.setText("<html>Daca nu mai folositi calculatorul si la alte operatii, puteti incerca <BR>cresterea prioritatii.\nIn cazul in care calculatorul nu raspunde bine, <BR>scadeti prioritatea</html>"); // NOI18N
-
-        jLabel1.setText("Prioritate:");
-
-        LabelPrioritate.setText("0");
-
-        SliderPrioritate.setMaximum(10);
-        SliderPrioritate.setMinimum(1);
-        SliderPrioritate.setPaintLabels(true);
-        SliderPrioritate.setPaintTicks(true);
-        SliderPrioritate.setSnapToTicks(true);
-        SliderPrioritate.setToolTipText("Seteaza prioritatea folosita de aplicatie");
-        SliderPrioritate.setValue(5);
-        SliderPrioritate.addChangeListener(new javax.swing.event.ChangeListener() {
-            public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                SliderPrioritateStateChanged(evt);
-            }
-        });
-
-        ComMemorie.setText("<html>La calculatoarele cu memorie multa, puteti incerca cresterea \n<BR>memoriei folosite.Astfel se va putea ajunge la solutii mai bune. \n<BR>In cazul in care aplicatia da erori, scadeti memoria folosita.</html>");
-
-        jLabel2.setText("Memorie folosita:");
-
-        LabelMem.setText("0");
-
-        SliderMemorie.setMaximum(20);
-        SliderMemorie.setMinimum(1);
-        SliderMemorie.setPaintLabels(true);
-        SliderMemorie.setPaintTicks(true);
-        SliderMemorie.setSnapToTicks(true);
-        SliderMemorie.setToolTipText("");
-        SliderMemorie.setValue(7);
-        SliderMemorie.addChangeListener(new javax.swing.event.ChangeListener() {
-            public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                SliderMemorieStateChanged(evt);
-            }
-        });
-
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(ComPrioritate, javax.swing.GroupLayout.DEFAULT_SIZE, 321, Short.MAX_VALUE)
-                    .addComponent(ComMemorie)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jLabel1)
-                            .addComponent(LabelPrioritate))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(SliderPrioritate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jLabel2)
-                            .addComponent(LabelMem))
-                        .addGap(10, 10, 10)
-                        .addComponent(SliderMemorie, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                .addContainerGap())
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(ComPrioritate, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(LabelPrioritate))
-                    .addComponent(SliderPrioritate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(ComMemorie, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel2)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(LabelMem))
-                    .addComponent(SliderMemorie, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
 
         jPanel2.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
@@ -222,6 +168,40 @@ public class Setari extends javax.swing.JDialog {
             }
         });
 
+        jLabel1.setText("Prioritate:");
+
+        LabelPrioritate.setText("0");
+
+        SliderPrioritate.setMaximum(10);
+        SliderPrioritate.setMinimum(1);
+        SliderPrioritate.setPaintLabels(true);
+        SliderPrioritate.setPaintTicks(true);
+        SliderPrioritate.setSnapToTicks(true);
+        SliderPrioritate.setToolTipText("Seteaza prioritatea folosita de aplicatie");
+        SliderPrioritate.setValue(5);
+        SliderPrioritate.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                SliderPrioritateStateChanged(evt);
+            }
+        });
+
+        jLabel2.setText("Memorie folosita:");
+
+        LabelMem.setText("0");
+
+        SliderMemorie.setMaximum(20);
+        SliderMemorie.setMinimum(1);
+        SliderMemorie.setPaintLabels(true);
+        SliderMemorie.setPaintTicks(true);
+        SliderMemorie.setSnapToTicks(true);
+        SliderMemorie.setToolTipText("");
+        SliderMemorie.setValue(7);
+        SliderMemorie.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                SliderMemorieStateChanged(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
@@ -230,11 +210,21 @@ public class Setari extends javax.swing.JDialog {
                 .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(NrIncarcari)
+                    .addComponent(SliderPrioritate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel4)
-                            .addComponent(AjungeAcasa, javax.swing.GroupLayout.PREFERRED_SIZE, 207, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 9, Short.MAX_VALUE)))
+                            .addComponent(AjungeAcasa, javax.swing.GroupLayout.PREFERRED_SIZE, 207, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addComponent(jLabel1)
+                                .addGap(55, 55, 55)
+                                .addComponent(LabelPrioritate))
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addComponent(jLabel2)
+                                .addGap(18, 18, 18)
+                                .addComponent(LabelMem)))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(SliderMemorie, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
@@ -246,6 +236,18 @@ public class Setari extends javax.swing.JDialog {
                 .addComponent(NrIncarcari, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(AjungeAcasa)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(LabelPrioritate))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(SliderPrioritate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel2)
+                    .addComponent(LabelMem))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(SliderMemorie, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -258,13 +260,11 @@ public class Setari extends javax.swing.JDialog {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -276,8 +276,7 @@ public class Setari extends javax.swing.JDialog {
                         .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -302,8 +301,6 @@ public class Setari extends javax.swing.JDialog {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox AjungeAcasa;
-    private javax.swing.JLabel ComMemorie;
-    private javax.swing.JLabel ComPrioritate;
     private javax.swing.JLabel LabelMem;
     private javax.swing.JLabel LabelPrioritate;
     private javax.swing.JTextField NrIncarcari;
@@ -317,7 +314,6 @@ public class Setari extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
-    private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;

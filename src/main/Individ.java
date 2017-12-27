@@ -28,21 +28,46 @@ import static main.AlgoritmGenetic.R;
  */
 public class Individ implements Comparable {
     /* PUBLIC STATIC */
-    //individul cel mai bun ajunge aici
+    /**
+     * Individul cel mai bun ajunge aici.
+     */
     public static Individ best;
+    /**
+     * Numarul de camioane trimise cu pachetele mari.
+     * Se foloseste la calculul final
+     */
     public static int celeMariNrCamioane;
+    /**
+     * Distanta totala parcursa de cele mari.
+     */
     public static double celeMariDist;
-    //pachetele mari care nu incap in camioane
+    /**
+     * Pachetele mari care nu incap in camioane.
+     */
     public static ArrayList<String> celeMari = new ArrayList(); //String-urile folosite la imprimare in fisier
     
     /* PUBLIC NESTATIC */
-    public Integer[] cromozom; //indexul e obiectul, valoarea e camionul pe care e incarcat
+    /**
+     * Cromozomul principal, optimizat.
+     * Indexul e obiectul de incarcat in camion. 
+     * Valoarea e numarul camionului pe care e incarcat obiectul
+     */
+    public Integer[] cromozom;
+    /**
+     * Copia neoptimizata a cromozomului principal
+     */
     public Integer[] cromozom2;
+    /**
+     * Lista de camioane. Fiecare isi cunoaste pachetele incarcate, distanta totala, etc.
+     */
     public ArrayList<Camion> camioane = new ArrayList();
+    /**
+     * Viata totala cu care a fost initializat individul. 
+     * Se foloseste la afisare si analiza.
+     */
     public int viataGen;
     
     /* PRIVATE */
-    //private Double distanta_totala;
     private Double fitness; //distanta totala parcursa
     private Integer nr_camioane;
     private int viata = 50; //50 de generatii
@@ -237,12 +262,21 @@ public class Individ implements Comparable {
         for(Camion c:camioane) c.optimizare();
     }
     
+    /**
+     * Metoda de comparare a 2 indivizi.
+     * @param obj Obiectul individ care trebuie comparat
+     * @return true daca sunt identice.
+     */
     @Override
     public boolean equals(Object obj) {
         Individ o = (Individ)obj;
         return (this.fitness == o.fitness); //To change body of generated methods, choose Tools | Templates.
     }
 
+    /**
+     * HashCode.
+     * @return int HashCode
+     */
     @Override
     public int hashCode() {
         int hash = 3;
@@ -252,12 +286,21 @@ public class Individ implements Comparable {
         return hash;
     }
     
+    /**
+     * Metoda de comparare
+     * @param o Obiectul cu care se compara.
+     * @return negativ daca e mai mic, 0 la fel, pozitiv mai mare
+     */
     @Override
     public int compareTo(Object o) {
         Individ c = (Individ) o;
         return this.fitness.compareTo(c.fitness);
     }
-
+    
+    /**
+     * toStrin().
+     * @return String.
+     */
     @Override
     public String toString() {
         System.out.println("Individ{ neincarcabile: " +neincarcabile()+", neincarcate: " +neincarcate()+ ", nr camioane=" + camioane.size() + ", fitness=" + fitness + '}');

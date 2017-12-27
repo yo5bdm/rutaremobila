@@ -13,14 +13,24 @@ import static main.MainFrame.*;
  * @author yo5bdm
  */
 public class Testing {
+
+    /**
+     * Teste.
+     */
     public Camion c = new Camion(110);
-    private Random r = new Random();
+    private final Random r = new Random();
+    /**
+     * Rularea testelor.
+     */
     public void run() {
         System.out.println("System testing:");
         CamionTest(true);
         //IndividTest(false);
     }
-    
+    /**
+     * Test camion.
+     * @param executa true daca se executa, false daca nu.
+     */
     private void CamionTest(boolean executa) {
         if(executa = false) return;
         Individ n=new Individ(Client.clienti.size(),0,100,false);
@@ -49,7 +59,10 @@ public class Testing {
         //n.setFitness(130.0);
         m.setBest(n,0,"TESTING"); 
     }
-    
+    /**
+     * Testul individului.
+     * @param executa true daca se executa.
+     */
     private void IndividTest(boolean executa) {
         if(executa == false) return;
         Individ n = new Individ(Client.clienti.size(),48,100,true);
