@@ -18,7 +18,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static main.MainFrame.s;
+import static main.MainFrame.*;
 
 /**
  * Clasa pentru analizarea functionarii algoritmului.
@@ -71,7 +71,7 @@ public class Analiza {
         ArrayList<String> fis = new ArrayList();
         DateFormat dateFormat = new SimpleDateFormat(formatDataText);
         Date date = new Date();
-        fis.add(s.toString());
+        fis.add(setari.toString());
         fis.add("Fisier generat in "+dateFormat.format(date));
         fis.add("Probabilitate Mutatie"+D+"Nr Indivizi"+D+"Viata"+D+"Nr Solutii Gasite"+D+"Generatia"+D+"Best Solutie");
         for(Obiect o:obiecte) fis.add(o.toString());
