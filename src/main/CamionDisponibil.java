@@ -5,8 +5,10 @@
  */
 package main;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
+import static main.MainFrame.*;
 
 /**
  * Clasa genereaza camioane disponibile, returneaza capacitatea acestuia.
@@ -19,12 +21,7 @@ public class CamionDisponibil {
      * Lista de camioane disponibile.
      */
     public static ArrayList<CamDisp> disponibil=new ArrayList();
-    /**
-     * Backup la lista de disponibile. Necesar pentru resetare.
-     */
-    protected static ArrayList<CamDisp> dispBak=new ArrayList();
     private ArrayList<CamDisp> capacitati;
-    private static double maxSize=0;
     /**
      * Constructorul clasei. Isi ia datele din proprietatile statice ale clasei
      * Genereaza un obiect cu camioanele ce au mai ramas dupa eliminarea pachetelor mari
@@ -59,16 +56,15 @@ public class CamionDisponibil {
      */
     public static void adaugaCapacitate(int cap, int nrCamioane) {
         disponibil.add(new CamDisp(cap,nrCamioane));
-        dispBak.add(new CamDisp(cap,nrCamioane));
+        setari.camDisponibile.add(new CamDisp(cap,nrCamioane));
         Collections.sort(disponibil);
-        if(cap>maxSize) maxSize = (double)cap;
     }
     /**
      * Reseteaza camioanele disponibile. Se foloseste la restartarea algoritmului.
      */
     public static void resetDisponibile() {
         disponibil.clear();
-        for(CamDisp i:dispBak) disponibil.add(new CamDisp(i));
+        for(CamDisp i:setari.camDisponibile) disponibil.add(new CamDisp(i));
     }
     /**
      * Metoda statica de returnare a unui camion disponibil.
@@ -91,13 +87,19 @@ public class CamionDisponibil {
      * @return Double - valoarea capacitatii camionului.
      */
     public static double getMaxSize() {
+        int maxSize = 0;
+        for(CamDisp i:disponibil) {
+            if(i.capacitate>maxSize && i.disponibile>0) {
+                maxSize = i.capacitate;
+            }
+        }
         return maxSize;
     }
 }
 
 
 //clasa obiect cu care lucreaza clasa publica
-class CamDisp implements Comparable {
+class CamDisp implements Comparable, Serializable {
     Integer capacitate;
     Integer disponibile;
     public CamDisp(int capacitate, int disponibile) {
@@ -112,5 +114,5 @@ class CamDisp implements Comparable {
     public int compareTo(Object o) {
         CamDisp c = (CamDisp) o;
         return c.capacitate.compareTo(this.capacitate);
-    }
+    }    
 }

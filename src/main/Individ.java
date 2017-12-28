@@ -105,14 +105,10 @@ public class Individ implements Comparable {
      */
     Individ(Individ b) {
         this(b.cromozom.length, b.nr_camioane, b.viataGen, false);
-        //cromozom = new Integer[b.cromozom.length];
-        //cromozom2 = new Integer[b.cromozom.length];
-        //camionDisponibil = new CamionDisponibil();
         for(int i=0;i<b.cromozom.length;i++) {
             this.cromozom[i] = b.cromozom[i];
             this.cromozom2[i] = b.cromozom2[i];
         }
-        //this.calculeaza(true);
     }
     /**
      * Metoda pregateste o noua copiere din cromozom. Goleste toate camioanele 
@@ -216,9 +212,14 @@ public class Individ implements Comparable {
         //golim camioanele suprapline
         for(int i=0;i<camioane.size();i++) {
             Camion c = camioane.get(i);
+            if(c.pachete.isEmpty()) continue;
             while(c.ok != true) {
                 int obiect = c.pop(); //pop last element
-                cromozom[obiect] = -1; //il marcam si in cromozom ca fiind nefolosit
+                if(obiect != -1) {
+                    cromozom[obiect] = -1; //il marcam si in cromozom ca fiind nefolosit
+                } else {
+                    break;
+                }
             }
         }
         //punem pachetele in plus in alt camion care nu e plin

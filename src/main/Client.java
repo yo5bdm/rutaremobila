@@ -21,10 +21,6 @@ public class Client {
      * Backupul listei de clienti. Va fi folosita pentru a restaura lista la restartarea algoritmului
      */
     public static ArrayList<Client> clientiBak = new ArrayList();
-    /**
-     * Punctul de unde vor pleca camioanele.
-     */
-    public static Client casa = new Client("ACASA", 47.075866, 21.901441, 0.0); //todo de mutat in clasa Setari
     //distantele de la casa la fiecare punct
     private static Double[] spreCasa;
     //distantele intre puncte
@@ -115,15 +111,15 @@ public class Client {
         for (Client c : clienti) {
             if (c.volum > CamionDisponibil.getMaxSize()) {
                 while (c.volum > CamionDisponibil.getMaxSize()) {
-                    int volum = CamionDisponibil.scadeLiber();
-                    c.volum -= volum;
-                    dist = Calcule.distanta(casa, c);
+                    int vol = CamionDisponibil.scadeLiber();
+                    c.volum -= vol;
+                    dist = Calcule.distanta(Setari.casa, c);
                     Individ.celeMariDist += dist;
                     Individ.celeMariNrCamioane++;
                     Individ.celeMari.add(" ");
                     Individ.celeMari.add("======================================");
-                    Individ.celeMari.add("Camion volum " + volum + ", ocupat " + volum + ", opriri 1, distanta totala " + (int) dist + " km;");
-                    Individ.celeMari.add(c.codClient + " " + c.shipTo + ", GPS=" + c.latitudine + "," + c.longitudine + " vol=" + volum);
+                    Individ.celeMari.add("Camion volum " + vol + ", ocupat " + vol + ", opriri 1, distanta totala " + (int) dist + " km;");
+                    Individ.celeMari.add(c.codClient + " " + c.shipTo + ", GPS=" + c.latitudine + "," + c.longitudine + " vol=" + vol);
                 }
                 temp.add(c);
             }
@@ -163,7 +159,7 @@ public class Client {
         }
         spreCasa = new Double[clienti.size()];
         for (int i = 0; i < clienti.size(); i++) {
-            spreCasa[i] = Calcule.distanta(casa, clienti.get(i));
+            spreCasa[i] = Calcule.distanta(Setari.casa, clienti.get(i));
         }
     }
     /**

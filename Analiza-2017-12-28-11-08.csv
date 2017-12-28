@@ -1,0 +1,15 @@
+main.SetariDialog[dialog0,960,540,490x328,invalid,hidden,layout=java.awt.BorderLayout,APPLICATION_MODAL,title=,defaultCloseOperation=DISPOSE_ON_CLOSE,rootPane=javax.swing.JRootPane[,8,31,474x289,invalid,layout=javax.swing.JRootPane$RootLayout,alignmentX=0.0,alignmentY=0.0,border=javax.swing.plaf.synth.SynthBorder@5c79c69f,flags=16777673,maximumSize=,minimumSize=,preferredSize=],rootPaneCheckingEnabled=true]
+Fisier generat in 2017/12/28 11:08
+Probabilitate Mutatie;Nr Indivizi;Viata;Nr Solutii Gasite;Generatia;Best Solutie
+1000;12;10;10;237382
+Generatia;Nr indivizi;Viata;Fitness
+0;1000;12;244811
+1;1000;12;244228
+2;1000;12;242663
+3;1000;12;242062
+4;1000;12;240930
+5;1000;12;240659
+6;1000;12;239779
+7;1000;12;238425
+9;1000;12;237791
+10;1000;12;237382

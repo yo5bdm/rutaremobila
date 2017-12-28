@@ -6,6 +6,7 @@
 package main;
 
 import javax.swing.table.AbstractTableModel;
+import static main.MainFrame.*;
 
 /**
  * Modelul folosit pentru afisarea datelor in tabelul de pe pagina de setari.
@@ -24,8 +25,8 @@ public class ModelCamioane extends AbstractTableModel {
      */
     @Override
     public int getRowCount() {
-        if(CamionDisponibil.dispBak == null) return 0;
-        return CamionDisponibil.dispBak.size();
+        if(setari.camDisponibile == null) return 0;
+        return setari.camDisponibile.size();
     }
     /**
      * Returneaza numarul de coloane a listei.
@@ -43,7 +44,7 @@ public class ModelCamioane extends AbstractTableModel {
      */
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
-        CamDisp c = CamionDisponibil.dispBak.get(rowIndex);
+        CamDisp c = setari.camDisponibile.get(rowIndex);
         switch(columnIndex) {
             case 0:
                 return c.capacitate;

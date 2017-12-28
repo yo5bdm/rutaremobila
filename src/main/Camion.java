@@ -7,6 +7,7 @@ package main;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import static main.MainFrame.*;
 
 /**
  * Clasa de lucru cu camioanele.
@@ -116,7 +117,7 @@ public class Camion {
     private void calc_partial() {
         numara_opriri();
         calculeaza_ocupat();
-        if(opriri<=15 && (ocupat/capacitate)<=1) 
+        if(opriri<=setari.nrDescarcari && (ocupat/capacitate)<=1) 
             ok = true; 
         else 
             ok = false;
@@ -128,6 +129,7 @@ public class Camion {
      * @return Int indexul din <i>MainFrame clienti</i> a pachetului eliminat.
      */
     public int pop() {
+        if(pachete.size()==0) return -1;
         sort();
         int ret = pachete.remove(pachete.size()-1);
         calc_partial();
@@ -139,6 +141,7 @@ public class Camion {
      * @return Double procentul de ocupare.
      */
     public Double ocupat() {
+        calculeaza_ocupat();
         return (ocupat/capacitate)*100;
     }    
     /**
@@ -154,7 +157,6 @@ public class Camion {
      */
     private void numara_opriri() {
         opriri = pachete.size();
-        if(opriri<15) ok = true;
     }    
     /**
      * calculeaza volumul total al pachetelor din camion.

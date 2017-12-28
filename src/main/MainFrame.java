@@ -51,10 +51,13 @@ public class MainFrame extends javax.swing.JFrame {
     public static final Object O = new Object(); //syncronized
 
     /**
-     * Setarile aplicatiei.
+     * Dialogul cu setarile aplicatiei.
      */
-    public static Setari s; //setarile aplicate
-
+    public static SetariDialog s; //setarile aplicate
+    /**
+     * Clasa de setari.
+     */
+    public static Setari setari;
     /**
      * Aici se salveaza numarul de generatii la care a ajuns un anumit fir.
      * Calculul procentului de pe MainFrame se face facand media acestor valori.
@@ -79,7 +82,7 @@ public class MainFrame extends javax.swing.JFrame {
     //runtime
     private boolean ruleaza=false;
     private ArrayList<AlgoritmGenetic> listaFire;
-    private final int[] viataIndivid = new int[] {18,20,22,24,26,28,30};
+    private final int[] viataIndivid = new int[] {12,16,20,24,28,32,36};
     private final Timer timer = new Timer(50, new ActionListener() { // 50ms, adica vreo 20fps
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -95,7 +98,8 @@ public class MainFrame extends javax.swing.JFrame {
         this.cenX = -1.0;
         //setLocationRelativeTo(null); //center
         initComponents();
-        s = new Setari(this,true);
+        s = new SetariDialog(this,true);
+        setari = s.setari;
         m = this;
         analiza = new Analiza();
         model = new ModelTabel();
@@ -107,9 +111,13 @@ public class MainFrame extends javax.swing.JFrame {
         disableSalveaza();
         VitezaAlgoritm.setEnabled(false);
         timer.start();
-        CamionDisponibil.adaugaCapacitate(101,10);
-        CamionDisponibil.adaugaCapacitate(91,15);
-        CamionDisponibil.adaugaCapacitate(81,9999);
+        //salveaza setarile la iesirea din aplicatie
+        Runtime.getRuntime().addShutdownHook(new Thread(){
+            @Override
+            public void run() {
+                Setari.salveaza(setari);
+            }
+        });
     }
     
     /**
@@ -387,14 +395,14 @@ public class MainFrame extends javax.swing.JFrame {
                     Client.restore();
                     Client.calculeazaTablouDistante();
                     Client.rezolvaCeleMari();
-                    //todo de adaugat mod ultrarapid, un singur fir, 4000 populatia, 500 de generatii
+                    //todo de adaugat mod ultrarapid, un singur fir, 500 populatia, 50 de generatii
                     int viteza = VitezaAlgoritm.getSelectedIndex();
                     listaFire = new ArrayList();
-                    procente = new int[s.memorie];
+                    procente = new int[setari.memorie];
                     AlgoritmGenetic a;
-                    for(int i=0;i<s.memorie;i++) {
-                        a = new AlgoritmGenetic(i,viteza,viataIndivid[i%viataIndivid.length],s.nrIndivizi);
-                        a.setPriority(s.prioritate);
+                    for(int i=0;i<setari.memorie;i++) {
+                        a = new AlgoritmGenetic(i,viteza,viataIndivid[i%viataIndivid.length]);
+                        a.setPriority(setari.prioritate);
                         a.start();
                         listaFire.add(a);
                     }
@@ -460,6 +468,8 @@ public class MainFrame extends javax.swing.JFrame {
     private void MeniuIncarcaCSVActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MeniuIncarcaCSVActionPerformed
         if(Fisier.incarcaClienti("clienti.csv")) {
             if(Client.clienti.size()>0) {
+                Individ.best = null;
+                camion = null;
                 PornesteGenerarea.setEnabled(true);
                 enableSalveaza();
                 VitezaAlgoritm.setEnabled(true);
@@ -628,7 +638,7 @@ public class MainFrame extends javax.swing.JFrame {
         }
         //deseneaza casa;
         g.setColor(Color.blue);
-        g.draw(new Ellipse2D.Double((cenX + ((Client.casa.longitudine-dx)*factorScalare))-3, (cenY - ((Client.casa.latitudine-dy)*factorScalare))-3,6,6)); 
+        g.draw(new Ellipse2D.Double((cenX + ((Setari.casa.longitudine-dx)*factorScalare))-3, (cenY - ((Setari.casa.latitudine-dy)*factorScalare))-3,6,6)); 
         //deseneaza restul clientilor
         g.setColor(Color.black);
         double x, y, x2,y2;
@@ -642,8 +652,8 @@ public class MainFrame extends javax.swing.JFrame {
         if(camion!=null) {
             //linia de acasa pana la primul:
             g.setColor(Color.BLUE);
-            x = cenX + ((Client.casa.longitudine-dx)*factorScalare); 
-            y = cenY - ((Client.casa.latitudine-dy)*factorScalare);
+            x = cenX + ((Setari.casa.longitudine-dx)*factorScalare); 
+            y = cenY - ((Setari.casa.latitudine-dy)*factorScalare);
             x2 = cenX + ((Client.clienti.get(camion.solutia.get(0)).longitudine-dx)*factorScalare); 
             y2 = cenY - ((Client.clienti.get(camion.solutia.get(0)).latitudine-dy)*factorScalare);
             g.draw(new Line2D.Double(x, y, x2, y2));

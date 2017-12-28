@@ -47,8 +47,7 @@ public class AlgoritmGenetic extends Thread {
     /**
      * Numarul de camioane. Se initializeaza cu o valoare mai mica, calculata in clasa client
      */
-    //todo de mutat calculul si initializarea acestui camp in clasa Client ca metoda statica.
-    protected int nrCamioane=48; //pentru initializare
+    protected int nrCamioane; 
 
     /**
      * Viata initiala a indivizilor. Fiecare individ va fi selectabil un anumit numar de generatii
@@ -87,11 +86,11 @@ public class AlgoritmGenetic extends Thread {
      * @param viataIndivid int numarul de generatii cat va fi selectabil individul
      * @param nrIndivizi int nr de indivizi per generatie
      */
-    public AlgoritmGenetic(int id, int viteza, int viataIndivid, int nrIndivizi) {
+    public AlgoritmGenetic(int id, int viteza, int viataIndivid) {
+        this.nrCamioane = s.nrCamioane();
         this.popTemp = new ArrayList();
         this.populatie = new ArrayList();
         this.id = id;
-        this.nrIndivizi = nrIndivizi;
         this.viataIndivid = viataIndivid;
         this.viataInd = viataIndivid; //folosit pentru teste/printare
         this.nrClienti = Client.clienti.size();
@@ -99,13 +98,25 @@ public class AlgoritmGenetic extends Thread {
         this.rapid = false;
         switch(viteza) {
             case 0: //rapid
-                maxGeneratii = 500; rapid = true; break;
+                maxGeneratii = 500; 
+                rapid = true; 
+                this.nrIndivizi = setari.nrIndivizi;
+                break;
             case 1: //mediu
-                maxGeneratii = 2000; rapid = true; break;
+                maxGeneratii = 2000; 
+                rapid = true; 
+                this.nrIndivizi = setari.nrIndivizi*2;
+                break;
             case 2: //lent
-                maxGeneratii = 10000; rapid = true; break;
+                maxGeneratii = 10000; 
+                rapid = true; 
+                this.nrIndivizi = setari.nrIndivizi*3;
+                break;
             default: // case 3: infinit
-                maxGeneratii = Integer.MAX_VALUE; rapid = true; break;
+                maxGeneratii = Integer.MAX_VALUE; 
+                rapid = true; 
+                this.nrIndivizi = setari.nrIndivizi*4;
+                break;
         }
         m.initProgres(maxGeneratii);
     }
@@ -115,6 +126,7 @@ public class AlgoritmGenetic extends Thread {
      */
     @Override
     public void run() {
+        System.out.println("Firul "+id+" incepe;");
         double total;
         genereaza_pop_initiala();
         for(Individ c:populatie) {
@@ -127,6 +139,7 @@ public class AlgoritmGenetic extends Thread {
             if(Individ.best == null) Individ.best=best_fit;
             O.notifyAll();
         }
+        System.out.println("Firul "+id+" - terminat generarea populatiei initiale;");
         for(int g=0;g<maxGeneratii;g++) {//main loop
             if(stop) break; //stop? atunci iesi din bucla
             if(g%10==0) {
@@ -170,59 +183,55 @@ public class AlgoritmGenetic extends Thread {
     protected void recombinare() {
         popTemp.clear();   
         while(popTemp.size()<nrIndivizi){
+            //varianta random absolut
             Individ p1 = populatie.get(R.nextInt(populatie.size()));
             Individ p2 = populatie.get(R.nextInt(populatie.size()));
+            //varianta random gaussian. test de convergenta.
+            //Individ p1 = populatie.get((int)Math.abs((double)nrIndivizi*R.nextGaussian())%nrIndivizi);
+            //Individ p2 = populatie.get((int)Math.abs((double)nrIndivizi*R.nextGaussian())%nrIndivizi);
             
-            //copiii din cromozomii strict optimizati
-            Individ a = new Individ(nrClienti,nrCamioane,viataIndivid,false); //false = nu generam cromozomul
-            Individ b = new Individ(nrClienti,nrCamioane,viataIndivid,false);
-            //copiii din cromozomii strict neoptimizati
-            Individ c = new Individ(nrClienti,nrCamioane,viataIndivid,false);
-            Individ d = new Individ(nrClienti,nrCamioane,viataIndivid,false);
-            //copii din cromozomii combinati
-            Individ p1p2_1 = new Individ(nrClienti,nrCamioane,viataIndivid,false);
-            Individ p1p2_2 = new Individ(nrClienti,nrCamioane,viataIndivid,false);
-            Individ p2p1_1 = new Individ(nrClienti,nrCamioane,viataIndivid,false);
-            Individ p2p1_2 = new Individ(nrClienti,nrCamioane,viataIndivid,false);
+            Individ v[] = new Individ[8];
+            for(int i=0;i<8;i++){
+                v[i] = new Individ(nrClienti,nrCamioane,viataIndivid,false); //false = nu generam cromozomul
+            }
             int pct_taiere = R.nextInt(nrClienti-1);
             for(int i=0;i<nrClienti;i++) {
                 if(i<pct_taiere) {
-                    a.cromozom[i] = p1.cromozom[i];
-                    b.cromozom[i] = p2.cromozom[i];
-                    c.cromozom[i] = p1.cromozom2[i];
-                    d.cromozom[i] = p2.cromozom2[i];
-                    p1p2_1.cromozom[i] = p1.cromozom[i];
-                    p1p2_2.cromozom[i] = p1.cromozom2[i];
-                    p2p1_1.cromozom[i] = p2.cromozom[i];
-                    p2p1_2.cromozom[i] = p2.cromozom2[i];
+                    v[0].cromozom[i] = p1.cromozom[i];
+                    v[1].cromozom[i] = p2.cromozom[i];
+                    v[2].cromozom[i] = p1.cromozom2[i];
+                    v[3].cromozom[i] = p2.cromozom2[i];
+                    v[4].cromozom[i] = p1.cromozom[i];
+                    v[5].cromozom[i] = p1.cromozom2[i];
+                    v[6].cromozom[i] = p2.cromozom[i];
+                    v[7].cromozom[i] = p2.cromozom2[i];
                     
                 } else {
-                    b.cromozom[i] = p1.cromozom[i];
-                    a.cromozom[i] = p2.cromozom[i];
-                    c.cromozom[i] = p1.cromozom2[i];
-                    d.cromozom[i] = p2.cromozom2[i];
-                    p1p2_1.cromozom[i] = p2.cromozom[i];
-                    p1p2_2.cromozom[i] = p2.cromozom2[i];
-                    p2p1_1.cromozom[i] = p1.cromozom[i];
-                    p2p1_2.cromozom[i] = p1.cromozom2[i];
+                    v[0].cromozom[i] = p1.cromozom[i];
+                    v[1].cromozom[i] = p2.cromozom[i];
+                    v[2].cromozom[i] = p1.cromozom2[i];
+                    v[3].cromozom[i] = p2.cromozom2[i];
+                    v[4].cromozom[i] = p2.cromozom[i];
+                    v[5].cromozom[i] = p2.cromozom2[i];
+                    v[6].cromozom[i] = p1.cromozom[i];
+                    v[7].cromozom[i] = p1.cromozom2[i];
                 }
             }
-            a.copiaza();
-            b.copiaza();
-            c.copiaza();
-            d.copiaza();
-            p1p2_1.copiaza();
-            p1p2_2.copiaza();
-            p2p1_1.copiaza();
-            p2p1_2.copiaza();
-            popTemp.add(a);
-            popTemp.add(b);
-            popTemp.add(c);
-            popTemp.add(d);
-            popTemp.add(p1p2_1);
-            popTemp.add(p1p2_2);
-            popTemp.add(p2p1_1);
-            popTemp.add(p2p1_2);
+            for(int i=0;i<8;i++){ //calculam fitness la toatw
+                v[i].copiaza();
+                v[i].calculeaza(true);
+            }
+            for(int i=0;i<2;i++) { //le punem doar pe primele 2 cele mai bune
+                double min=Double.MAX_VALUE; int m=-1;
+                for(int j=0;j<8;j++) {
+                    if(v[j]!=null && v[j].getFitness()<min) {
+                        min = v[j].getFitness();
+                        m=j;
+                    }
+                }
+                popTemp.add(v[m]);
+                v[m] = null;
+            }
         }       
     }
     /**
@@ -232,17 +241,40 @@ public class AlgoritmGenetic extends Thread {
     protected void mutatie() { //mutatia se aplica pe o copie a individului, raman ambele variante
         ArrayList<Individ> temps = new ArrayList();
         int pm;
-        for(int i=0;i<popTemp.size();i++) { //pentru fiecare individ
+        for(int i=0;i<popTemp.size();i++) { //pentru fiecare individ din populatia temporara
             Individ n = new Individ(popTemp.get(i));
             pm = procMut(i); //probabilitatea de mutatie
-            if(R.nextInt(100)<procMut(i)) {
-                for(int j=0;j<(pm/Setari.procMutatie[0]);j++) { //nr de mutatii depind de probabilitate
+            if(R.nextInt(100)<pm) {
+                for(int j=0;j<pm;j++) { //nr de mutatii depind de probabilitate
                     int pos1 = R.nextInt(nrClienti-1);
                     int pos2 = R.nextInt(nrClienti-1);
-                    int temp = n.cromozom[pos1];
+                    int temp1 = n.cromozom[pos1];
                     n.cromozom[pos1] = n.cromozom[pos2];
-                    n.cromozom[pos2] = temp;
-                    n.copiaza();
+                    n.cromozom[pos2] = temp1;
+                    
+                    int temp2 = n.cromozom[pos1];
+                    n.cromozom2[pos1] = n.cromozom2[pos2];
+                    n.cromozom2[pos2] = temp1;
+                    
+                    temps.add(n);
+                }
+            }
+        }
+        for(int i=0;i<populatie.size();i++) { //pentru fiecare individ din populatia normala
+            Individ n = new Individ(populatie.get(i));
+            pm = procMut(i); //probabilitatea de mutatie
+            if(R.nextInt(100)<pm) {
+                for(int j=0;j<pm;j++) { //nr de mutatii depind de probabilitate
+                    int pos1 = R.nextInt(nrClienti-1);
+                    int pos2 = R.nextInt(nrClienti-1);
+                    int temp1 = n.cromozom[pos1];
+                    n.cromozom[pos1] = n.cromozom[pos2];
+                    n.cromozom[pos2] = temp1;
+                    
+                    int temp2 = n.cromozom[pos1];
+                    n.cromozom2[pos1] = n.cromozom2[pos2];
+                    n.cromozom2[pos2] = temp1;
+                    
                     temps.add(n);
                 }
             }
