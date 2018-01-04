@@ -96,7 +96,7 @@ public class MainFrame extends javax.swing.JFrame {
     public MainFrame() {
         this.cenY = -1.0;
         this.cenX = -1.0;
-        //setLocationRelativeTo(null); //center
+        setLocationRelativeTo(null); //center
         initComponents();
         s = new SetariDialog(this,true);
         setari = s.setari;
@@ -166,7 +166,6 @@ public class MainFrame extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Rutare pachete");
         setLocation(new java.awt.Point(0, 0));
-        setLocationByPlatform(true);
 
         Panel1.setBackground(new java.awt.Color(255, 255, 255));
         Panel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
@@ -379,7 +378,8 @@ public class MainFrame extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
-        pack();
+        setSize(new java.awt.Dimension(923, 505));
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
     private void PornesteGenerareaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_PornesteGenerareaActionPerformed
@@ -466,26 +466,33 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_Panel1MouseDragged
 
     private void MeniuIncarcaCSVActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MeniuIncarcaCSVActionPerformed
-        if(Fisier.incarcaClienti("clienti.csv")) {
-            if(Client.clienti.size()>0) {
-                Individ.best = null;
-                camion = null;
-                PornesteGenerarea.setEnabled(true);
-                enableSalveaza();
-                VitezaAlgoritm.setEnabled(true);
-                for(Client c:Client.clienti) { 
-                    dx += (c.longitudine);
-                    dy += (c.latitudine);
+        //todo de adaugat cod de selectie fisier
+        JFileChooser fileChooser = new JFileChooser(); //File curDir = din setari
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV File","csv");
+        fileChooser.setFileFilter(filter);
+        if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) { 
+            if(Fisier.incarcaClienti(fileChooser.getSelectedFile().getAbsolutePath())) {
+                if(Client.clienti.size()>0) {
+                    Individ.best = null;
+                    camion = null;
+                    PornesteGenerarea.setEnabled(true);
+                    enableSalveaza();
+                    VitezaAlgoritm.setEnabled(true);
+                    for(Client c:Client.clienti) { 
+                        dx += (c.longitudine);
+                        dy += (c.latitudine);
+                    }
+                    dx /= Client.clienti.size();
+                    dy /= Client.clienti.size();
+                } else {
+                    PornesteGenerarea.setEnabled(false);
+                    disableSalveaza();
+                    VitezaAlgoritm.setEnabled(false);
                 }
-                dx /= Client.clienti.size();
-                dy /= Client.clienti.size();
-            } else {
-                PornesteGenerarea.setEnabled(false);
-                disableSalveaza();
-                VitezaAlgoritm.setEnabled(false);
+                FisierIncarcat.setText("Nr clienti = "+Client.clienti.size());
             }
-            FisierIncarcat.setText("Nr clienti = "+Client.clienti.size());
         }
+        
     }//GEN-LAST:event_MeniuIncarcaCSVActionPerformed
 
     private void MeniuSetariActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MeniuSetariActionPerformed
