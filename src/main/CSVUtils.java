@@ -13,7 +13,7 @@ import java.util.ArrayList;
  */
 public class CSVUtils {
 
-    private static final char DEFAULT_SEPARATOR = ',';
+    private static final char DEFAULT_SEPARATOR = ';';
     private static final char DEFAULT_QUOTE = '"';
 
     /**

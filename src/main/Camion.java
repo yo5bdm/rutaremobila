@@ -57,6 +57,8 @@ public class Camion {
      * Constructor.
      * @param capacitate Int capacitatea ce o va avea camionul
      */
+    private ArrayList<Integer> solTemp = new ArrayList();
+    
     public Camion(int capacitate) {
         this.capacitate = capacitate;
         numara_opriri();
@@ -73,6 +75,7 @@ public class Camion {
         this.distanta = c.distanta;
         this.pachete = new ArrayList();
         this.solutia = new ArrayList();
+        this.solTemp = new ArrayList();
         if(c.pachete!=null && c.pachete.size()>0) for(int i:c.pachete) this.pachete.add(i);
         if(c.solutia!=null && c.solutia.size()>0) for(int i:c.solutia) this.solutia.add(i);
     }
@@ -277,6 +280,67 @@ public class Camion {
         distanta = Client.catreCasa(solutia.get(0));
         for(int i=0;i<solutia.size()-1;i++) {
             distanta+=Client.distanta(solutia.get(i),solutia.get(i+1));
+        }
+    }
+    
+    /**
+     * Varianta 2-opt a calculului traseului optim
+     * http://www.technical-recipes.com/2017/applying-the-2-opt-algorithm-to-traveling-salesman-problems-in-java/
+     */
+    public void calculeazaDistanta3() {
+        distanta = 0.0; //initializare
+        solutia = new ArrayList();
+        //ArrayList<Integer> solTemp = new ArrayList();
+        int size = pachete.size();
+        if(size == 0) { //daca nu avem pachete in camion
+            return;
+        }        
+        solutia.addAll(pachete); //copiem pachetele in array-ul de lucru
+        int improve = 0;
+        int iteration = 0;
+        double bestDist, newDist;
+        bestDist = Client.catreCasa(solutia.get(0));
+        for(int i=1;i<size;i++) { //calculam distanta initiala intre puncte
+            bestDist += Client.distanta(solutia.get(i-1), solutia.get(i));
+        }
+        while(improve < 10) {
+            restart: for ( int i = 1; i < size - 1; i++ ) { //2-opt alg
+                for ( int k = i + 1; k < size; k++) {
+                    TwoOptSwap( i, k , size);
+                    iteration++;
+                    newDist = Client.catreCasa(solTemp.get(0));
+                    for(int x=1;x<size;x++) { //calculam distanta initiala intre puncte
+                        newDist += Client.distanta(solTemp.get(x-1), solTemp.get(x));
+                    }
+                    if ( newDist < bestDist ) {
+                        bestDist = newDist;
+                        solutia.clear();
+                        solutia.addAll(solTemp);
+                        improve = 0;
+                        break restart; //restartam tot
+                    }
+                }
+            }
+            improve++;
+        }
+        distanta = Client.catreCasa(solutia.get(0));
+        for(int i=0;i<solutia.size()-1;i++) {
+            distanta+=Client.distanta(solutia.get(i),solutia.get(i+1));
+        }
+    }
+
+    private void TwoOptSwap(int p1, int p2, int size) {
+        solTemp.clear();
+        for(int i=0;i<p1;i++) { //copiem prima parte in ordinea normala
+            solTemp.add(solutia.get(i));
+        }
+        int tmp = p2;
+        for(int i=p1;i<=p2;i++) {//partea intermediara in ordine inversa
+            solTemp.add(solutia.get(tmp));
+            --tmp;
+        }
+        for(int i=p2+1;i<size;i++) {//ultima parte in ordinea normala
+            solTemp.add(solutia.get(i));
         }
     }
 }
