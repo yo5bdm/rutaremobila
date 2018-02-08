@@ -61,7 +61,7 @@ public class Analiza {
             obiecte.add(c);
         }
         evolutie.add(+generatia+D+nrIndivizi+D+viata+D+(int)bestSolutie);
-        System.out.println("G"+generatia+";I"+nrIndivizi+";V"+viata+";F"+(int)bestSolutie);
+        //System.out.println("G"+generatia+";I"+nrIndivizi+";V"+viata+";F"+(int)bestSolutie);
     }
     /**
      * Genereaza formatul textului pentru export.
@@ -140,6 +140,4 @@ class Obiect {
         hash = 97 * hash + this.nrIndivizi;
         return hash;
     }
-    
-    
 }

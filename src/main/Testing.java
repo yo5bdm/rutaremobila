@@ -24,8 +24,8 @@ public class Testing {
      */
     public void run() {
         System.out.println("System testing:");
-        CamionTest(true);
-        //IndividTest(false);
+        //CamionTest2(true);
+        IndividTest(true);
     }
     /**
      * Test camion.
@@ -34,30 +34,34 @@ public class Testing {
     private void CamionTest(boolean executa) {
         if(executa = false) return;
         Individ n=new Individ(Client.clienti.size(),0,100,false);
-        Camion c1, c2;
-        c1 = new Camion(100);
+        Camion c1, c2, c3;
+        //c1 = new Camion(100);
         c2 = new Camion(100);
+        c3 = new Camion(100);
         System.out.println("Adaug 10 pachete...");
         for(int i=0;i<10;i++) {
-            c1.add(i*50+i);
+            //c1.add(i*50+i);
             c2.add(i*50+i);
+            c3.add(i*50+i);
         }
-        System.out.println(c1);
+        //System.out.println(c1);
         System.out.println(c2);
         for(int i=0;i<10000;i++) {  //warmup
-            c1.calculeazaDistanta();
+            //c1.calculeazaDistanta();
             c2.calculeazaDistanta2();
+            c3.calculeazaDistanta3();
         }
         long start = System.nanoTime(); //time benchmark
-        for(int i=0;i<10000;i++) c1.calculeazaDistanta();
+        //for(int i=0;i<10000;i++) c1.calculeazaDistanta();
         System.out.println("Greedy a terminat in "+((System.nanoTime() - start)/1000000)+" ms");
         start = System.nanoTime();
         for(int i=0;i<10000;i++) c2.calculeazaDistanta2();
         System.out.println("Metoda 2 a terminat in "+((System.nanoTime() - start)/1000000)+" ms");
-        n.camioane.add(c1);
+        //n.camioane.add(c1);
         n.camioane.add(c2);
-        //n.setFitness(130.0);
-        m.setBest(n,0,"TESTING"); 
+        n.camioane.add(c3);
+        n.calculeaza(true);
+        m.setBest(n,0,0,"TESTING"); 
     }
     /**
      * Testul individului.
@@ -66,9 +70,8 @@ public class Testing {
     private void IndividTest(boolean executa) {
         if(executa == false) return;
         Individ n = new Individ(Client.clienti.size(),48,100,true);
-        System.out.println("Fitnes total"+n.calculeaza(true)); 
-        for(Camion cam:n.camioane) System.out.println(cam);
+        System.out.println("Fitnes total"+n.calculeaza(true));
         System.out.println("Neincarcabile = "+n.neincarcabile());
-        m.setBest(n,0,"TESTING");
+        m.setBest(n,0,0,"TESTING");
     }
 }

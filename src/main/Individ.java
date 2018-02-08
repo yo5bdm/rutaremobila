@@ -2,12 +2,15 @@
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
- */
+ */ 
 package main;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import static java.util.stream.IntStream.range;
 import static main.AlgoritmGenetic.R;
+import static main.MainFrame.setari;
 
 /**
  * Individul folosit in algoritmul genetic.
@@ -72,6 +75,7 @@ public class Individ implements Comparable {
     private Integer nr_camioane;
     private int viata = 50; //50 de generatii
     private CamionDisponibil camionDisponibil; //obiectul folosit pentru aflarea a ce camion e disponibil
+    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock(true); //lock pentru parallel()
             
     /**
      * Constructor.
@@ -145,12 +149,6 @@ public class Individ implements Comparable {
      * @return Double fitness-ul individului
      */
     public double calculeaza(boolean optimizeaza) {
-//        Nod n = hashDb.iaNod(this.hashCode());
-//        if(n!=null) {
-//            this.fitness = n.fitness;
-//            return fitness;
-//        }
-//        int hash = this.hashCode();
         int max=0;
         for(int i:cromozom) if(i>max) max=i; //gasim maxim, sa stim cate camioane avem nevoie.
         nr_camioane = max+1;
@@ -168,14 +166,22 @@ public class Individ implements Comparable {
         if(optimizeaza) optimize_loads();
         fitness = 0.0;
         //calculam datele fiecarui camion si fitness-ul total al generatiei
-        for (Camion camion : camioane) {
-            fitness += camion.calc(); //distanta totala parcursa de toate camioanele
-        } 
+        range(0,camioane.size()).parallel().forEach(i -> {
+            lock.readLock().lock();
+            Camion c = camioane.get(i);
+            lock.readLock().unlock();
+            double fit;
+            if(c!=null) {
+                fit = c.calc();
+                lock.writeLock().lock();
+                fitness += fit;
+                lock.writeLock().unlock();
+            } 
+        });
         //fiecare neincarcabil scade fitnesul total cu 10k
         for(int i=0;i<neincarcabile();i++){
             fitness += 9999.0;
         }
-        //hashDb.adauga(hash,fitness);
         return fitness;
     }
     /**
@@ -210,18 +216,21 @@ public class Individ implements Comparable {
      */
     private void optimize_loads() {
         //golim camioanele suprapline
-        for(int i=0;i<camioane.size();i++) {
+        range(0,camioane.size()).parallel().forEach(i -> {
+            lock.readLock().lock();
             Camion c = camioane.get(i);
-            if(c.pachete.isEmpty()) continue;
-            while(c.ok != true) {
-                int obiect = c.pop(); //pop last element
-                if(obiect != -1) {
-                    cromozom[obiect] = -1; //il marcam si in cromozom ca fiind nefolosit
-                } else {
-                    break;
+            lock.readLock().unlock();
+            if(!c.pachete.isEmpty()){
+                while(c.ok != true) {
+                    int obiect = c.pop(); //pop last element
+                    if(obiect != -1) {
+                        cromozom[obiect] = -1; //il marcam si in cromozom ca fiind nefolosit
+                    } else {
+                        break;
+                    }
                 }
             }
-        }
+        });
         //punem pachetele in plus in alt camion care nu e plin
         while(neincarcate()!=0) {
             //prima data incercam sa incarcam pe un camion existent
@@ -232,7 +241,7 @@ public class Individ implements Comparable {
                     camioane: for(int j=0;j<camioane.size();j++) {
                         Camion c = camioane.get(j);
                         if(c.opriri>=15) continue;
-                        if((c.capacitate - c.ocupat)>=Client.clienti.get(i).volum) {
+                        if((c.capacitate*setari.procentIncarcare() - c.ocupat)>=Client.clienti.get(i).volum) {
                             cromozom[i] = j;
                             c.add(i);
                             incarcat=1;
@@ -240,7 +249,7 @@ public class Individ implements Comparable {
                         }
                     }
                     //nu am reusit sa incarc produsul, volumul e mai mare decat camioanele disponibile
-                    if(incarcat==0 && Client.clienti.get(i).volum>80) {
+                    if(incarcat==0 && Client.clienti.get(i).volum>(camionDisponibil.cautaMinim()*setari.procentIncarcare())) {
                         cromozom[i]=-2; //il marcam ca atare
                     }
                 }
@@ -260,7 +269,12 @@ public class Individ implements Comparable {
      * Metoda optimizeaza toate camioanele.
      */
     public void optimizare() {
-        for(Camion c:camioane) c.optimizare();
+        range(0,camioane.size()).parallel().forEach(i->{
+            lock.readLock().lock();
+            Camion c = camioane.get(i);
+            lock.readLock().unlock();
+            c.optimizare();
+        });
     }
     
     /**
@@ -332,5 +346,12 @@ public class Individ implements Comparable {
      */
     public void selecteaza() {
         viata--;
+    }
+    /**
+     * Pentru clasa testing.
+     * @param d fitnessul
+     */
+    void setFitness(double d) {
+        this.fitness = d;
     }
 }

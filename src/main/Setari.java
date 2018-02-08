@@ -23,7 +23,7 @@ public class Setari implements Serializable {
      * Algoritmul foloseste un procent mai mic de mutatie pentru indivizii buni
      * si unul mai mare pentru indivizii mai putin buni
      */
-    public static final int[] procMutatie = new int[]{2, 4, 6, 8, 10, 12, 16, 20, 24, 40};
+    public static final int[] procMutatie = new int[]{2, 4, 8, 15, 20, 35, 45, 60, 150, 200};
     /**
      * Punctul de unde vor pleca camioanele.
      */
@@ -37,6 +37,10 @@ public class Setari implements Serializable {
      */
     public boolean ajungeAcasa = false;
     /**
+     * Procentul de incarcare al camioanelor. 0.8 = 80%;
+     */
+    public int procentIncarcare = 100;
+    /**
      * Numarul de thread-uri folosite la generare.
      */
     public int memorie = 1;
@@ -44,10 +48,6 @@ public class Setari implements Serializable {
      * Prioritatea folosita de thread-uri.
      */
     public int prioritate = 5;
-    /**
-     * Numarul de indivizi folositi la generare.
-     */
-    public final int nrIndivizi = 1000;
     /**
      * Maximul numarului de descarcari.
      */
@@ -62,7 +62,7 @@ public class Setari implements Serializable {
     
     @Override
     public String toString() {
-        return "Setari{" + "prioritate=" + prioritate + " memorie=" + memorie + " nrDescarcari=" + nrDescarcari + " ajungeAcasa=" + ajungeAcasa + " nrIndivizi=" + nrIndivizi + '}';
+        return "Setari{" + "prioritate=" + prioritate + " memorie=" + memorie + " nrDescarcari=" + nrDescarcari + " ajungeAcasa=" + ajungeAcasa + '}';
     }
     
     static void salveaza(Setari e) {
@@ -91,4 +91,7 @@ public class Setari implements Serializable {
          }
     }
     
+    public double procentIncarcare() {
+        return (((double)procentIncarcare)/100.0);
+    }
 }

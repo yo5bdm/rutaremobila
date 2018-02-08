@@ -49,6 +49,15 @@ public class CamionDisponibil {
         }
         return -1;
     }
+    public int cautaMinim() {
+        int min=Integer.MAX_VALUE;
+        for(CamDisp i: capacitati) { 
+            if(min > i.capacitate) {
+                min = i.capacitate;
+            }
+        }
+        return min;
+    }
     /**
      * Metoda statica de adaugat camioane disponibile
      * @param cap Capacitatea camionului disponibil

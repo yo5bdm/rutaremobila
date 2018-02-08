@@ -5,6 +5,7 @@
  */
 package main;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -81,13 +82,15 @@ public class MainFrame extends javax.swing.JFrame {
     //runtime
     private boolean ruleaza=false;
     private ArrayList<AlgoritmGenetic> listaFire;
-    private final int[] viataIndivid = new int[] {12,16,20,24,28,32,36};
+    private final int[] viataIndivid = new int[] {40,16,20,24,28,32,36};//20 primul
+    private final ArrayList<Grafic> grafic = new ArrayList();
     private final Timer timer = new Timer(50, new ActionListener() { // 50ms, adica vreo 20fps
         @Override
         public void actionPerformed(ActionEvent e) {
             m.repaint(); //main frame repaint
         }
     });
+    private int maxgen;
 
     /**
      * Creates new form MainFrame
@@ -102,7 +105,7 @@ public class MainFrame extends javax.swing.JFrame {
         m = this;
         analiza = new Analiza();
         model = new ModelTabel();
-        setBest(null,0,"");
+        setBest(null,0,0,"");
         jTable1.setModel(model);
         jTable1.setAutoCreateRowSorter(true); //
         camion = null;
@@ -152,6 +155,14 @@ public class MainFrame extends javax.swing.JFrame {
         Progres = new javax.swing.JProgressBar();
         FisierIncarcat = new javax.swing.JLabel();
         jLabel1 = new javax.swing.JLabel();
+        Grila = new javax.swing.JPanel() {
+            @Override
+            public void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2 = (Graphics2D)g;
+                grila(g2);
+            }
+        };
         jMenuBar1 = new javax.swing.JMenuBar();
         MeniuFisier = new javax.swing.JMenu();
         MeniuIncarcaCSV = new javax.swing.JMenuItem();
@@ -187,7 +198,7 @@ public class MainFrame extends javax.swing.JFrame {
         );
         Panel1Layout.setVerticalGroup(
             Panel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
+            .addGap(0, 165, Short.MAX_VALUE)
         );
 
         jSlider1.setMaximum(300);
@@ -299,11 +310,25 @@ public class MainFrame extends javax.swing.JFrame {
                     .addComponent(jLabel5)
                     .addComponent(BSNrCamioane))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 226, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
         jLabel1.setText("Zoom harta");
+
+        Grila.setBackground(new java.awt.Color(255, 255, 255));
+        Grila.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        javax.swing.GroupLayout GrilaLayout = new javax.swing.GroupLayout(Grila);
+        Grila.setLayout(GrilaLayout);
+        GrilaLayout.setHorizontalGroup(
+            GrilaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+        GrilaLayout.setVerticalGroup(
+            GrilaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 305, Short.MAX_VALUE)
+        );
 
         MeniuFisier.setText("Fisier");
 
@@ -358,8 +383,9 @@ public class MainFrame extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jSlider1, javax.swing.GroupLayout.DEFAULT_SIZE, 540, Short.MAX_VALUE))
-                    .addComponent(Panel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(jSlider1, javax.swing.GroupLayout.DEFAULT_SIZE, 770, Short.MAX_VALUE))
+                    .addComponent(Panel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(Grila, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -368,7 +394,9 @@ public class MainFrame extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(Panel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(Grila, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(Panel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jSlider1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -377,7 +405,7 @@ public class MainFrame extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
-        setSize(new java.awt.Dimension(923, 505));
+        setSize(new java.awt.Dimension(1153, 598));
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
@@ -389,13 +417,12 @@ public class MainFrame extends javax.swing.JFrame {
                     MeniuIncarcaCSV.setEnabled(false);
                     MeniuSetari.setEnabled(false);
                     VitezaAlgoritm.setEnabled(false);
-                    //t.run(); //testele
                     CamionDisponibil.resetDisponibile();
                     Client.restore();
                     Client.calculeazaTablouDistante();
                     Client.rezolvaCeleMari();
-                    //todo de adaugat mod ultrarapid, un singur fir, 500 populatia, 50 de generatii
                     int viteza = VitezaAlgoritm.getSelectedIndex();
+                    //t.run(); //testarile
                     listaFire = new ArrayList();
                     procente = new int[setari.memorie];
                     AlgoritmGenetic a;
@@ -550,6 +577,7 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JLabel BSGeneratia;
     private javax.swing.JLabel BSNrCamioane;
     private javax.swing.JLabel FisierIncarcat;
+    private javax.swing.JPanel Grila;
     private javax.swing.JMenu MeniuFisier;
     private javax.swing.JMenuItem MeniuIncarcaCSV;
     private javax.swing.JMenuItem MeniuSetari;
@@ -579,10 +607,15 @@ public class MainFrame extends javax.swing.JFrame {
      * @param max Numarul maxim de generatii ce vor fi completate
      */
     public void initProgres(int max) {
+        maxgen = max;
         Progres.setMaximum(max);
         Progres.setValue(0);
         for(int i=0;i<procente.length;i++) procente[i]=0;
         Progres.setStringPainted(true);
+    }
+    
+    public void modMax(int max) {
+        Progres.setMaximum(max);
     }
     /**
      * Seteaza valoarea curenta a progresului pe ProgressBar-ul de pe pagina principala.
@@ -604,8 +637,9 @@ public class MainFrame extends javax.swing.JFrame {
      * @param id int id-ul thread-ului care face actualizarea
      * @param text String cu textul ce urmeaza sa fie afisat, cod de debugging
      */
-    public void setBest(Individ i, int id, String text) {
+    public void setBest(Individ i, int id, int gen, String text) {
         if(i!=null) {
+            grafic.add(new Grafic(gen,i.getFitness()));
             Double delta=0.0;
             if(Individ.best!=null) {
                 delta = ((startFitness-i.getFitness())/startFitness)*100;
@@ -630,6 +664,35 @@ public class MainFrame extends javax.swing.JFrame {
         }
         model.fireTableDataChanged();
     }
+    
+    public void grila(Graphics2D g) {
+        int h, w;
+        w = Grila.getWidth();
+        h = Grila.getHeight();
+        double ox=10, oy=h-10;
+        double lx = w-20, ly = h-20;
+        //axele de baza
+        g.setColor(Color.black);
+        g.setStroke(new BasicStroke(3));
+        g.draw(new Line2D.Double(ox, oy, ox, 10)); //axa oy
+        g.draw(new Line2D.Double(ox, oy, lx, oy)); //axa ox
+        
+        //graficul efectiv
+        ox+=2; //incrementare sa depaseasca valoarea stroke-ului
+        if(grafic.size()>1) {
+            g.setColor(Color.blue);
+            g.setStroke(new BasicStroke(1));
+            double x=ox, fx = lx/maxgen;
+            double fy = ly / grafic.get(0).fitness;
+            for(int i=1;i<grafic.size();i++) {
+                Grafic v1 = grafic.get(i-1);
+                Grafic v2 = grafic.get(i);
+                g.draw(new Line2D.Double(v1.generatia*fx+ox, h-v1.fitness*fy, v2.generatia*fx+ox, h-v2.fitness*fy));
+            }
+        }
+        
+    }
+    
     /**
      * Metoda de redesenare a jPanel-ului de pe MainFrame.
      * @param g Graphics2D trimis de catre jPanel.repaint()

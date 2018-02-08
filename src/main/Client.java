@@ -6,6 +6,7 @@
 package main;
 
 import java.util.ArrayList;
+import static main.MainFrame.setari;
 
 /**
  * Clasa cuprinde toate datele clientului.
@@ -109,8 +110,8 @@ public class Client {
         Individ.celeMariNrCamioane = 0;
         double dist;
         for (Client c : clienti) {
-            if (c.volum > CamionDisponibil.getMaxSize()) {
-                while (c.volum > CamionDisponibil.getMaxSize()) {
+            if (c.volum > (CamionDisponibil.getMaxSize()*setari.procentIncarcare())) {
+                while (c.volum > (CamionDisponibil.getMaxSize()*setari.procentIncarcare())) {
                     int vol = CamionDisponibil.scadeLiber();
                     c.volum -= vol;
                     dist = Calcule.distanta(Setari.casa, c);

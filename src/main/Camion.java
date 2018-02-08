@@ -7,6 +7,7 @@ package main;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import static main.MainFrame.*;
 
 /**
@@ -58,7 +59,10 @@ public class Camion {
      * @param capacitate Int capacitatea ce o va avea camionul
      */
     private ArrayList<Integer> solTemp = new ArrayList();
-    
+    /**
+     * Lock-ul pentru operatiile paralelizate.
+     */ 
+    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock(true);
     public Camion(int capacitate) {
         this.capacitate = capacitate;
         numara_opriri();
@@ -83,7 +87,7 @@ public class Camion {
      * Resetarea camionului.
      */
     public void reset() {
-        pachete = new ArrayList();
+        pachete.clear();// = new ArrayList();
         calc();
     }
     /**
@@ -120,7 +124,7 @@ public class Camion {
     private void calc_partial() {
         numara_opriri();
         calculeaza_ocupat();
-        if(opriri<=setari.nrDescarcari && (ocupat/capacitate)<=1) 
+        if(opriri<=setari.nrDescarcari && (ocupat/capacitate)<=setari.procentIncarcare()) 
             ok = true; 
         else 
             ok = false;
@@ -166,8 +170,7 @@ public class Camion {
      */
     private void calculeaza_ocupat() {
         ocupat = 0.0;
-        for(int i=0;i<pachete.size();i++) {
-            int p = pachete.get(i);
+        for(int p:pachete) {
             ocupat += Client.clienti.get(p).volum;
         }
     }
@@ -233,7 +236,7 @@ public class Camion {
     }
     
     /**
-     * Metoda de calcul distanta totala optima si traseu cu o metoda modificata a algoritmului Clarke-Wright.
+     * Metoda de calcul distanta totala optima si traseu.
      * OVRP, camionul nu se intoarce la baza. Se porneste de la baza si se adauga 
      * pachetele pe rand. La fiecare pas se calculeaza pozitia optima a pachetului de inserat
      * astfel incat ruta totala sa fie cat mai scurta.
@@ -255,10 +258,11 @@ public class Camion {
             dist=0.0;
             pachet = pacheteBak.get(pacheteBak.size()-1);
             pacheteBak.remove(pacheteBak.size()-1);
-            if(solutia.isEmpty()) solutia.add(pachet);
-            else {
+            if(solutia.isEmpty()) {
+                solutia.add(pachet);
+            } else {
                 //calculeaza pozitia perfecta
-                for(int i=0;i<=solutia.size();i++) {
+                for(int i=0;i<=solutia.size();i++) { //todo paralelizabil
                     solTemp.clear();
                     solTemp.addAll(solutia);
                     solTemp.add(i,pachet);
@@ -273,7 +277,6 @@ public class Camion {
                         minDist = dist;
                     }
                 }
-                //insereaza la pozitia perfecta
                 solutia.add(pos,pachet);
             }
         }
@@ -284,7 +287,7 @@ public class Camion {
     }
     
     /**
-     * Varianta 2-opt a calculului traseului optim
+     * Varianta 2-opt a calculului traseului optim.
      * http://www.technical-recipes.com/2017/applying-the-2-opt-algorithm-to-traveling-salesman-problems-in-java/
      */
     public void calculeazaDistanta3() {

@@ -14,6 +14,11 @@ import static main.MainFrame.*;
 public class AddCamioane extends javax.swing.JDialog {
 
     /**
+     * Maximul de generatii ce va rula algoritmul.
+     */
+    public int maxGeneratii;
+
+    /**
      * Creates new form AddCamioane
      */
     public AddCamioane(java.awt.Frame parent, boolean modal) {
