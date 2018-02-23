@@ -82,7 +82,6 @@ public class MainFrame extends javax.swing.JFrame {
     //runtime
     private boolean ruleaza=false;
     private ArrayList<AlgoritmGenetic> listaFire;
-    private final int[] viataIndivid = new int[] {40,16,20,24,28,32,36};//20 primul
     private final ArrayList<Grafic> grafic = new ArrayList();
     private final Timer timer = new Timer(50, new ActionListener() { // 50ms, adica vreo 20fps
         @Override
@@ -90,7 +89,16 @@ public class MainFrame extends javax.swing.JFrame {
             m.repaint(); //main frame repaint
         }
     });
+    private final Timer timer2 = new Timer(1000, new ActionListener() { // 50ms, adica vreo 20fps
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if(ruleaza) {
+                printDifference();
+            }
+        }
+    });
     private int maxgen;
+    private long start;
 
     /**
      * Creates new form MainFrame
@@ -113,6 +121,7 @@ public class MainFrame extends javax.swing.JFrame {
         disableSalveaza();
         VitezaAlgoritm.setEnabled(false);
         timer.start();
+        timer2.start();
         //salveaza setarile la iesirea din aplicatie
         Runtime.getRuntime().addShutdownHook(new Thread(){
             @Override
@@ -120,6 +129,13 @@ public class MainFrame extends javax.swing.JFrame {
                 Setari.salveaza(setari);
             }
         });
+        
+        //debug distanta              lat   long
+        Client unu = new Client("unu",47.080,21.890,1.0);
+        Client doi = new Client("doi",48.63835378,2.32086182,1.0);
+        System.out.println("Distanta debug: "+Calcule.distanta(unu,doi));
+        //end debug
+        
     }
     
     /**
@@ -154,6 +170,8 @@ public class MainFrame extends javax.swing.JFrame {
         VitezaAlgoritm = new javax.swing.JComboBox<>();
         Progres = new javax.swing.JProgressBar();
         FisierIncarcat = new javax.swing.JLabel();
+        jElapsed = new javax.swing.JLabel();
+        jStatus = new javax.swing.JLabel();
         jLabel1 = new javax.swing.JLabel();
         Grila = new javax.swing.JPanel() {
             @Override
@@ -198,7 +216,7 @@ public class MainFrame extends javax.swing.JFrame {
         );
         Panel1Layout.setVerticalGroup(
             Panel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 165, Short.MAX_VALUE)
+            .addGap(0, 288, Short.MAX_VALUE)
         );
 
         jSlider1.setMaximum(300);
@@ -253,6 +271,10 @@ public class MainFrame extends javax.swing.JFrame {
 
         FisierIncarcat.setText("Nici un fisier incarcat.");
 
+        jElapsed.setText("00:00:00");
+
+        jStatus.setText("[ status ]");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -277,10 +299,16 @@ public class MainFrame extends javax.swing.JFrame {
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(VitezaAlgoritm, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(FisierIncarcat, javax.swing.GroupLayout.DEFAULT_SIZE, 123, Short.MAX_VALUE)
+                            .addComponent(FisierIncarcat, javax.swing.GroupLayout.PREFERRED_SIZE, 123, Short.MAX_VALUE)
                             .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(PornesteGenerarea)))
+                        .addComponent(PornesteGenerarea))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jElapsed))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jStatus)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -310,7 +338,11 @@ public class MainFrame extends javax.swing.JFrame {
                     .addComponent(jLabel5)
                     .addComponent(BSNrCamioane))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jElapsed)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jStatus)
                 .addContainerGap())
         );
 
@@ -380,12 +412,12 @@ public class MainFrame extends javax.swing.JFrame {
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
+                    .addComponent(Panel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(Grila, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jSlider1, javax.swing.GroupLayout.DEFAULT_SIZE, 770, Short.MAX_VALUE))
-                    .addComponent(Panel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(Grila, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(jSlider1, javax.swing.GroupLayout.DEFAULT_SIZE, 669, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -396,16 +428,16 @@ public class MainFrame extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(Grila, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(Panel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(Panel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jSlider1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel1)))
+                            .addComponent(jSlider1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.TRAILING)))
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
-        setSize(new java.awt.Dimension(1153, 598));
+        setSize(new java.awt.Dimension(1153, 764));
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
@@ -426,14 +458,13 @@ public class MainFrame extends javax.swing.JFrame {
                     listaFire = new ArrayList();
                     procente = new int[setari.memorie];
                     AlgoritmGenetic a;
-                    for(int i=0;i<setari.memorie;i++) {
-                        a = new AlgoritmGenetic(i,viteza,viataIndivid[i%viataIndivid.length]);
-                        a.setPriority(setari.prioritate);
-                        a.start();
-                        listaFire.add(a);
-                    }
+                    a = new AlgoritmGenetic(0,viteza);
+                    a.setPriority(setari.prioritate);
+                    a.start();
+                    listaFire.add(a);
                     PornesteGenerarea.setText("Opreste generarea");
                     ruleaza = true;
+                    start = System.currentTimeMillis();
                     for(Thread t:listaFire) {
                         try {
                             t.join();
@@ -588,6 +619,7 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JMenuItem SalveazaHTML;
     private javax.swing.JMenuItem SalveazaTXT;
     private javax.swing.JComboBox<String> VitezaAlgoritm;
+    private javax.swing.JLabel jElapsed;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -599,6 +631,7 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JSlider jSlider1;
+    private javax.swing.JLabel jStatus;
     private javax.swing.JTable jTable1;
     // End of variables declaration//GEN-END:variables
 
@@ -616,6 +649,7 @@ public class MainFrame extends javax.swing.JFrame {
     
     public void modMax(int max) {
         Progres.setMaximum(max);
+        maxgen = max;
     }
     /**
      * Seteaza valoarea curenta a progresului pe ProgressBar-ul de pe pagina principala.
@@ -723,13 +757,13 @@ public class MainFrame extends javax.swing.JFrame {
             g.setColor(Color.BLUE);
             x = cenX + ((Setari.casa.longitudine-dx)*factorScalare); 
             y = cenY - ((Setari.casa.latitudine-dy)*factorScalare);
-            x2 = cenX + ((Client.clienti.get(camion.solutia.get(0)).longitudine-dx)*factorScalare); 
-            y2 = cenY - ((Client.clienti.get(camion.solutia.get(0)).latitudine-dy)*factorScalare);
+            x2 = cenX + ((Client.clienti.get(camion.pachete.get(0)).longitudine-dx)*factorScalare); 
+            y2 = cenY - ((Client.clienti.get(camion.pachete.get(0)).latitudine-dy)*factorScalare);
             g.draw(new Line2D.Double(x, y, x2, y2));
             g.setColor(Color.black);
-            for(int i=0;i<camion.solutia.size()-1;i++) {
-                int i1 = camion.solutia.get(i);
-                int i2 = camion.solutia.get(i+1);
+            for(int i=0;i<camion.pachete.size()-1;i++) {
+                int i1 = camion.pachete.get(i);
+                int i2 = camion.pachete.get(i+1);
                 x = cenX + ((Client.clienti.get(i1).longitudine-dx)*factorScalare); 
                 y = cenY - ((Client.clienti.get(i1).latitudine-dy)*factorScalare);
                 x2 = cenX + ((Client.clienti.get(i2).longitudine-dx)*factorScalare); 
@@ -769,5 +803,36 @@ public class MainFrame extends javax.swing.JFrame {
         SalveazaCSV.setEnabled(false);
         SalveazaTXT.setEnabled(false);
         SalveazaHTML.setEnabled(false);
+    }
+    
+    public void printDifference(){
+		//milliseconds
+		long different = System.currentTimeMillis()-start;
+
+		long secondsInMilli = 1000;
+		long minutesInMilli = secondsInMilli * 60;
+		long hoursInMilli = minutesInMilli * 60;
+		long daysInMilli = hoursInMilli * 24;
+
+		long elapsedDays = different / daysInMilli;
+		different = different % daysInMilli;
+		long elapsedHours = different / hoursInMilli;
+		different = different % hoursInMilli;
+		long elapsedMinutes = different / minutesInMilli;
+		different = different % minutesInMilli;
+		long elapsedSeconds = different / secondsInMilli;
+                
+                jElapsed.setText(cZ(elapsedHours)+":"+cZ(elapsedMinutes)+":"+cZ(elapsedSeconds));
+    }
+    
+    private String cZ(long nr) {
+        if(nr<10) {
+            return "0"+nr;
+        } else {
+            return ""+nr;
+        }
+    }
+    public void setStatus(String text) {
+        jStatus.setText("[ "+text+" ]");
     }
 }

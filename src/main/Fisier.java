@@ -40,7 +40,7 @@ public class Fisier {
             ret.add("======================================");
             ret.add("Camion volum " + (cam.capacitate - 1) + ", ocupat " + cam.ocupat + ", opriri " + cam.opriri + ", distanta totala " + (int) cam.distanta + " km;");
             ret.add("Pachetele de incarcat:");
-            for (Integer i : cam.solutia) {
+            for (Integer i : cam.pachete) {
                 cli = Client.clienti.get(i);
                 ret.add(cli.codClient + " " + cli.shipTo + ", GPS=" + cli.latitudine + "," + cli.longitudine + " vol=" + cli.volum);
             }

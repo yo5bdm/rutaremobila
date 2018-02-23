@@ -113,7 +113,7 @@ public class Client {
             if (c.volum > (CamionDisponibil.getMaxSize()*setari.procentIncarcare())) {
                 while (c.volum > (CamionDisponibil.getMaxSize()*setari.procentIncarcare())) {
                     int vol = CamionDisponibil.scadeLiber();
-                    c.volum -= vol;
+                    c.volum -= vol*setari.procentIncarcare();
                     dist = Calcule.distanta(Setari.casa, c);
                     Individ.celeMariDist += dist;
                     Individ.celeMariNrCamioane++;

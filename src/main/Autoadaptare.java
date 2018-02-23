@@ -10,6 +10,13 @@ package main;
  * @author yo5bd
  */
 public class Autoadaptare {
+
+    /**
+     * Algoritm Genetic Autoadaptiv (AGA).
+     * Algoritmul foloseste un procent mai mic de mutatie pentru indivizii buni
+     * si unul mai mare pentru indivizii mai putin buni
+     */
+    public static final int[] procMutatie = new int[]{2, 4, 8, 15, 25, 40, 60, 95, 150, 230}; //{2, 4, 8, 15, 20, 35, 45, 60, 150, 200};
     /**
      * Numarul de indivizi per generatie.
      */
@@ -20,7 +27,19 @@ public class Autoadaptare {
      * false = random gaussian dintre cei mai buni indivizi
      */
     public boolean rapid;
-    public double fs=0.5;
+    public double fs; 
+    public int selection=2;
+    public final int viataIndivid = 20; //5
+    public boolean enableAnnealing;
+    public int annDx; //diferenta de fitness dupa annealing (media)
+    public int pasiAnnealing;
+    public int indiviziAnnealing;
+    
+    //private
+    private int maxPasiAnnealing;
+    private int maxIndiviziAnnealing=6;
+    private double minFs = 0.5; //0.5
+    private double maxFs = 0.5;
     private int maxGeneratii;
     private final double procEvolutie = 1.3; //1.6
     private final double procRegres = 1.1;
@@ -29,30 +48,69 @@ public class Autoadaptare {
     private int generatia;
     private int minIndivizi;
     private int maxIndivizi;
+    private double dx; //aici va fi media diferentei intre cel mai bun si cel mai slab individ din fiecare generatie
+    public double lastDx;
+    private AnnealingThread ant;
+    private Individ antBest;
+    private AlgoritmGenetic parinte;
 
-    Autoadaptare(int nrClienti, boolean b) {
+    Autoadaptare(int nrClienti, boolean b, AlgoritmGenetic parinte) {
+        this.parinte = parinte;
         this.nrIndivizi = nrClienti;
-        minIndivizi = 100;
-        maxIndivizi = nrClienti * 2;
+        minIndivizi = 100; //100
+        maxIndivizi = 500; //x2
         rapid = b;
         maxGeneratii = 20000;
+        dx = 0;
+        lastDx =0;
+        this.fs = minFs;
+        enableAnnealing = false;
+        annDx = 9999;
+        maxPasiAnnealing = 20000;
     }
 
     void boost() {
-        if(generatia%100==0) {
-            if(generatia!=0 && nrIndivizi < maxIndivizi) {
-                nrIndivizi *= 4;
-            }
-            if(generatia%1000 == 0) {
-                minIndivizi *= 1.2;
-                maxIndivizi *= 1.5;
+        if(ant!=null) {
+            antBest = ant.lucru;
+            if(antBest.getFitness()<Individ.best.getFitness()) {
+                antBest.setViata(80);
+                parinte.lock.writeLock().lock();
+                parinte.populatie.add(antBest);
+                parinte.lock.writeLock().unlock();
             }
         }
+        if(generatia%100 == 0 && rapid == true) {
+            //enableAnnealing = true;
+            maxPasiAnnealing *= 1.1;
+            pasiAnnealing = maxPasiAnnealing; //full annealing
+            indiviziAnnealing = maxIndiviziAnnealing;    
+            if(generatia%500==0) {
+                if(generatia%1000==0) {
+                    minIndivizi *= 1.1;
+                    maxIndivizi *= 1.1;
+                }
+                ant = new AnnealingThread(Individ.best,Client.clienti.size());
+            }
+        }
+        
+        
+        dx /= 10; //media pe 10 generatii
+        if(rapid==true){
+            if(dx <200){
+                nrIndivizi *= 2;
+                //enableAnnealing = true;
+                pasiAnnealing = maxPasiAnnealing/10; //partial annealing
+                indiviziAnnealing = maxIndiviziAnnealing*10;
+            }
+        }
+        lastDx = dx;
+        dx=0;
     }
 
-    void adaptare() {
+    void adaptare(double dx) {
+        this.dx += dx;
         if(faraEvolutie > 20) {
-            rapid = !rapid;
+            schimba();
             faraEvolutie = -80;
             cuEvolutie=0;
         } else if(maxGeneratii!=Integer.MAX_VALUE && cuEvolutie>20 && generatia>(0.8*maxGeneratii)) {
@@ -61,12 +119,15 @@ public class Autoadaptare {
         }
         
         if(rapid) {
+            fs = minFs;
             if(nrIndivizi > minIndivizi){
                 nrIndivizi /= procRegres;
             } else {
                 nrIndivizi = minIndivizi;
             }
         } else {
+            fs = maxFs;
+            selection = 2;
             if(nrIndivizi < maxIndivizi){
                 nrIndivizi *= procEvolutie;
             } else {
@@ -75,9 +136,14 @@ public class Autoadaptare {
         }
         
         if(generatia == maxGeneratii/2) {
-            minIndivizi *= 2;
-            nrIndivizi *= 2;
+            //minIndivizi *= 2;
+            //maxIndivizi *= 2;
         }
+    }
+    
+    private void schimba() {
+        rapid = !rapid;
+        ant = new AnnealingThread(Individ.best,Client.clienti.size());
     }
     
     public boolean continua() {
@@ -95,7 +161,7 @@ public class Autoadaptare {
     public void evolutie() {
         faraEvolutie=0;
         cuEvolutie++;
-        if(cuEvolutie > 3){
+        if(cuEvolutie > 5){
             rapid = true;
         }
     }
@@ -119,7 +185,24 @@ public class Autoadaptare {
         maxGeneratii = Integer.MAX_VALUE;
     }
 
-    int getMaxGeneratii() {
+    public int getMaxGeneratii() {
         return maxGeneratii;
+    }
+    
+    public double getDx() {
+        return dx;
+    }
+
+    /**
+     * Returneaza procentul de mutatie pentru indivizul curent.
+     * Algoritm Genetic Autoadaptiv (AGA).
+     *
+     * @param i int Indexul elementului curent
+     * @param size dimensiunea populatiei pentru care se calculeaza
+     * @return int procentul de mutatie
+     */
+    public int procMut(int i, int size) {                 //%9
+        int lung = procMutatie.length;
+        return (int)(fs*procMutatie[((i / size) * lung) % lung]);
     }
 }

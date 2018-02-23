@@ -23,7 +23,7 @@ public class Calcule {
         double delta_lat = toRad(u.latitudine - d.latitudine); //latitudine
         double delta_long = toRad(u.longitudine - d.longitudine);
         double R = 6371; //km
-        double kmReal = 1.0; //1.24
+        double kmReal = 1.24; //1.24
         double a = Math.sin(delta_lat / 2) * Math.sin(delta_lat / 2) + Math.cos(toRad(u.latitudine)) * Math.cos(toRad(d.latitudine)) * Math.sin(delta_long / 2) * Math.sin(delta_long / 2);
         return kmReal * R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     }

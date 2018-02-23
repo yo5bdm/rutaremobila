@@ -19,15 +19,9 @@ import java.util.ArrayList;
 public class Setari implements Serializable {
 
     /**
-     * Algoritm Genetic Autoadaptiv (AGA).
-     * Algoritmul foloseste un procent mai mic de mutatie pentru indivizii buni
-     * si unul mai mare pentru indivizii mai putin buni
-     */
-    public static final int[] procMutatie = new int[]{2, 4, 8, 15, 20, 35, 45, 60, 150, 200};
-    /**
      * Punctul de unde vor pleca camioanele.
      */
-    public static Client casa = new Client("ACASA", 47.075866, 21.901441, 0.0);
+    public static Client casa = new Client("ACASA", 47.080, 21.890, 0.0);
     /**
      * Lista de camioane disponibile. Necesar pentru resetare si salvare in fisier.
      */
@@ -51,9 +45,9 @@ public class Setari implements Serializable {
     /**
      * Maximul numarului de descarcari.
      */
-    public int nrDescarcari = 15;
+    public int nrDescarcari = 17;
 
-    private static final String FILENAME = "Setari.ser";
+    private static final String FILENAME = "Setarile.ser";
     public Setari() {
         //CamionDisponibil.adaugaCapacitate(101,10);
         //CamionDisponibil.adaugaCapacitate(91,15);

@@ -29,12 +29,11 @@ public class SetariDialog extends javax.swing.JDialog {
         setLocationRelativeTo(parent);
         initComponents();
         TabelCamioane.setModel(modelCamioane);
-        LabelMem.setText(setari.memorie+"");
-        SliderMemorie.setValue(setari.memorie);
         LabelPrioritate.setText(setari.prioritate+"");
         SliderPrioritate.setValue(setari.prioritate);
         sProcIncarcare.setValue(setari.procentIncarcare);
         AjungeAcasa.setSelected(setari.ajungeAcasa);
+        NrIncarcari.setText(setari.nrDescarcari+"");
     }
 
     /**
@@ -59,9 +58,6 @@ public class SetariDialog extends javax.swing.JDialog {
         jLabel1 = new javax.swing.JLabel();
         LabelPrioritate = new javax.swing.JLabel();
         SliderPrioritate = new javax.swing.JSlider();
-        jLabel2 = new javax.swing.JLabel();
-        LabelMem = new javax.swing.JLabel();
-        SliderMemorie = new javax.swing.JSlider();
         jLabel5 = new javax.swing.JLabel();
         jTextField1 = new javax.swing.JTextField();
         sProcIncarcare = new javax.swing.JSlider();
@@ -126,7 +122,7 @@ public class SetariDialog extends javax.swing.JDialog {
                 .addContainerGap()
                 .addComponent(jLabel3)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 290, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 280, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton1)
@@ -167,23 +163,6 @@ public class SetariDialog extends javax.swing.JDialog {
             }
         });
 
-        jLabel2.setText("Memorie folosita:");
-
-        LabelMem.setText("0");
-
-        SliderMemorie.setMaximum(20);
-        SliderMemorie.setMinimum(1);
-        SliderMemorie.setPaintLabels(true);
-        SliderMemorie.setPaintTicks(true);
-        SliderMemorie.setSnapToTicks(true);
-        SliderMemorie.setToolTipText("");
-        SliderMemorie.setValue(7);
-        SliderMemorie.addChangeListener(new javax.swing.event.ChangeListener() {
-            public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                SliderMemorieStateChanged(evt);
-            }
-        });
-
         jLabel5.setText("Limitare distanta parcursa de camion (km):");
 
         jTextField1.setEditable(false);
@@ -207,9 +186,8 @@ public class SetariDialog extends javax.swing.JDialog {
                 .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(NrIncarcari)
-                    .addComponent(SliderPrioritate, javax.swing.GroupLayout.DEFAULT_SIZE, 248, Short.MAX_VALUE)
+                    .addComponent(SliderPrioritate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(AjungeAcasa, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(SliderMemorie, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jTextField1)
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -218,17 +196,13 @@ public class SetariDialog extends javax.swing.JDialog {
                                 .addComponent(jLabel1)
                                 .addGap(55, 55, 55)
                                 .addComponent(LabelPrioritate))
-                            .addGroup(jPanel3Layout.createSequentialGroup()
-                                .addComponent(jLabel2)
-                                .addGap(18, 18, 18)
-                                .addComponent(LabelMem))
                             .addComponent(jLabel5)
                             .addGroup(jPanel3Layout.createSequentialGroup()
                                 .addComponent(jLabel7)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(labelProcIncarcare))
                             .addComponent(sProcIncarcare, javax.swing.GroupLayout.PREFERRED_SIZE, 238, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(0, 113, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
@@ -256,17 +230,16 @@ public class SetariDialog extends javax.swing.JDialog {
                     .addComponent(LabelPrioritate))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(SliderPrioritate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel2)
-                    .addComponent(LabelMem))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(SliderMemorie, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addGap(102, 102, 102))
         );
 
         jButton3.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         jButton3.setText("Salveaza si inchide");
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -288,13 +261,13 @@ public class SetariDialog extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
 
-        setSize(new java.awt.Dimension(555, 426));
+        setSize(new java.awt.Dimension(767, 471));
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
@@ -302,12 +275,6 @@ public class SetariDialog extends javax.swing.JDialog {
         setari.prioritate = SliderPrioritate.getValue();
         LabelPrioritate.setText(setari.prioritate+"");
     }//GEN-LAST:event_SliderPrioritateStateChanged
-
-    private void SliderMemorieStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_SliderMemorieStateChanged
-        setari.memorie = SliderMemorie.getValue();
-        LabelMem.setText(setari.memorie+"");
-        System.out.println("Memorie "+setari.memorie);
-    }//GEN-LAST:event_SliderMemorieStateChanged
 
     private void AjungeAcasaStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_AjungeAcasaStateChanged
         setari.ajungeAcasa = AjungeAcasa.isSelected();
@@ -328,19 +295,20 @@ public class SetariDialog extends javax.swing.JDialog {
         labelProcIncarcare.setText(setari.procentIncarcare+"%");
     }//GEN-LAST:event_sProcIncarcareStateChanged
 
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        setari.nrDescarcari = Integer.parseInt(NrIncarcari.getText());
+    }//GEN-LAST:event_jButton3ActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox AjungeAcasa;
-    private javax.swing.JLabel LabelMem;
     private javax.swing.JLabel LabelPrioritate;
     private javax.swing.JTextField NrIncarcari;
-    private javax.swing.JSlider SliderMemorie;
     private javax.swing.JSlider SliderPrioritate;
     private javax.swing.JTable TabelCamioane;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;

@@ -1,0 +1,10 @@
+Setari{prioritate=5 memorie=1 nrDescarcari=17 ajungeAcasa=false}
+Fisier generat in 2018/02/20 22:54
+Probabilitate Mutatie;Nr Indivizi;Viata;Nr Solutii Gasite;Generatia;Best Solutie
+500;5;5;13;264004
+Generatia;Nr indivizi;Viata;Fitness
+7;500;5;270670
+8;500;5;269022
+9;500;5;266359
+11;500;5;264339
+13;500;5;264004

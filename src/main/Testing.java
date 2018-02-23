@@ -47,9 +47,7 @@ public class Testing {
         //System.out.println(c1);
         System.out.println(c2);
         for(int i=0;i<10000;i++) {  //warmup
-            //c1.calculeazaDistanta();
             c2.calculeazaDistanta2();
-            c3.calculeazaDistanta3();
         }
         long start = System.nanoTime(); //time benchmark
         //for(int i=0;i<10000;i++) c1.calculeazaDistanta();

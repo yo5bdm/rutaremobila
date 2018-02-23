@@ -51,16 +51,6 @@ public class Individ implements Comparable {
     
     /* PUBLIC NESTATIC */
     /**
-     * Cromozomul principal, optimizat.
-     * Indexul e obiectul de incarcat in camion. 
-     * Valoarea e numarul camionului pe care e incarcat obiectul
-     */
-    public Integer[] cromozom;
-    /**
-     * Copia neoptimizata a cromozomului principal
-     */
-    public Integer[] cromozom2;
-    /**
      * Lista de camioane. Fiecare isi cunoaste pachetele incarcate, distanta totala, etc.
      */
     public ArrayList<Camion> camioane = new ArrayList();
@@ -69,79 +59,103 @@ public class Individ implements Comparable {
      * Se foloseste la afisare si analiza.
      */
     public int viataGen;
-    
     /* PRIVATE */
+    /**
+     * Cromozomul principal, optimizat.
+     * Indexul e obiectul de incarcat in camion. 
+     * Valoarea e numarul camionului pe care e incarcat obiectul
+     */
+    private Integer[] cromozom1;
+    /**
+     * Copia neoptimizata a cromozomului principal
+     */
+    private Integer[] cromozom2;
+    private int nrClienti;
     private Double fitness; //distanta totala parcursa
-    private Integer nr_camioane;
-    private int viata = 50; //50 de generatii
+    private Integer nrCamioane;
     private CamionDisponibil camionDisponibil; //obiectul folosit pentru aflarea a ce camion e disponibil
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock(true); //lock pentru parallel()
+    private boolean optimizat;
+    private static final int NEINCARCAT = -1;
+    private static final int NEINCARCABIL = -2;
+    private int viata;
             
     /**
      * Constructor.
      * @param nrClienti int nr de clienti
      * @param viataIndivid int numarul de generatii ce va fi selectabil individul
-     * @param cam numarul de camioane
+     * @param nrCamioane numarul de camioane
      * @param generare Boolean true daca se doreste generarea random a individului
      */    
-    public Individ(int nrClienti, int cam, int viataIndivid, boolean generare) {
+    public Individ(int nrClienti, int nrCamioane, int viataIndivid, boolean generare) {
+        this.nrClienti = nrClienti;
         this.viata = viataIndivid;
         this.viataGen = viataIndivid;
-        cromozom = new Integer[nrClienti];
+        cromozom1 = new Integer[nrClienti];
         cromozom2 = new Integer[nrClienti];
         camionDisponibil = new CamionDisponibil();
-        nr_camioane = cam;
+        this.nrCamioane = nrCamioane;
         if(generare == true) {
             for(int j=0;j<nrClienti;j++) {
-            cromozom[j] = R.nextInt(nr_camioane-1); //random in camioanele care pot duce marfa respectiva
-            cromozom2[j] = cromozom[j];
-            //clienti.get(j).volum
+                setCromozomVal(j,R.nextInt(nrCamioane-1));
             }
         }
-        for(int i=0;i<nr_camioane;i++) {
+        for(int i=0;i<nrCamioane;i++) {
               camioane.add(new Camion(camionDisponibil.cautaLiber()));
         }
-        if(generare == true) optimize_loads();
+        optimizat = false;
+        if(generare == true) calculeaza(true);
     }
     /**
      * Constructorul de copiere.
      * @param b Individul (obiectul) de copiat
      */
     Individ(Individ b) {
-        this(b.cromozom.length, b.nr_camioane, b.viataGen, false);
-        for(int i=0;i<b.cromozom.length;i++) {
-            this.cromozom[i] = b.cromozom[i];
+        this(b.cromozom1.length, b.nrCamioane, b.viataGen, false);
+        for(int i=0;i<b.cromozom1.length;i++) {
+            this.cromozom1[i] = b.cromozom1[i];
             this.cromozom2[i] = b.cromozom2[i];
         }
+        optimizat = false;
+    }
+    
+    public void setCromozomVal(int pozitie, int valoare) {
+        cromozom1[pozitie] = valoare;
+        cromozom2[pozitie] = valoare;
+    }
+    
+    public int getCromozom1Val(int pozitie) {
+        return cromozom1[pozitie];
+    }
+    public int getCromozom2Val(int pozitie) {
+        return cromozom2[pozitie];
     }
     /**
-     * Metoda pregateste o noua copiere din cromozom. Goleste toate camioanele 
+     * Metoda pregateste o noua copiere din cromozom1. Goleste toate camioanele 
      * si ajusteaza numarul total, daca e necesar
      */
     private void reset_camioane() {
         for(Camion c:camioane) c.reset();
-        if(camioane.size()<nr_camioane) {
-            int nr = nr_camioane-camioane.size();
+        if(camioane.size()<nrCamioane) {
+            int nr = nrCamioane-camioane.size();
             for(int i=0;i<nr;i++) {
                 camioane.add(new Camion(camionDisponibil.cautaLiber()));
             }
         }
-        nr_camioane = camioane.size();
-    }
-    /**
-     * face o copie a cromozomului in varianta neoptimizata
-     */
-    public void copiaza() { //copiaza cromozomul curent in cromozomul copie
-        for(int i=0;i<cromozom.length;i++){
-            cromozom2[i]=cromozom[i];
-        }
+        nrCamioane = camioane.size();
+        optimizat=false;
     }
     /**
      * Returneaza fitness-ul populatiei.
      * @return Double, valoarea fitness-ului total al populatiei
      */
     public double getFitness() {
-        return fitness;
+        if(optimizat) {
+            return fitness;
+        } else {
+            calculeaza(true);
+            return fitness;
+        }
     }
     /**
      * Calculeaza fitness-ul individului curent.
@@ -150,20 +164,26 @@ public class Individ implements Comparable {
      */
     public double calculeaza(boolean optimizeaza) {
         int max=0;
-        for(int i:cromozom) if(i>max) max=i; //gasim maxim, sa stim cate camioane avem nevoie.
-        nr_camioane = max+1;
+        for(int i:cromozom1) { //gasim maxim, sa stim cate camioane avem nevoie.
+            if(i>max) {
+                max=i;
+            }
+        } 
+        nrCamioane = max+1;
         reset_camioane();
-        //incercam sa plasam si neplasabilele
-        for(int i=0;i<cromozom.length;i++) { 
-            if(cromozom[i]==-2) cromozom[i]=-1;
+        
+        for(int i=0;i<cromozom1.length;i++) {
+            switch(cromozom1[i]) {
+                case NEINCARCABIL: //incercam sa plasam si neplasabilele
+                    cromozom1[i]=NEINCARCAT;
+                    break;
+                case NEINCARCAT: //nu se trateaza aici
+                    break;
+                default: //se adauga pachetul curent in camionul aferent
+                    camioane.get(cromozom1[i]).add(i); 
+            }
         }
-        //se adauga pachetul curent in camionul aferent
-        for(int i=0;i<cromozom.length;i++) {
-            if(cromozom[i]==-1) continue;
-            camioane.get(cromozom[i]).add(i); //luat camionul cu nr gasit la indexul i si adaugam produsul in el
-        }
-        //se optimizeaza incarcarile
-        if(optimizeaza) optimize_loads();
+        if(optimizeaza) optimize_loads();//se optimizeaza incarcarile
         fitness = 0.0;
         //calculam datele fiecarui camion si fitness-ul total al generatiei
         range(0,camioane.size()).parallel().forEach(i -> {
@@ -182,16 +202,17 @@ public class Individ implements Comparable {
         for(int i=0;i<neincarcabile();i++){
             fitness += 9999.0;
         }
+        optimizat = true;
         return fitness;
     }
     /**
-     * Numara pachetele neincarcate (cele cu -1)
+     * Numara pachetele neincarcate.
      * @return int - numarul de pachete neincarcate
      */
     private int neincarcate() {
         int ret=0;
-        for(int i:cromozom) {
-            if(i==-1) {
+        for(int i:cromozom1) {
+            if(i==NEINCARCAT) {
                 ret++;
             }
         }
@@ -203,8 +224,8 @@ public class Individ implements Comparable {
      */
     public int neincarcabile() {
         int ret=0;
-        for(int i:cromozom) {
-            if(i==-2) {
+        for(int i:cromozom1) {
+            if(i==NEINCARCABIL) {
                 ret++;
             }
         }
@@ -223,8 +244,10 @@ public class Individ implements Comparable {
             if(!c.pachete.isEmpty()){
                 while(c.ok != true) {
                     int obiect = c.pop(); //pop last element
-                    if(obiect != -1) {
-                        cromozom[obiect] = -1; //il marcam si in cromozom ca fiind nefolosit
+                    if(obiect != NEINCARCAT) {
+                        lock.writeLock().lock();
+                        cromozom1[obiect] = NEINCARCAT; //il marcam si in cromozom1 ca fiind nefolosit
+                        lock.writeLock().unlock();
                     } else {
                         break;
                     }
@@ -232,51 +255,44 @@ public class Individ implements Comparable {
             }
         });
         //punem pachetele in plus in alt camion care nu e plin
-        while(neincarcate()!=0) {
+        int neincarcate = neincarcate();
+        while(neincarcate!=0) {
             //prima data incercam sa incarcam pe un camion existent
-            int incarcat=0;
-            for(int i=0;i<cromozom.length;i++) {
-                if(cromozom[i] == -1) { //clientul nu e incarcat
+            int incarcat;
+            for(int i=0;i<cromozom1.length;i++) {
+                if(cromozom1[i] == NEINCARCAT) {
                     incarcat=0;
                     camioane: for(int j=0;j<camioane.size();j++) {
                         Camion c = camioane.get(j);
-                        if(c.opriri>=15) continue;
+                        if(c.opriri>=setari.nrDescarcari) continue;
                         if((c.capacitate*setari.procentIncarcare() - c.ocupat)>=Client.clienti.get(i).volum) {
-                            cromozom[i] = j;
+                            cromozom1[i] = j;
                             c.add(i);
                             incarcat=1;
+                            neincarcate--;
                             break camioane; //iesi din bucla for
                         }
                     }
-                    //nu am reusit sa incarc produsul, volumul e mai mare decat camioanele disponibile
+                    //nu am reusit sa incarc produsul, 
+                    //volumul e mai mare decat camioanele disponibile
                     if(incarcat==0 && Client.clienti.get(i).volum>(camionDisponibil.cautaMinim()*setari.procentIncarcare())) {
-                        cromozom[i]=-2; //il marcam ca atare
+                        cromozom1[i]=NEINCARCABIL; //il marcam ca atare
+                        neincarcate--;
                     }
                 }
             }
             //daca totusi nu reusim sa le incarcam toate si volumele sunt 
             //mai mici decat camioanele disponibile, mai punem un camion 
             //in lista si mai incercam odata sa optimizam
-            if(neincarcate()!=0) {
+            if(neincarcate!=0) {
                 Camion c = new Camion(camionDisponibil.cautaLiber());
                 c.calc();
-                nr_camioane++;
+                nrCamioane++;
                 camioane.add(c);
             }
         }
     }
-    /**
-     * Metoda optimizeaza toate camioanele.
-     */
-    public void optimizare() {
-        range(0,camioane.size()).parallel().forEach(i->{
-            lock.readLock().lock();
-            Camion c = camioane.get(i);
-            lock.readLock().unlock();
-            c.optimizare();
-        });
-    }
-    
+        
     /**
      * Metoda de comparare a 2 indivizi.
      * @param obj Obiectul individ care trebuie comparat
@@ -288,19 +304,6 @@ public class Individ implements Comparable {
         return (this.fitness == o.fitness); //To change body of generated methods, choose Tools | Templates.
     }
 
-    /**
-     * HashCode.
-     * @return int HashCode
-     */
-    @Override
-    public int hashCode() {
-        int hash = 3;
-        hash = 59 * hash + Arrays.deepHashCode(this.cromozom);
-        hash = 59 * hash + Arrays.deepHashCode(this.cromozom2);
-        hash = 59 * hash - fitness.intValue();
-        return hash;
-    }
-    
     /**
      * Metoda de comparare
      * @param o Obiectul cu care se compara.
@@ -320,6 +323,11 @@ public class Individ implements Comparable {
     public String toString() {
         System.out.println("Individ{ neincarcabile: " +neincarcabile()+", neincarcate: " +neincarcate()+ ", nr camioane=" + camioane.size() + ", fitness=" + fitness + '}');
         //for(Camion c:camioane) System.out.println(c);
+        for(int i=0;i<nrClienti;i++) {
+            if(cromozom1[i]==-2) {
+                System.out.println(""+Client.clienti.get(i));
+            }
+        }
         return "";
     }
     
@@ -328,6 +336,9 @@ public class Individ implements Comparable {
      * @return true daca nu exista pachete neincarcate, neincarcabile si toate camioanele sunt ok.
      */
     public boolean ok() {
+        if(!optimizat) {
+            calculeaza(true);
+        }
         if(neincarcabile()>0 && neincarcate()>=0) return false;
         for(Camion c:camioane) if(c.ok==false) return false;
         return true;
@@ -351,7 +362,60 @@ public class Individ implements Comparable {
      * Pentru clasa testing.
      * @param d fitnessul
      */
-    void setFitness(double d) {
+    void setFitnessForTesting(double d) {
         this.fitness = d;
+    }
+
+    /**
+     *
+     * @param size the value of size
+     * @param algoritmGenetic the value of algoritmGenetic
+     */
+    public static Individ annealing(Individ n, int pasi) {
+            Individ nou;
+            int temperatura = pasi;
+            int pos1, pos2;
+            double startEn = n.getFitness();
+            double solEn = 0;
+            double pastEn = 0;
+            while (temperatura>1) {
+                nou = new Individ(n); //copiem individul curent cel mai bun
+                //--- mutatia
+                pos1 = R.nextInt(nou.nrClienti - 1);
+                pos2 = R.nextInt(nou.nrClienti - 1);
+                nou.swap(pos1,pos2);
+                //---
+                nou.calculeaza(true);
+                pastEn = n.getFitness();
+                solEn = nou.getFitness();
+                if (solEn < pastEn) {
+                    n = nou;
+                }
+                temperatura--;
+            }
+            if (startEn - n.getFitness() > 0) {
+                return n;
+            } else {
+                return null;
+            }
+    }
+    /**
+     * Schimba 2 pozitii din cromozom intre ele.
+     * Aplica acelasi swap pe ambii cromozomi
+     * @param pozitie1
+     * @param pozitie2 
+     */
+    public void swap(int pozitie1, int pozitie2) {
+        int tmp = cromozom1[pozitie1];
+        cromozom1[pozitie1] = cromozom1[pozitie2];
+        cromozom1[pozitie2] = tmp;
+
+        tmp = cromozom2[pozitie1];
+        cromozom2[pozitie1] = cromozom2[pozitie2];
+        cromozom2[pozitie2] = tmp;
+    }
+
+    void setViata(int i) {
+        viata = i;
     }
 }
