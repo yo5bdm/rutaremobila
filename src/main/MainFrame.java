@@ -81,7 +81,7 @@ public class MainFrame extends javax.swing.JFrame {
     private double factorScalare;
     //runtime
     private boolean ruleaza=false;
-    private ArrayList<AlgoritmGenetic> listaFire;
+    AlgoritmGenetic a;
     private final ArrayList<Grafic> grafic = new ArrayList();
     private final Timer timer = new Timer(50, new ActionListener() { // 50ms, adica vreo 20fps
         @Override
@@ -129,13 +129,6 @@ public class MainFrame extends javax.swing.JFrame {
                 Setari.salveaza(setari);
             }
         });
-        
-        //debug distanta              lat   long
-        Client unu = new Client("unu",47.080,21.890,1.0);
-        Client doi = new Client("doi",48.63835378,2.32086182,1.0);
-        System.out.println("Distanta debug: "+Calcule.distanta(unu,doi));
-        //end debug
-        
     }
     
     /**
@@ -172,6 +165,10 @@ public class MainFrame extends javax.swing.JFrame {
         FisierIncarcat = new javax.swing.JLabel();
         jElapsed = new javax.swing.JLabel();
         jStatus = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        jDistantaInterna = new javax.swing.JLabel();
+        jLabel7 = new javax.swing.JLabel();
+        jDistantaExterna = new javax.swing.JLabel();
         jLabel1 = new javax.swing.JLabel();
         Grila = new javax.swing.JPanel() {
             @Override
@@ -216,7 +213,7 @@ public class MainFrame extends javax.swing.JFrame {
         );
         Panel1Layout.setVerticalGroup(
             Panel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 288, Short.MAX_VALUE)
+            .addGap(0, 331, Short.MAX_VALUE)
         );
 
         jSlider1.setMaximum(300);
@@ -275,6 +272,14 @@ public class MainFrame extends javax.swing.JFrame {
 
         jStatus.setText("[ status ]");
 
+        jLabel2.setText("Distanta interna:");
+
+        jDistantaInterna.setText("jLabel7");
+
+        jLabel7.setText("Distanta externa:");
+
+        jDistantaExterna.setText("jLabel8");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -293,22 +298,30 @@ public class MainFrame extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(BSDistanta))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel5)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(BSNrCamioane))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(VitezaAlgoritm, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(FisierIncarcat, javax.swing.GroupLayout.PREFERRED_SIZE, 123, Short.MAX_VALUE)
+                            .addComponent(FisierIncarcat, javax.swing.GroupLayout.DEFAULT_SIZE, 123, Short.MAX_VALUE)
                             .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(PornesteGenerarea))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jDistantaInterna))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jStatus)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel7)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jDistantaExterna))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(jElapsed))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jStatus)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel5)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(BSNrCamioane)))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -335,8 +348,16 @@ public class MainFrame extends javax.swing.JFrame {
                     .addComponent(BSDistanta))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel5)
-                    .addComponent(BSNrCamioane))
+                    .addComponent(jLabel2)
+                    .addComponent(jDistantaInterna))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel7)
+                    .addComponent(jDistantaExterna))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(BSNrCamioane)
+                    .addComponent(jLabel5))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jElapsed)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -417,7 +438,7 @@ public class MainFrame extends javax.swing.JFrame {
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jSlider1, javax.swing.GroupLayout.DEFAULT_SIZE, 669, Short.MAX_VALUE)))
+                        .addComponent(jSlider1, javax.swing.GroupLayout.DEFAULT_SIZE, 770, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -454,23 +475,18 @@ public class MainFrame extends javax.swing.JFrame {
                     Client.calculeazaTablouDistante();
                     Client.rezolvaCeleMari();
                     int viteza = VitezaAlgoritm.getSelectedIndex();
-                    //t.run(); //testarile
-                    listaFire = new ArrayList();
+//                    t.run(); //testarile
                     procente = new int[setari.memorie];
-                    AlgoritmGenetic a;
                     a = new AlgoritmGenetic(0,viteza);
                     a.setPriority(setari.prioritate);
                     a.start();
-                    listaFire.add(a);
                     PornesteGenerarea.setText("Opreste generarea");
                     ruleaza = true;
                     start = System.currentTimeMillis();
-                    for(Thread t:listaFire) {
-                        try {
-                            t.join();
-                        } catch (InterruptedException ex) {
-                            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
-                        }
+                    try {
+                        a.join();
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
                     }
                     analiza.saveFile();
                     MeniuIncarcaCSV.setEnabled(true);
@@ -483,10 +499,8 @@ public class MainFrame extends javax.swing.JFrame {
             
         } else  {
             try {
-                for(AlgoritmGenetic a:listaFire) {
-                    a.opreste();
-                    a.join();
-                }
+                a.opreste();
+                a.join();
                 analiza.saveFile();
                 MeniuIncarcaCSV.setEnabled(true);
                 MeniuSetari.setEnabled(true);
@@ -541,10 +555,14 @@ public class MainFrame extends javax.swing.JFrame {
                     }
                     dx /= Client.clienti.size();
                     dy /= Client.clienti.size();
+                    Individ.best = null;
+                    model.fireTableDataChanged();
                 } else {
                     PornesteGenerarea.setEnabled(false);
                     disableSalveaza();
                     VitezaAlgoritm.setEnabled(false);
+                    Individ.best = null;
+                    model.fireTableDataChanged();
                 }
                 FisierIncarcat.setText("Nr clienti = "+Client.clienti.size());
             }
@@ -619,12 +637,16 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JMenuItem SalveazaHTML;
     private javax.swing.JMenuItem SalveazaTXT;
     private javax.swing.JComboBox<String> VitezaAlgoritm;
+    private javax.swing.JLabel jDistantaExterna;
+    private javax.swing.JLabel jDistantaInterna;
     private javax.swing.JLabel jElapsed;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JPanel jPanel1;
@@ -686,6 +708,8 @@ public class MainFrame extends javax.swing.JFrame {
             }
             Individ.best = i;
             BSDistanta.setText((int)((double)Individ.best.getFitness()+Individ.celeMariDist)+" km (-"+delta.intValue()+"%)");
+            jDistantaInterna.setText((int)Individ.best.totalDistantaInterna()+" km");
+            jDistantaExterna.setText((int)((double)Individ.best.getFitness()+Individ.celeMariDist-Individ.best.totalDistantaInterna())+" km");
             BSNrCamioane.setText((Individ.best.camioane.size()+Individ.celeMariNrCamioane)+"");
             BSGeneratia.setText("("+text+")");
             enableSalveaza();
@@ -693,6 +717,8 @@ public class MainFrame extends javax.swing.JFrame {
             Individ.best = null;
             BSDistanta.setText("");
             BSNrCamioane.setText("");
+            jDistantaInterna.setText("");
+            jDistantaExterna.setText("");
             BSGeneratia.setText("");
             disableSalveaza();
         }
@@ -748,8 +774,7 @@ public class MainFrame extends javax.swing.JFrame {
         for(Client c:Client.clienti) {
             x = cenX + ((c.longitudine-dx)*factorScalare); 
             y = cenY - ((c.latitudine-dy)*factorScalare);
-            //g.drawOval((int)(x-1.5),(int)(y-1.5), 3, 3);
-            g.draw(new Ellipse2D.Double(x-1.5, y-1.5,3,3));
+            g.draw(new Ellipse2D.Double(x-1, y-1,2,2));
         }
         // partea de desenare drumuri pt camionul selectat
         if(camion!=null) {
@@ -832,6 +857,7 @@ public class MainFrame extends javax.swing.JFrame {
             return ""+nr;
         }
     }
+    
     public void setStatus(String text) {
         jStatus.setText("[ "+text+" ]");
     }

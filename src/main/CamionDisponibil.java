@@ -104,6 +104,16 @@ public class CamionDisponibil {
         }
         return maxSize;
     }
+    
+    public static double getMinSize() {
+        int minSize = Integer.MAX_VALUE;
+        for(CamDisp i:disponibil) {
+            if(i.capacitate<minSize && i.disponibile>0) {
+                minSize = i.capacitate;
+            }
+        }
+        return minSize;
+    }
 }
 
 

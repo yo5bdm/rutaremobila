@@ -30,23 +30,44 @@ public class AnnealingThread extends Thread {
     
     @Override
     public void run() {
+        System.out.println("Start Ann Thread...");
         Individ nou;
         int pos1, pos2; 
         double pastEn, solEn;
+        int pasi=0;
+        int i=0;
+        int dx=1;
+        boolean random = false;
         while(merge) {
+            if(random == false && i>=Client.nrClienti()-dx) {
+                i=0;
+                pasi++;
+                if(pasi > 5) {
+                    dx++;
+                    if(dx>10) {
+                        random = true;
+                    }
+                }
+            }
             nou = new Individ(lucru); //copiem individul curent cel mai bun
 
             //--- mutatia
-            pos1 = R.nextInt(nrClienti - 1);
-            pos2 = R.nextInt(nrClienti - 1);
-            nou.swap(pos1,pos2);
+            if(random) {
+                pos1 = R.nextInt(nrClienti - 1);
+                pos2 = R.nextInt(nrClienti - 1);
+                nou.swap(pos1,pos2);
+            } else{
+                nou.swap(i,i+1);
+            }
             //---
             nou.calculeaza(true);
             pastEn = lucru.getFitness();
             solEn = nou.getFitness();
             if (solEn < pastEn-1 && nou.ok()==true) {
                 lucru = nou;
+                pasi=0;
             }
+            if(!random) i++;
         }
     }
     

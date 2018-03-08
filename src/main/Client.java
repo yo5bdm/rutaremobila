@@ -6,13 +6,14 @@
 package main;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import static main.MainFrame.setari;
 
 /**
  * Clasa cuprinde toate datele clientului.
  * @author yo5bdm
  */
-public class Client {
+public class Client implements Comparable {
     /* STATICE */
     /**
      * Lista de clienti/puncte unde trebuie sa ajunga marfa.
@@ -26,6 +27,22 @@ public class Client {
     private static Double[] spreCasa;
     //distantele intre puncte
     private static Double[][] distante;
+    private static int nrClienti;
+
+    public static void sorteaza() {
+        Collections.sort(clienti);
+        Collections.reverse(clienti);
+    }
+
+    static int nrClienti() {
+        return nrClienti;
+    }
+
+    static void numara() {
+        nrClienti = clienti.size();
+    }
+    
+    
     
     /* NESTATICE */
     /**
@@ -88,7 +105,6 @@ public class Client {
      * Metoda toString().
      * @return
      */
-    @Override
     public String toString() {
         if(codClient == null) return "Client{" + "ShipTo=" + shipTo + ", GPS=" + latitudine + "," + longitudine + ", volum=" + volum + '}';
         else if(shipTo == null) return "Client{" + "codClient=" + codClient + ", GPS=" + latitudine + "," + longitudine + ", volum=" + volum + '}';
@@ -173,5 +189,11 @@ public class Client {
         for(Client c:clientiBak) { //copiaza datele din backup
             clienti.add(new Client(c));
         }
+    }
+
+    @Override
+    public int compareTo(Object t) {
+        Client c = (Client) t;
+        return this.volum.compareTo(c.volum);
     }
 }

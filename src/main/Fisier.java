@@ -78,13 +78,11 @@ public class Fisier {
                     //constructorul cu 4
                     c = new Client(line.get(0),Double.parseDouble(line.get(1)),Double.parseDouble(line.get(2)),Double.parseDouble(line.get(3)));
                     Client.clienti.add(c);
-                    Client.clientiBak.add(c);
                     break;
                 case 5:
                     //constructorul cu 5
                     c = new Client(line.get(0),line.get(1),Double.parseDouble(line.get(2)),Double.parseDouble(line.get(3)),Double.parseDouble(line.get(4)));
                     Client.clienti.add(c);
-                    Client.clientiBak.add(c);
                     break;
                 default:
                     mesajEroare("Fisierul CSV nu are un format suportat!");
@@ -92,6 +90,9 @@ public class Fisier {
             }
         }
         scanner.close();
+        Client.sorteaza();
+        Client.numara();
+        Client.clientiBak.addAll(Client.clienti);
         return true;
     }
     

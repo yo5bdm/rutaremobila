@@ -5,6 +5,9 @@
  */
 package main;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  *
  * @author yo5bd
@@ -21,11 +24,6 @@ public class Autoadaptare {
      * Numarul de indivizi per generatie.
      */
     public int nrIndivizi;
-    /**
-     * Metoda de selectie.
-     * true = se iau primii cei mai buni indivizi,
-     * false = random gaussian dintre cei mai buni indivizi
-     */
     public boolean rapid;
     public double fs; 
     public int selection=2;
@@ -34,6 +32,7 @@ public class Autoadaptare {
     public int annDx; //diferenta de fitness dupa annealing (media)
     public int pasiAnnealing;
     public int indiviziAnnealing;
+    public int nrPuncteTaiere=200; //150
     
     //private
     private int maxPasiAnnealing;
@@ -53,43 +52,51 @@ public class Autoadaptare {
     private AnnealingThread ant;
     private Individ antBest;
     private AlgoritmGenetic parinte;
+    private boolean enableAnt = true;
 
     Autoadaptare(int nrClienti, boolean b, AlgoritmGenetic parinte) {
         this.parinte = parinte;
         this.nrIndivizi = nrClienti;
         minIndivizi = 100; //100
-        maxIndivizi = 500; //x2
+        maxIndivizi = 400; //x2
         rapid = b;
-        maxGeneratii = 20000;
+        maxGeneratii = 10000;
         dx = 0;
         lastDx =0;
         this.fs = minFs;
-        enableAnnealing = false;
         annDx = 9999;
-        maxPasiAnnealing = 20000;
     }
 
     void boost() {
-        if(ant!=null) {
+        selection = 2;
+        if(enableAnt) {
+            if(ant!=null) {
             antBest = ant.lucru;
             if(antBest.getFitness()<Individ.best.getFitness()) {
-                antBest.setViata(80);
+                antBest.setViata(40);
                 parinte.lock.writeLock().lock();
                 parinte.populatie.add(antBest);
                 parinte.lock.writeLock().unlock();
             }
+            } else {
+                ant = new AnnealingThread(Individ.best,Client.clienti.size());
+            }
         }
-        if(generatia%100 == 0 && rapid == true) {
-            //enableAnnealing = true;
-            maxPasiAnnealing *= 1.1;
-            pasiAnnealing = maxPasiAnnealing; //full annealing
-            indiviziAnnealing = maxIndiviziAnnealing;    
+        if(generatia%100 == 0 && rapid == true) { 
             if(generatia%500==0) {
                 if(generatia%1000==0) {
-                    minIndivizi *= 1.1;
-                    maxIndivizi *= 1.1;
+                    minIndivizi *= 1.2;
+                    maxIndivizi *= 1.2;
                 }
-                ant = new AnnealingThread(Individ.best,Client.clienti.size());
+                if(enableAnt) {
+                    ant.opreste();
+                    try {
+                        ant.join();
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(Autoadaptare.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    ant = new AnnealingThread(Individ.best,Client.clienti.size());
+                }
             }
         }
         
@@ -98,9 +105,7 @@ public class Autoadaptare {
         if(rapid==true){
             if(dx <200){
                 nrIndivizi *= 2;
-                //enableAnnealing = true;
-                pasiAnnealing = maxPasiAnnealing/10; //partial annealing
-                indiviziAnnealing = maxIndiviziAnnealing*10;
+                selection = 3;
             }
         }
         lastDx = dx;
@@ -136,14 +141,22 @@ public class Autoadaptare {
         }
         
         if(generatia == maxGeneratii/2) {
-            //minIndivizi *= 2;
-            //maxIndivizi *= 2;
+            minIndivizi *= 2;
+            maxIndivizi *= 2;
         }
     }
     
     private void schimba() {
         rapid = !rapid;
-        ant = new AnnealingThread(Individ.best,Client.clienti.size());
+        if(enableAnt) {
+            ant.opreste();
+            try {
+                ant.join();
+            } catch (InterruptedException ex) {
+                Logger.getLogger(Autoadaptare.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            ant = new AnnealingThread(Individ.best,Client.clienti.size());
+        }
     }
     
     public boolean continua() {

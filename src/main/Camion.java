@@ -48,7 +48,9 @@ public class Camion {
     /**
      * Distanta totala parcursa de camion. Depinde de modul de calcul, daca se intoarce acasa sau nu.
      */
-    public double distanta; //distnata totala parcursa
+    public double distanta;
+    public double distantaDeAcasa;
+    public double distantaIntern;
 
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock(true);
     
@@ -83,26 +85,17 @@ public class Camion {
     /**
      * Metoda de calcul complet al camionului.
      * Calculeaza numarul de opriri, volumul total ocupat de pachete, 
-     * traseul optim si distanta totala parcursa de camion.
-     * @return Double distanta totala parcursa de camion, incepand de la baza
+ traseul optim si distantaTotala totala parcursa de camion.
+     * @return Double distantaTotala totala parcursa de camion, incepand de la baza
      */
     public double calc() {
         sort();
         calc_partial();
-        calculeazaDistanta2();
+        calculeazaTraseuOptim();
+        distTot();
+        //if(distanta>2500.0) ok = false;
         return distanta;
-    }    
-    /**
-     * Sorteaza descendent dupa volum pachetele din camion.
-     */
-    private void sort() {
-        Comparator<Integer> cmprtr = (Integer u, Integer d) -> {
-            if(Client.clienti.get(u).volum < Client.clienti.get(d).volum) return 1;
-            else if(Client.clienti.get(u).volum > Client.clienti.get(d).volum) return -1;
-            else return 0;
-        };
-        pachete.sort(cmprtr);
-    }    
+    }
     /**
      * Calculeaza numarul de opriri si volumul ocupat al pachetelor din camion.
      */
@@ -124,9 +117,15 @@ public class Camion {
         if(pachete.size()==0) return -1;
         sort();
         int ret = pachete.remove(pachete.size()-1);
-        calc_partial();
+        calc();
         return ret;
     }    
+    
+    public int popLast() {
+        if(pachete.size()<2) return -1;
+        int ret = pachete.remove(pachete.size()-1);
+        return ret;
+    }
     /**
      * Returneaza procentul de ocupare al camionului.
      * Util pentru afisare in lista din MainFrame
@@ -145,22 +144,6 @@ public class Camion {
         calc_partial();
     }    
     /**
-     * Numara opririle programate.
-     */
-    private void numara_opriri() {
-        opriri = pachete.size();
-    }    
-    /**
-     * calculeaza volumul total al pachetelor din camion.
-     */
-    private void calculeaza_ocupat() {
-        ocupat = 0.0;
-        for(int p:pachete) {
-            ocupat += Client.clienti.get(p).volum;
-        }
-    }
-
-    /**
      * Metoda toString().
      * @return String.
      */
@@ -172,14 +155,14 @@ public class Camion {
         }
         return "Camion{ ok=" +ok+ ", capacitate=" + capacitate + ", ocupat=" + ocupat + ", opriri=" + opriri + ", distanta=" + distanta + ", obiecte= "+obiecte+" }";
     }
-      
+    
     /**
-     * Metoda de calcul distanta totala optima si traseu.
+     * Metoda de calcul distantaTotala totala optima si traseu.
      * OVRP, camionul nu se intoarce la baza. Se porneste de la baza si se adauga 
      * pachetele pe rand. La fiecare pas se calculeaza pozitia optima a pachetului de inserat
      * astfel incat ruta totala sa fie cat mai scurta.
      */
-    public void calculeazaDistanta2() { //varianta clarke-wright modificat
+    public void calculeazaTraseuOptim() { //varianta clarke-wright modificat
         distanta = 0.0; //initializare
         ArrayList<Integer> solutia = new ArrayList();
         if(pachete.isEmpty()) { //daca nu avem pachete in camion
@@ -218,11 +201,128 @@ public class Camion {
                 solutia.add(pos,pachet);
             }
         }
-        distanta = Client.catreCasa(solutia.get(0));
-        for(int i=0;i<solutia.size()-1;i++) {
-            distanta+=Client.distanta(solutia.get(i),solutia.get(i+1));
-        }
         pachete.clear();
         pachete.addAll(solutia);
+        distTot();
     }
+    
+    public double distantaInterna() {
+        return distantaIntern;
+    }
+    
+    public double distantaTotala() {
+        return distanta;
+    }
+    
+    public double distantaDeAcasa() {
+        return distantaDeAcasa;
+    }
+    
+    
+    //                  PRIVATE
+    /**
+     * Sorteaza descendent dupa volum pachetele din camion.
+     */
+    private void sort() {
+        Comparator<Integer> cmprtr = (Integer u, Integer d) -> {
+            if(Client.clienti.get(u).volum < Client.clienti.get(d).volum) return 1;
+            else if(Client.clienti.get(u).volum > Client.clienti.get(d).volum) return -1;
+            else return 0;
+        };
+        pachete.sort(cmprtr);
+    }    
+    /**
+     * Numara opririle programate.
+     */
+    private void numara_opriri() {
+        opriri = pachete.size();
+    }    
+    /**
+     * calculeaza volumul total al pachetelor din camion.
+     */
+    private void calculeaza_ocupat() {
+        ocupat = 0.0;
+        for(int p:pachete) {
+            ocupat += Client.clienti.get(p).volum;
+        }
+    }
+
+    private void distTot() {
+        if(pachete.isEmpty()) {
+            this.distantaDeAcasa = 0.0;
+            this.distantaIntern = 0.0;
+            this.distanta = 0.0;
+        } else {
+            this.distantaDeAcasa = Client.catreCasa(pachete.get(0));
+            this.distantaIntern = distIntern();
+            distanta = distantaDeAcasa + distantaIntern;
+        }
+    }
+    private double distIntern() {
+        double dist =0;
+        for(int i=0;i<pachete.size()-1;i++) {
+            dist+=Client.distanta(pachete.get(i),pachete.get(i+1));
+        }
+        return dist;
+    }
+    
+    public boolean ok() {
+        calc(); //_partial
+        return ok;
+    }
+
+    double test(int pachetDeVerificat) {
+        double distFin = 0.0; //initializare
+        ArrayList<Integer> solutia = new ArrayList();
+        if(pachete.isEmpty()) { //daca nu avem pachete in camion
+            return Client.catreCasa(pachetDeVerificat);
+        }
+        //ArrayList<Integer> pacheteBak = new ArrayList(); //altfel
+        ArrayList<Integer> solTemp = new ArrayList();
+        solutia.addAll(pachete);
+        int pos, pachet, bestPos;
+        double minDist, dist;
+        //
+        pos = 0;
+        minDist=Double.MAX_VALUE; 
+        dist=0.0;
+        for(int i=0;i<=solutia.size();i++) {
+            dist=0.0;
+            solTemp.clear();
+            solTemp.addAll(solutia);
+            solTemp.add(i,pachetDeVerificat);
+            for(int j=0;j<solTemp.size();j++) {
+                if(j==0) dist = Client.catreCasa(solTemp.get(j));
+                else {
+                    dist += Client.distanta(solTemp.get(j-1),solTemp.get(j));
+                }
+            }
+            if(minDist > dist) {
+                pos = i;
+                minDist = dist;
+            }
+        }
+        return minDist;
+    }
+
+    int popFirst() {
+        if(pachete.size()==0) return -1;
+        int ret = pachete.remove(0);
+        calc();
+        return ret;
+    }
+    
+    
+    /**
+     * Intoarce distantaTotala dintre primul din pachet si acesta.
+     * @param i pachetul de testat
+     * @return double cu distantaTotala in km
+     */
+    public Double testClosest(int i) {
+        if(pachete.size()==0) {
+            return Client.catreCasa(i);
+        }
+        return Client.distanta(pachete.get(0), i);
+    }
+
 }

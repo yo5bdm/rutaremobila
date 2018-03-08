@@ -69,6 +69,7 @@ public class AlgoritmGenetic extends Thread {
      */ 
     public final ReentrantReadWriteLock lock = new ReentrantReadWriteLock(true);
     private final Autoadaptare adapt;
+    private double dx;
     /**
      * Constructorul clasei.
      * Se intializeaza clasa, dar nu se porneste algoritmul.
@@ -110,53 +111,65 @@ public class AlgoritmGenetic extends Thread {
      */
     @Override
     public void run() {
-        long start = System.currentTimeMillis();
-        DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
-        m.setStatus("Algoritmul incepe "+dateFormat.format(new Date()));
-        genereazaPopulatiaInitiala();
-        m.setStatus("terminat generarea populatiei initiale;");
-        Collections.sort(populatie);
-        Individ localBestFit = populatie.get(0);
-        Individ.best=localBestFit;
-        double totFitness10gen=localBestFit.getFitness();
-        String rapid="";
-        while(adapt.continua()) {//main loop
-            if(stop) break; //stop? atunci iesi din bucla
-            if(adapt.zeceGeneratii()) {
-                System.gc();
-                totFitness10gen = localBestFit.getFitness();
-                m.setProgres(id, adapt.getGeneratia());
-                adapt.boost();
-                if(adapt.rapid) {
-                    rapid = "rapid";
-                } else {
-                    rapid = "lent";
+        try {
+            long start = System.currentTimeMillis();
+            DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+            m.setStatus("Genereaza populatia initiala "+dateFormat.format(new Date()));
+            genereazaPopulatiaInitiala();
+            m.setStatus("Terminat generarea populatiei initiale;");
+            Collections.sort(populatie);
+            Individ localBestFit = populatie.get(0);
+            Individ.best=localBestFit;
+            double totFitness10gen=localBestFit.getFitness();
+            String rapid="";
+            m.setStatus("Incepe algoritmul...");
+            while(adapt.continua()) {//main loop
+                if(stop) break; //stop? atunci iesi din bucla
+                if(adapt.zeceGeneratii()) {
+                    System.gc();
+                    totFitness10gen = localBestFit.getFitness();
+                    m.setProgres(id, adapt.getGeneratia());
+                    adapt.boost();
+                    if(adapt.rapid) {
+                        rapid = "rapid";
+                    } else {
+                        rapid = "lent";
+                    }
+                    m.setStatus("G"+adapt.getGeneratia()+";P"+adapt.nrIndivizi+"; "+rapid+"; "+((System.currentTimeMillis()-start)/1000)+"s; Best "+(int)populatie.get(0).getFitness()+"; dx="+(int)adapt.lastDx);
+                    start = System.currentTimeMillis();
+                    m.modMax(adapt.getMaxGeneratii());
+//                    long startOpt = System.currentTimeMillis();
+//                    dx=0;
+//                    range(0, populatie.size()).parallel().forEach((int ppp)->{
+//                        Individ ind = new Individ(populatie.get(ppp));
+//                        lock.writeLock().lock();
+//                        dx+=ind.optimizeaza();
+//                        lock.writeLock().unlock();
+//                    });
+//                    System.out.println("Opt> "+(System.currentTimeMillis()-startOpt)+" "+(int)dx);
                 }
-                m.setStatus("G"+adapt.getGeneratia()+";P"+adapt.nrIndivizi+"; "+rapid+"; "+((System.currentTimeMillis()-start)/1000)+"s; Best "+(int)populatie.get(0).getFitness()+"; dx="+(int)adapt.lastDx);
-                start = System.currentTimeMillis();
-                m.modMax(adapt.getMaxGeneratii());
-                
+                adapt.adaptare(populatie.get(populatie.size()-1).getFitness()-populatie.get(0).getFitness());
+                //algoritmul efectiv
+                recombinare();
+                mutatie();
+                selectie();
+                //verificarea celui mai bun
+                localBestFit = populatie.get(0);
+                //System.out.println(""+localBestFit);
+                if(localBestFit.getFitness()<Individ.best.getFitness()-1 && localBestFit.ok()==true) {
+                    m.setBest(localBestFit,id,adapt.getGeneratia(),id+"G"+adapt.getGeneratia());
+                    analiza.adauga(adapt.getGeneratia(),viataInd,adapt.nrIndivizi,localBestFit.getFitness());
+                    adapt.evolutie();
+                } else {
+                    adapt.faraEvolutie();
+                }
             }
-            if(adapt.enableAnnealing==true) {
-                anneal(adapt.pasiAnnealing,adapt.indiviziAnnealing);
-            }
-            adapt.adaptare(populatie.get(populatie.size()-1).getFitness()-populatie.get(0).getFitness());
-            //algoritmul efectiv
-            recombinare();
-            mutatie();
-            selectie();
-            //verificarea celui mai bun
-            localBestFit = populatie.get(0);
-            if(localBestFit.getFitness()<Individ.best.getFitness()-1 && localBestFit.ok()==true) {
-                m.setBest(localBestFit,id,adapt.getGeneratia(),id+"G"+adapt.getGeneratia());
-                analiza.adauga(adapt.getGeneratia(),viataInd,adapt.nrIndivizi,localBestFit.getFitness());
-                adapt.evolutie();
-            } else {
-                adapt.faraEvolutie();
-            }
+            m.setProgres(id,adapt.getMaxGeneratii());
+            m.setStatus("Algoritmul a finalizat");
+        } catch(IllegalArgumentException e){
+            MainFrame.mesajEroare("A fost intampinata o eroare in algoritm "+e);
+            System.out.println("Aici "+e);
         }
-        m.setProgres(id,adapt.getMaxGeneratii());
-        m.setStatus("Algoritmul a finalizat");
     }
     /**
      * Generarea populatiei initiale.
@@ -165,6 +178,7 @@ public class AlgoritmGenetic extends Thread {
         range(0,adapt.nrIndivizi).parallel().forEach((int i) -> { //
             Individ n = new Individ(nrClienti,nrCamioane,viataIndivid,true);
             n.calculeaza(true);
+            //n = Individ.annealing(n,1000);
             lock.writeLock().lock();
             populatie.add(n);
             lock.writeLock().unlock();
@@ -183,8 +197,9 @@ public class AlgoritmGenetic extends Thread {
     protected void recombinare() {
         popTemp.clear();
         int popSize = populatie.size()-1;
+        int nrPuncteTaiere = adapt.nrPuncteTaiere;
         range(0,adapt.nrIndivizi/2).parallel().forEach((int x) -> {
-            int[] puncteTaiere = new int[4];
+            int[] puncteTaiere = new int[nrPuncteTaiere];
             int rndGet1, rndGet2;
             while(true) {
                 switch(x%3) {
@@ -193,22 +208,25 @@ public class AlgoritmGenetic extends Thread {
                         rndGet2 = popSize - rndGet1; //ia al doilea din partea opusa primului
                         break;
                     case 1:
-                        rndGet1 = R.nextInt(popSize-50);
+                        rndGet1 = R.nextInt(popSize);
                         int nextGaussian = (int)(R.nextGaussian()*10);
                         if(nextGaussian == 0) {
                             nextGaussian = 1;
                         }
-                        rndGet2 = rndGet1+nextGaussian; //ia al doilea din partea opusa primului
+                        rndGet2 = rndGet1+nextGaussian; //ia al doilea din vecinatatea primului
                         break;
                     case 2:
                     default:
                         rndGet1 = R.nextInt(popSize);
-                        rndGet2 = R.nextInt(popSize); //ia al doilea din vecinatatea primului
+                        rndGet2 = R.nextInt(popSize); //full random
                         break;
                 }
                 if(rndGet1>=0 && rndGet1 <=popSize && rndGet2>=0 && rndGet2 <=popSize) {
                     break;
                 }
+            }
+            if(x<5) {
+                rndGet1 = 0;
             }
             lock.readLock().lock();
             Individ parinte1 = populatie.get(rndGet1);
@@ -219,24 +237,19 @@ public class AlgoritmGenetic extends Thread {
             for(int i=0;i<8;i++){
                 copii[i] = new Individ(nrClienti,nrCamioane,viataIndivid,false); //false = nu generam cromozomul
             }
-            boolean egal = true;
-            while(egal == true) {
-                egal = false;
-                puncteTaiere[0] = R.nextInt(nrClienti-1);//4 pct de taiere
-                puncteTaiere[1] = R.nextInt(nrClienti-1);
-                puncteTaiere[2] = R.nextInt(nrClienti-1);
-                puncteTaiere[3] = R.nextInt(nrClienti-1);
-
-                Arrays.sort(puncteTaiere);
-                
-                for(int i=0;i<3;i++) { //avem grija sa nu fie egale
-                    if(puncteTaiere[i]==puncteTaiere[i+1]) {
-                        egal = true;
-                    }
-                }
+            //punctele de taiere
+            for(int i=0;i<nrPuncteTaiere;i++) {
+                puncteTaiere[i] = R.nextInt(nrClienti-1);
             }
+            Arrays.sort(puncteTaiere);
+            boolean direct = true;
+            int punctulSelectat=0;
             for(int i=0;i<nrClienti;i++) { //crossoverul efectiv
-                if(i>puncteTaiere[0] && i<puncteTaiere[1] || i>puncteTaiere[2] && i<puncteTaiere[3]) { 
+                if(punctulSelectat<nrPuncteTaiere && i>=puncteTaiere[punctulSelectat]) {
+                    direct=!direct;
+                    punctulSelectat++;
+                }
+                if(direct) { 
                     copii[0].setCromozomVal(i,parinte1.getCromozom1Val(i));
                     copii[1].setCromozomVal(i,parinte2.getCromozom1Val(i));
                     

@@ -47,13 +47,13 @@ public class Testing {
         //System.out.println(c1);
         System.out.println(c2);
         for(int i=0;i<10000;i++) {  //warmup
-            c2.calculeazaDistanta2();
+            c2.calculeazaTraseuOptim();
         }
         long start = System.nanoTime(); //time benchmark
         //for(int i=0;i<10000;i++) c1.calculeazaDistanta();
         System.out.println("Greedy a terminat in "+((System.nanoTime() - start)/1000000)+" ms");
         start = System.nanoTime();
-        for(int i=0;i<10000;i++) c2.calculeazaDistanta2();
+        for(int i=0;i<10000;i++) c2.calculeazaTraseuOptim();
         System.out.println("Metoda 2 a terminat in "+((System.nanoTime() - start)/1000000)+" ms");
         //n.camioane.add(c1);
         n.camioane.add(c2);
@@ -66,8 +66,11 @@ public class Testing {
      * @param executa true daca se executa.
      */
     private void IndividTest(boolean executa) {
-        if(executa == false) return;
-        Individ n = new Individ(Client.clienti.size(),48,100,true);
+        Individ n = new Individ(Client.clienti.size(),48,100,false);
+        for(int i=0;i<Client.clienti.size();i++) {
+            n.setCromozomVal(i,-1);
+        }
+        AnnealingThread ann = new AnnealingThread(n,Client.clienti.size());
         System.out.println("Fitnes total"+n.calculeaza(true));
         System.out.println("Neincarcabile = "+n.neincarcabile());
         m.setBest(n,0,0,"TESTING");
