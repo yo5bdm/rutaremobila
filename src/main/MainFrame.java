@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static java.util.stream.IntStream.range;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.Timer;
@@ -81,12 +82,16 @@ public class MainFrame extends javax.swing.JFrame {
     private double factorScalare;
     //runtime
     private boolean ruleaza=false;
+    private Histograma h;
     AlgoritmGenetic a;
+    public static boolean repaint = false;
     private final ArrayList<Grafic> grafic = new ArrayList();
     private final Timer timer = new Timer(50, new ActionListener() { // 50ms, adica vreo 20fps
         @Override
         public void actionPerformed(ActionEvent e) {
+            //RepaintManager.currentManager(histoPanel).markCompletelyClean(histoPanel);
             m.repaint(); //main frame repaint
+            repaint = false;
         }
     });
     private final Timer timer2 = new Timer(1000, new ActionListener() { // 50ms, adica vreo 20fps
@@ -164,11 +169,18 @@ public class MainFrame extends javax.swing.JFrame {
         Progres = new javax.swing.JProgressBar();
         FisierIncarcat = new javax.swing.JLabel();
         jElapsed = new javax.swing.JLabel();
-        jStatus = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         jDistantaInterna = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
         jDistantaExterna = new javax.swing.JLabel();
+        histoPanel = new javax.swing.JPanel(){
+            @Override
+            public void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2 = (Graphics2D)g;
+                histograma(g2);
+            }
+        };
         jLabel1 = new javax.swing.JLabel();
         Grila = new javax.swing.JPanel() {
             @Override
@@ -178,6 +190,8 @@ public class MainFrame extends javax.swing.JFrame {
                 grila(g2);
             }
         };
+        jPanel2 = new javax.swing.JPanel();
+        jStatus = new javax.swing.JLabel();
         jMenuBar1 = new javax.swing.JMenuBar();
         MeniuFisier = new javax.swing.JMenu();
         MeniuIncarcaCSV = new javax.swing.JMenuItem();
@@ -187,6 +201,7 @@ public class MainFrame extends javax.swing.JFrame {
         SalveazaHTML = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
         MeniuSetari = new javax.swing.JMenuItem();
+        jMenuItem1 = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Rutare pachete");
@@ -213,7 +228,7 @@ public class MainFrame extends javax.swing.JFrame {
         );
         Panel1Layout.setVerticalGroup(
             Panel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 331, Short.MAX_VALUE)
+            .addGap(0, 303, Short.MAX_VALUE)
         );
 
         jSlider1.setMaximum(300);
@@ -270,8 +285,6 @@ public class MainFrame extends javax.swing.JFrame {
 
         jElapsed.setText("00:00:00");
 
-        jStatus.setText("[ status ]");
-
         jLabel2.setText("Distanta interna:");
 
         jDistantaInterna.setText("jLabel7");
@@ -279,6 +292,20 @@ public class MainFrame extends javax.swing.JFrame {
         jLabel7.setText("Distanta externa:");
 
         jDistantaExterna.setText("jLabel8");
+
+        histoPanel.setBackground(new java.awt.Color(255, 255, 255));
+        histoPanel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        javax.swing.GroupLayout histoPanelLayout = new javax.swing.GroupLayout(histoPanel);
+        histoPanel.setLayout(histoPanelLayout);
+        histoPanelLayout.setHorizontalGroup(
+            histoPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+        histoPanelLayout.setVerticalGroup(
+            histoPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -300,7 +327,7 @@ public class MainFrame extends javax.swing.JFrame {
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(VitezaAlgoritm, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(FisierIncarcat, javax.swing.GroupLayout.DEFAULT_SIZE, 123, Short.MAX_VALUE)
+                            .addComponent(FisierIncarcat, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(PornesteGenerarea))
@@ -308,9 +335,6 @@ public class MainFrame extends javax.swing.JFrame {
                         .addComponent(jLabel2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jDistantaInterna))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jStatus)
-                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel7)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -321,7 +345,8 @@ public class MainFrame extends javax.swing.JFrame {
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel5)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(BSNrCamioane)))
+                        .addComponent(BSNrCamioane))
+                    .addComponent(histoPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -361,9 +386,9 @@ public class MainFrame extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jElapsed)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 266, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jStatus)
+                .addComponent(histoPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -381,6 +406,27 @@ public class MainFrame extends javax.swing.JFrame {
         GrilaLayout.setVerticalGroup(
             GrilaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGap(0, 305, Short.MAX_VALUE)
+        );
+
+        jPanel2.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        jStatus.setText("[ status ]");
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jStatus)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jStatus)
+                .addContainerGap())
         );
 
         MeniuFisier.setText("Fisier");
@@ -420,6 +466,14 @@ public class MainFrame extends javax.swing.JFrame {
         });
         jMenu2.add(MeniuSetari);
 
+        jMenuItem1.setText("Testare");
+        jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem1ActionPerformed(evt);
+            }
+        });
+        jMenu2.add(jMenuItem1);
+
         jMenuBar1.add(jMenu2);
 
         setJMenuBar(jMenuBar1);
@@ -430,15 +484,18 @@ public class MainFrame extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(Panel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(Grila, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(jLabel1)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jSlider1, javax.swing.GroupLayout.DEFAULT_SIZE, 770, Short.MAX_VALUE)))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(Panel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(Grila, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addComponent(jLabel1)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jSlider1, javax.swing.GroupLayout.DEFAULT_SIZE, 966, Short.MAX_VALUE)))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -455,10 +512,12 @@ public class MainFrame extends javax.swing.JFrame {
                             .addComponent(jSlider1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.TRAILING)))
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(5, 5, 5)
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
-        setSize(new java.awt.Dimension(1153, 764));
+        setSize(new java.awt.Dimension(1349, 781));
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
@@ -472,8 +531,8 @@ public class MainFrame extends javax.swing.JFrame {
                     VitezaAlgoritm.setEnabled(false);
                     CamionDisponibil.resetDisponibile();
                     Client.restore();
-                    Client.calculeazaTablouDistante();
                     Client.rezolvaCeleMari();
+                    Client.calculeazaTablouDistante();
                     int viteza = VitezaAlgoritm.getSelectedIndex();
 //                    t.run(); //testarile
                     procente = new int[setari.memorie];
@@ -589,6 +648,57 @@ public class MainFrame extends javax.swing.JFrame {
             }
         }        
     }//GEN-LAST:event_SalveazaTXTActionPerformed
+
+    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
+        if(!ruleaza) {
+            new Thread(){
+                @Override
+                public void run() {
+                    MeniuIncarcaCSV.setEnabled(false);
+                    MeniuSetari.setEnabled(false);
+                    VitezaAlgoritm.setEnabled(false);
+                    CamionDisponibil.resetDisponibile();
+                    Client.restore();
+                    Client.calculeazaTablouDistante();
+                    Client.rezolvaCeleMari();
+                    //int viteza = VitezaAlgoritm.getSelectedIndex();
+                    t.run(); //testarile
+//                    procente = new int[setari.memorie];
+//                    a = new AlgoritmGenetic(0,viteza);
+//                    a.setPriority(setari.prioritate);
+//                    a.start();
+//                    PornesteGenerarea.setText("Opreste generarea");
+//                    ruleaza = true;
+//                    start = System.currentTimeMillis();
+//                    try {
+//                        a.join();
+//                    } catch (InterruptedException ex) {
+//                        Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+//                    }
+//                    analiza.saveFile();
+//                    MeniuIncarcaCSV.setEnabled(true);
+//                    MeniuSetari.setEnabled(true);
+//                    VitezaAlgoritm.setEnabled(true);
+//                    PornesteGenerarea.setText("Porneste generarea");
+//                    ruleaza = false;
+                }
+            }.start();
+            
+        } else  {
+            try {
+                a.opreste();
+                a.join();
+                analiza.saveFile();
+                MeniuIncarcaCSV.setEnabled(true);
+                MeniuSetari.setEnabled(true);
+                VitezaAlgoritm.setEnabled(true);
+                PornesteGenerarea.setText("Porneste generarea");
+                ruleaza = false;
+            } catch (InterruptedException ex) {
+                Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }//GEN-LAST:event_jMenuItem1ActionPerformed
     
     /**
      * @param args the command line arguments
@@ -637,6 +747,7 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JMenuItem SalveazaHTML;
     private javax.swing.JMenuItem SalveazaTXT;
     private javax.swing.JComboBox<String> VitezaAlgoritm;
+    javax.swing.JPanel histoPanel;
     private javax.swing.JLabel jDistantaExterna;
     private javax.swing.JLabel jDistantaInterna;
     private javax.swing.JLabel jElapsed;
@@ -649,7 +760,9 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel7;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JSlider jSlider1;
@@ -713,6 +826,7 @@ public class MainFrame extends javax.swing.JFrame {
             BSNrCamioane.setText((Individ.best.camioane.size()+Individ.celeMariNrCamioane)+"");
             BSGeneratia.setText("("+text+")");
             enableSalveaza();
+            imprimaGenealogia();
         } else {
             Individ.best = null;
             BSDistanta.setText("");
@@ -724,7 +838,6 @@ public class MainFrame extends javax.swing.JFrame {
         }
         model.fireTableDataChanged();
     }
-    
     public void grila(Graphics2D g) {
         int h, w;
         w = Grila.getWidth();
@@ -752,7 +865,6 @@ public class MainFrame extends javax.swing.JFrame {
         }
         
     }
-    
     /**
      * Metoda de redesenare a jPanel-ului de pe MainFrame.
      * @param g Graphics2D trimis de catre jPanel.repaint()
@@ -771,11 +883,13 @@ public class MainFrame extends javax.swing.JFrame {
         //deseneaza restul clientilor
         g.setColor(Color.black);
         double x, y, x2,y2;
-        for(Client c:Client.clienti) {
-            x = cenX + ((c.longitudine-dx)*factorScalare); 
-            y = cenY - ((c.latitudine-dy)*factorScalare);
-            g.draw(new Ellipse2D.Double(x-1, y-1,2,2));
-        }
+        try {
+            for(Client c:Client.clienti) {
+                x = cenX + ((c.longitudine-dx)*factorScalare); 
+                y = cenY - ((c.latitudine-dy)*factorScalare);
+                g.draw(new Ellipse2D.Double(x-1, y-1,2,2));
+            }
+        } catch(Exception e) {}
         // partea de desenare drumuri pt camionul selectat
         if(camion!=null) {
             //linia de acasa pana la primul:
@@ -860,5 +974,44 @@ public class MainFrame extends javax.swing.JFrame {
     
     public void setStatus(String text) {
         jStatus.setText("[ "+text+" ]");
+        histoPanel.repaint();
+    }
+    
+    private void histograma(Graphics2D g) {
+        if(a == null || a.populatie == null || a.populatie.isEmpty()) 
+            return; //do nothing
+        
+        int maxX = histoPanel.getWidth();
+        int maxY = histoPanel.getHeight();
+        if(repaint != false || h==null) {
+            a.lock.readLock().lock();
+            try {
+                h = new Histograma(
+                        a.populatie.get(0).getFitness(),
+                        a.populatie.get(a.populatie.size()-1).getFitness()
+                );
+                range(0,a.populatie.size()-1).parallel().forEach(x->{
+                    Individ i = a.populatie.get(x);
+                    h.adauga(i.getFitness());
+                });
+            } finally {
+                a.lock.readLock().unlock();
+            }
+        }
+        int pas = maxX / h.getNrBare();
+        int padding = 5; //pixeli
+        int x, y0, y1;
+        for(int i=0;i<h.getNrBare();i++) {
+            x = (i+1)*pas-pas/2;
+            y0 = maxY-padding;
+            if(h.citeste(i)!=0){
+                y1 = (int) (y0 - (maxY-padding)*h.citeste(i));
+                g.drawLine(x,y0,x,y1);
+            }
+        }
+    }
+
+    private void imprimaGenealogia() {
+        System.out.println(Individ.best.genealogie);
     }
 }

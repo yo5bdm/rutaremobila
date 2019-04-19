@@ -70,6 +70,8 @@ public class AlgoritmGenetic extends Thread {
     public final ReentrantReadWriteLock lock = new ReentrantReadWriteLock(true);
     private final Autoadaptare adapt;
     private double dx;
+    
+    private double dupa;
     /**
      * Constructorul clasei.
      * Se intializeaza clasa, dar nu se porneste algoritmul.
@@ -135,18 +137,17 @@ public class AlgoritmGenetic extends Thread {
                     } else {
                         rapid = "lent";
                     }
-                    m.setStatus("G"+adapt.getGeneratia()+";P"+adapt.nrIndivizi+"; "+rapid+"; "+((System.currentTimeMillis()-start)/1000)+"s; Best "+(int)populatie.get(0).getFitness()+"; dx="+(int)adapt.lastDx);
+                    MainFrame.repaint = true;
+                    adapt.calc_std_dev();
+                    m.setStatus("Generatia "+adapt.getGeneratia()+
+                            "; Populatia "+adapt.nrIndivizi+
+                            "; Tip rulare "+rapid+
+                            "; Timp pentru 10 generatii "+((System.currentTimeMillis()-start)/1000)+" s"
+                            + "; Best "+(int)populatie.get(0).getFitness()+
+                            "; dx="+(int)adapt.lastDx+"; delta sigma="+adapt.deltaSigma(populatie.get(0)));
+                    m.repaint();
                     start = System.currentTimeMillis();
                     m.modMax(adapt.getMaxGeneratii());
-//                    long startOpt = System.currentTimeMillis();
-//                    dx=0;
-//                    range(0, populatie.size()).parallel().forEach((int ppp)->{
-//                        Individ ind = new Individ(populatie.get(ppp));
-//                        lock.writeLock().lock();
-//                        dx+=ind.optimizeaza();
-//                        lock.writeLock().unlock();
-//                    });
-//                    System.out.println("Opt> "+(System.currentTimeMillis()-startOpt)+" "+(int)dx);
                 }
                 adapt.adaptare(populatie.get(populatie.size()-1).getFitness()-populatie.get(0).getFitness());
                 //algoritmul efectiv
@@ -178,7 +179,6 @@ public class AlgoritmGenetic extends Thread {
         range(0,adapt.nrIndivizi).parallel().forEach((int i) -> { //
             Individ n = new Individ(nrClienti,nrCamioane,viataIndivid,true);
             n.calculeaza(true);
-            //n = Individ.annealing(n,1000);
             lock.writeLock().lock();
             populatie.add(n);
             lock.writeLock().unlock();
@@ -201,8 +201,9 @@ public class AlgoritmGenetic extends Thread {
         range(0,adapt.nrIndivizi/2).parallel().forEach((int x) -> {
             int[] puncteTaiere = new int[nrPuncteTaiere];
             int rndGet1, rndGet2;
-            while(true) {
-                switch(x%3) {
+            Individ parinte1, parinte2;
+            while(true) { 
+                switch(x%3) { //modul de selectie a celor 2 indivizi
                     case 0:
                         rndGet1 = R.nextInt(popSize/2);
                         rndGet2 = popSize - rndGet1; //ia al doilea din partea opusa primului
@@ -221,21 +222,32 @@ public class AlgoritmGenetic extends Thread {
                         rndGet2 = R.nextInt(popSize); //full random
                         break;
                 }
-                if(rndGet1>=0 && rndGet1 <=popSize && rndGet2>=0 && rndGet2 <=popSize) {
-                    break;
+//                if(x<5) {
+//                    rndGet1 = 0;
+//                } 
+                //verificam sa fie ok numerele generate si indivizii sa fie compatibili
+                if(rndGet1>=0 && rndGet1 <=popSize && rndGet2>=0 && rndGet2 <=popSize) { //cu genealogie
+                    lock.readLock().lock();
+                    parinte1 = populatie.get(rndGet1);
+                    parinte2 = populatie.get(rndGet2);
+                    lock.readLock().unlock();
+                    if(Genealogie.compatibile(parinte1.genealogie, parinte2.genealogie)){
+                        break;
+                    }
                 }
             }
-            if(x<5) {
-                rndGet1 = 0;
-            }
-            lock.readLock().lock();
-            Individ parinte1 = populatie.get(rndGet1);
-            Individ parinte2 = populatie.get(rndGet2);
-            lock.readLock().unlock();
+//            if(x<5) { //fara genealogie
+//                rndGet1 = 0;
+//            }
+//            lock.readLock().lock();
+//            parinte1 = populatie.get(rndGet1);
+//            parinte2 = populatie.get(rndGet2);
+//            lock.readLock().unlock();
             
             Individ[] copii = new Individ[8];
             for(int i=0;i<8;i++){
                 copii[i] = new Individ(nrClienti,nrCamioane,viataIndivid,false); //false = nu generam cromozomul
+                copii[i].setParinti(parinte1, parinte2); //copiem genealogiile
             }
             //punctele de taiere
             for(int i=0;i<nrPuncteTaiere;i++) {
@@ -277,7 +289,9 @@ public class AlgoritmGenetic extends Thread {
                 copii[i].calculeaza(true);
             }
             Arrays.sort(copii);
-            lock.writeLock().lock();
+//            copii[0].setParinti(parinte1, parinte2); //copiem genealogiile
+//            copii[1].setParinti(parinte1, parinte2);
+            lock.writeLock().lock(); //luam doar primii 2 cei mai buni
             popTemp.add(copii[0]);
             popTemp.add(copii[1]);
             lock.writeLock().unlock();
@@ -289,6 +303,10 @@ public class AlgoritmGenetic extends Thread {
      */
     protected void mutatie() { //mutatia se aplica pe o copie a individului, raman ambele variante
         ArrayList<Individ> temps = new ArrayList();
+        /*
+        Lucreaza pe 2 indivizi, nou si n 
+        unul se imbunatateste obligatoriu, celalalt e lasat random
+        */        
         range(0,popTemp.size()).parallel().forEach(i -> { //pentru fiecare individ din populatia temporara
             lock.readLock().lock();
             Individ n = new Individ(popTemp.get(i)),nou,bak;
@@ -346,7 +364,7 @@ public class AlgoritmGenetic extends Thread {
     protected void selectie() {
         popTemp.addAll(populatie);
         populatie.clear();
-        int nrAdaugareDirecta = 20;
+        int nrAdaugareDirecta = 5;
         Collections.sort(popTemp);
         for(int i=0;i<nrAdaugareDirecta;) {
             if(popTemp.get(0).selectabil()==true){
@@ -355,7 +373,7 @@ public class AlgoritmGenetic extends Thread {
             }
             popTemp.remove(0);
         }
-        if(adapt.selection == 1) {
+        if(adapt.selectionType == 1) { //selectie primii x care sunt cei mai buni
             int i=0, size=0; //i->individul curent din populatia temporara, size = populatie.size()
             Individ c;
             while(size < adapt.nrIndivizi-nrAdaugareDirecta) {
@@ -368,7 +386,7 @@ public class AlgoritmGenetic extends Thread {
                 i++;
             }
             popTemp.clear();
-        } else if(adapt.selection == 2) {
+        } else if(adapt.selectionType == 2) {
             Individ selectat;
             boolean sel;
             for(int i=0;i<adapt.nrIndivizi-nrAdaugareDirecta;i++) {
@@ -376,7 +394,7 @@ public class AlgoritmGenetic extends Thread {
                     break;
                 }
                 sel=false;
-                while(sel == false) {
+                while(sel == false) { //cautam random un individ dupa curba lui gauss
                     //random gausian absolut intre 0 si nrIndivizi
                     int rnd = (int)Math.abs((double)popTemp.size()*(R.nextGaussian()/5))%popTemp.size(); 
                     //selecteaza individul dupa randomul de mai sus si adauga in pop temp
@@ -390,7 +408,7 @@ public class AlgoritmGenetic extends Thread {
                 }
             }
             popTemp.clear();
-        } else {
+        } else { //cautam full random un individ
             int i, size=0; //i->individul curent din populatia temporara, size = populatie.size()
             Individ c;
             while(size < adapt.nrIndivizi-nrAdaugareDirecta) {
@@ -423,34 +441,6 @@ public class AlgoritmGenetic extends Thread {
      */
     public void opreste() {
         stop = true;
-    }
-    
-    private void anneal(int pasi, int nrAnn) {
-        long start = System.currentTimeMillis();
-        ArrayList<Integer> tabAnn = new ArrayList();
-        range(0,nrAnn).parallel().forEach(ann->{ //de la inceputul listei (adica cei mai buni)
-            lock.readLock().lock();
-            Individ n = populatie.get(ann);
-            lock.readLock().unlock();
-            Individ nou = Individ.annealing(n,pasi);
-            if(nou != null) {
-                lock.writeLock().lock();
-                populatie.add(nou);
-                lock.writeLock().unlock();
-                int rez = (int)(n.getFitness()-nou.getFitness());
-                tabAnn.add(new Integer(rez));
-            }
-        });
-        Collections.sort(populatie);
-        adapt.annDx =0;
-        if(tabAnn.size()>0){
-            for(int i:tabAnn) {
-                adapt.annDx += i;
-            }
-            adapt.annDx /= tabAnn.size();
-        }
-        m.setStatus("ann> "+adapt.annDx+" "+((System.currentTimeMillis()-start)/1000)+"s");
-        adapt.enableAnnealing=false;
     }
     
 }

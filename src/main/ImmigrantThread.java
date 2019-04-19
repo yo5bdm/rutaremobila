@@ -11,13 +11,13 @@ import java.util.Random;
  *
  * @author yo5bdm
  */
-public class AnnealingThread extends Thread {
+public class ImmigrantThread extends Thread {
     public Individ lucru;
     private int nrClienti;
     private final Random R = new Random();
     private boolean merge = true;
     
-    public AnnealingThread(Individ n, int nrClienti){
+    public ImmigrantThread(Individ n, int nrClienti){
         lucru = n;
         this.nrClienti = nrClienti;
         start();
@@ -30,7 +30,6 @@ public class AnnealingThread extends Thread {
     
     @Override
     public void run() {
-        System.out.println("Start Ann Thread...");
         Individ nou;
         int pos1, pos2; 
         double pastEn, solEn;

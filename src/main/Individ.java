@@ -5,7 +5,6 @@
  */ 
 package main;
 
-import static java.lang.Double.compare;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -79,10 +78,12 @@ public class Individ implements Comparable {
     private Integer nrCamioane;
     private CamionDisponibil camionDisponibil; //obiectul folosit pentru aflarea a ce camion e disponibil
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock(true); //lock pentru parallel()
-    private boolean optimizat;
+    boolean optimizat;
     private static final int NEINCARCAT = -1;
     private static final int NEINCARCABIL = -2;
     private int viata;
+    
+    public Genealogie genealogie;
             
     /**
      * Constructor.
@@ -92,6 +93,7 @@ public class Individ implements Comparable {
      * @param generare Boolean true daca se doreste generarea random a individului
      */    
     public Individ(int nrClienti, int nrCamioane, int viataIndivid, boolean generare) {
+        genealogie = new Genealogie();
         this.nrClienti = nrClienti;
         this.viata = viataIndivid;
         this.viataGen = viataIndivid;
@@ -116,11 +118,16 @@ public class Individ implements Comparable {
      */
     Individ(Individ b) {
         this(b.cromozom1.length, b.nrCamioane, b.viataGen, false);
+        this.genealogie.copiaza(b.genealogie);
         for(int i=0;i<b.cromozom1.length;i++) {
             this.cromozom1[i] = b.cromozom1[i];
             this.cromozom2[i] = b.cromozom2[i];
         }
         optimizat = false;
+    }
+    
+    public void setParinti(Individ a, Individ b) {
+        this.genealogie.setParinti(a.genealogie, b.genealogie);
     }
     
     public void setCromozomVal(int pozitie, int valoare) {
@@ -488,30 +495,30 @@ public class Individ implements Comparable {
      * @param size the value of size
      * @param algoritmGenetic the value of algoritmGenetic
      */
-    public static Individ annealing(Individ n, int pasi) {
-            Individ nou;
-            int temperatura = pasi;
-            int pos1, pos2;
-            double startEn = n.getFitness();
-            double solEn = 0;
-            double pastEn = 0;
-            while (temperatura>1) {
-                nou = new Individ(n); //copiem individul curent cel mai bun
-                //--- mutatia
-                pos1 = R.nextInt(nou.nrClienti - 1);
-                pos2 = R.nextInt(nou.nrClienti - 1);
-                nou.swap(pos1,pos2);
-                //---
-                nou.calculeaza(true);
-                pastEn = n.getFitness();
-                solEn = nou.getFitness();
-                if (solEn < pastEn) {
-                    n = nou;
-                }
-                temperatura--;
-            }
-            return n;
-    }
+//    public static Individ annealing(Individ n, int pasi) {
+//            Individ nou;
+//            int temperatura = pasi;
+//            int pos1, pos2;
+//            double startEn = n.getFitness();
+//            double solEn = 0;
+//            double pastEn = 0;
+//            while (temperatura>1) {
+//                nou = new Individ(n); //copiem individul curent cel mai bun
+//                //--- mutatia
+//                pos1 = R.nextInt(nou.nrClienti - 1);
+//                pos2 = R.nextInt(nou.nrClienti - 1);
+//                nou.swap(pos1,pos2);
+//                //---
+//                nou.calculeaza(true);
+//                pastEn = n.getFitness();
+//                solEn = nou.getFitness();
+//                if (solEn < pastEn) {
+//                    n = nou;
+//                }
+//                temperatura--;
+//            }
+//            return n;
+//    }
     /**
      * Schimba 2 pozitii din cromozom intre ele.
      * Aplica acelasi swap pe ambii cromozomi

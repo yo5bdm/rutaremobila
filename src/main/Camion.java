@@ -7,6 +7,7 @@ package main;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Objects;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import static main.MainFrame.*;
 
@@ -162,16 +163,15 @@ public class Camion {
      * pachetele pe rand. La fiecare pas se calculeaza pozitia optima a pachetului de inserat
      * astfel incat ruta totala sa fie cat mai scurta.
      */
-    public void calculeazaTraseuOptim() { //varianta clarke-wright modificat
-        distanta = 0.0; //initializare
+    public void calculeazaTraseuOptim() {
+        distanta = 0.0;
         ArrayList<Integer> solutia = new ArrayList();
-        if(pachete.isEmpty()) { //daca nu avem pachete in camion
+        if(pachete.isEmpty()) 
             return;
-        }
-        ArrayList<Integer> pacheteBak = new ArrayList(); //altfel
-        ArrayList<Integer> solTemp = new ArrayList();
+        ArrayList<Integer> pacheteBak = new ArrayList();
+        ArrayList<Integer> solTemp = new ArrayList(); //solutia temporara
         pacheteBak.addAll(pachete);
-        int pos, pachet, bestPos;
+        int pos, pachet;
         double minDist, dist;
         while(!pacheteBak.isEmpty()) {
             pos = 0;
@@ -204,6 +204,52 @@ public class Camion {
         pachete.clear();
         pachete.addAll(solutia);
         distTot();
+    }
+    
+    private ArrayList<Integer> solutiaBtrk = new ArrayList();
+    private ArrayList<Integer> temp = new ArrayList();
+    int nrPachete;
+    double distMin = Double.MAX_VALUE;
+    public double traseuBacktracking() {
+        distanta = 0.0;
+        if(pachete.isEmpty()) 
+            return 0.0;
+        nrPachete = pachete.size();
+        btrk(0);
+        distanta = distMin;
+        pachete.clear();
+        pachete.addAll(solutiaBtrk);
+        return distMin;
+    }
+    
+    private void btrk(int pos) {
+        for(int i=0;i<nrPachete;i++) {
+            temp.add(pos, pachete.get(i));
+            if(verificare()){
+                if(pos<nrPachete-1) btrk(pos++);
+                if(pos == nrPachete - 1) {
+                    double dist=0.0;
+                    for(int j=0;j<temp.size();j++) {
+                        if(j==0) dist = Client.catreCasa(temp.get(j));
+                        else {
+                            dist += Client.distanta(temp.get(j-1),temp.get(j));
+                        }
+                    }
+                    if(dist < distMin) {
+                        distMin = dist;
+                        solutiaBtrk.addAll(temp);
+                    }
+                }
+            }
+        }
+    }
+    
+    private boolean verificare() {
+        if(temp.size()<2) return true;
+        for(int i=0;i<(temp.size()-1);i++)
+            for(int j=i+1;j<temp.size();j++)
+                if(Objects.equals(temp.get(i), temp.get(j))) return false;
+        return true;
     }
     
     public double distantaInterna() {
@@ -272,15 +318,12 @@ public class Camion {
     }
 
     double test(int pachetDeVerificat) {
-        double distFin = 0.0; //initializare
         ArrayList<Integer> solutia = new ArrayList();
-        if(pachete.isEmpty()) { //daca nu avem pachete in camion
+        if(pachete.isEmpty())
             return Client.catreCasa(pachetDeVerificat);
-        }
-        //ArrayList<Integer> pacheteBak = new ArrayList(); //altfel
         ArrayList<Integer> solTemp = new ArrayList();
         solutia.addAll(pachete);
-        int pos, pachet, bestPos;
+        int pos;
         double minDist, dist;
         //
         pos = 0;
@@ -293,9 +336,7 @@ public class Camion {
             solTemp.add(i,pachetDeVerificat);
             for(int j=0;j<solTemp.size();j++) {
                 if(j==0) dist = Client.catreCasa(solTemp.get(j));
-                else {
-                    dist += Client.distanta(solTemp.get(j-1),solTemp.get(j));
-                }
+                else dist += Client.distanta(solTemp.get(j-1),solTemp.get(j));                
             }
             if(minDist > dist) {
                 pos = i;
@@ -312,16 +353,13 @@ public class Camion {
         return ret;
     }
     
-    
     /**
      * Intoarce distantaTotala dintre primul din pachet si acesta.
      * @param i pachetul de testat
      * @return double cu distantaTotala in km
      */
     public Double testClosest(int i) {
-        if(pachete.size()==0) {
-            return Client.catreCasa(i);
-        }
+        if(pachete.size()==0) return Client.catreCasa(i);
         return Client.distanta(pachete.get(0), i);
     }
 

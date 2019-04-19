@@ -25,42 +25,15 @@ public class Testing {
     public void run() {
         System.out.println("System testing:");
         //CamionTest2(true);
-        IndividTest(true);
+        //IndividTest(true);
+        System.out.println("TEstare genealogie");
+        genealogieTest();
     }
     /**
      * Test camion.
      * @param executa true daca se executa, false daca nu.
      */
-    private void CamionTest(boolean executa) {
-        if(executa = false) return;
-        Individ n=new Individ(Client.clienti.size(),0,100,false);
-        Camion c1, c2, c3;
-        //c1 = new Camion(100);
-        c2 = new Camion(100);
-        c3 = new Camion(100);
-        System.out.println("Adaug 10 pachete...");
-        for(int i=0;i<10;i++) {
-            //c1.add(i*50+i);
-            c2.add(i*50+i);
-            c3.add(i*50+i);
-        }
-        //System.out.println(c1);
-        System.out.println(c2);
-        for(int i=0;i<10000;i++) {  //warmup
-            c2.calculeazaTraseuOptim();
-        }
-        long start = System.nanoTime(); //time benchmark
-        //for(int i=0;i<10000;i++) c1.calculeazaDistanta();
-        System.out.println("Greedy a terminat in "+((System.nanoTime() - start)/1000000)+" ms");
-        start = System.nanoTime();
-        for(int i=0;i<10000;i++) c2.calculeazaTraseuOptim();
-        System.out.println("Metoda 2 a terminat in "+((System.nanoTime() - start)/1000000)+" ms");
-        //n.camioane.add(c1);
-        n.camioane.add(c2);
-        n.camioane.add(c3);
-        n.calculeaza(true);
-        m.setBest(n,0,0,"TESTING"); 
-    }
+    //private void CamionTest(boolean executa)
     /**
      * Testul individului.
      * @param executa true daca se executa.
@@ -70,9 +43,33 @@ public class Testing {
         for(int i=0;i<Client.clienti.size();i++) {
             n.setCromozomVal(i,-1);
         }
-        AnnealingThread ann = new AnnealingThread(n,Client.clienti.size());
+        //AnnealingThread ann = new AnnealingThread(n,Client.clienti.size());
         System.out.println("Fitnes total"+n.calculeaza(true));
         System.out.println("Neincarcabile = "+n.neincarcabile());
         m.setBest(n,0,0,"TESTING");
+    }
+    private void genealogieTest() {
+        Genealogie a, b;
+        System.out.println("Creem genealogiile A si B: ");
+        a = new Genealogie();
+        b = new Genealogie();
+        int col = 2;   //parintii pe linia 0 au 2 coloane
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < col; j++) { //se copiaza parintii parintilor la bunici, bunicii la strabunici, etc
+                a.tablou[i][j] = (long) (Math.random()*100); //ordinea nu conteaza
+                b.tablou[i][j] = (long) (Math.random()*100); //ordinea nu conteaza
+            }
+            col *= 2; //in nivelul urmator avem dublu nr de coloane
+        }
+        System.out.println(a);
+        System.out.println(b);
+        System.out.println("Testam constructorul de copiere:");
+        Genealogie c = new Genealogie();
+        c.copiaza(a);
+        System.out.println(c);
+        System.out.println("Testam setarea parintilor:");
+        Genealogie d = new Genealogie();
+        d.setParinti(a, b);
+        System.out.println(d);
     }
 }

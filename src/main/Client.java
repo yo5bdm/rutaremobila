@@ -137,10 +137,14 @@ public class Client implements Comparable {
                     Individ.celeMari.add("======================================");
                     Individ.celeMari.add("Camion volum " + vol + ", ocupat " + vol + ", opriri 1, distanta totala " + (int) dist + " km;");
                     Individ.celeMari.add(c.codClient + " " + c.shipTo + ", GPS=" + c.latitudine + "," + c.longitudine + " vol=" + vol);
+                //break;
                 }
                 temp.add(c);
             }
         }
+//        for(Client c: temp) { //se incarca un singur camion, restul se elimina
+//            clienti.remove(c);
+//        }
     }
     /**
      * Returneaza distanta dintre 2 clienti.
