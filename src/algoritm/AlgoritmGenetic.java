@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package main;
+package algoritm;
 
+import interfata.MainFrame;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -14,7 +15,7 @@ import java.util.Date;
 import java.util.Random;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import static java.util.stream.IntStream.range;
-import static main.MainFrame.*;
+import static interfata.MainFrame.*;
 
 /**
  * Algoritmul genetic.

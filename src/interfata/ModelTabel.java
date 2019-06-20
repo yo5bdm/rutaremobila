@@ -3,16 +3,18 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package main;
+package interfata;
 
+import algoritm.Individ;
+import algoritm.Camion;
+import static interfata.MainFrame.*;
 import javax.swing.table.AbstractTableModel;
-import static main.MainFrame.*;
 
 /**
  * Clasa care ofera datele pentru tabelul de pe pagina principala
  * @author yo5bdm
  */
-class ModelTabel extends AbstractTableModel {
+public class ModelTabel extends AbstractTableModel {
 
     String[] coloane = {"Distanta","Capacitate","Ocupat","Opriri","OK"};
     private final Class[] columnClass = new Class[] {

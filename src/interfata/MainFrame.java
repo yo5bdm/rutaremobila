@@ -3,8 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package main;
+package interfata;
 
+import algoritm.AlgoritmGenetic;
+import algoritm.Camion;
+import algoritm.CamionDisponibil;
+import algoritm.Client;
+import algoritm.Individ;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
@@ -71,7 +76,6 @@ public class MainFrame extends javax.swing.JFrame {
     public static Analiza analiza;
     
 //privati
-    private final Testing t = new Testing();
     private Timer paint;
     //pentru desenare
     private Camion camion;
@@ -201,7 +205,6 @@ public class MainFrame extends javax.swing.JFrame {
         SalveazaHTML = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
         MeniuSetari = new javax.swing.JMenuItem();
-        jMenuItem1 = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Rutare pachete");
@@ -228,7 +231,7 @@ public class MainFrame extends javax.swing.JFrame {
         );
         Panel1Layout.setVerticalGroup(
             Panel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 303, Short.MAX_VALUE)
+            .addGap(0, 329, Short.MAX_VALUE)
         );
 
         jSlider1.setMaximum(300);
@@ -327,7 +330,7 @@ public class MainFrame extends javax.swing.JFrame {
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(VitezaAlgoritm, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(FisierIncarcat, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(FisierIncarcat, javax.swing.GroupLayout.DEFAULT_SIZE, 192, Short.MAX_VALUE)
                             .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(PornesteGenerarea))
@@ -441,6 +444,11 @@ public class MainFrame extends javax.swing.JFrame {
         MeniuFisier.add(jSeparator1);
 
         SalveazaCSV.setText("Salveaza solutia (CSV)");
+        SalveazaCSV.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                SalveazaCSVActionPerformed(evt);
+            }
+        });
         MeniuFisier.add(SalveazaCSV);
 
         SalveazaTXT.setText("Salveaza solutia (TXT)");
@@ -452,6 +460,11 @@ public class MainFrame extends javax.swing.JFrame {
         MeniuFisier.add(SalveazaTXT);
 
         SalveazaHTML.setText("Salveaza solutia (HTML)");
+        SalveazaHTML.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                SalveazaHTMLActionPerformed(evt);
+            }
+        });
         MeniuFisier.add(SalveazaHTML);
 
         jMenuBar1.add(MeniuFisier);
@@ -466,14 +479,6 @@ public class MainFrame extends javax.swing.JFrame {
         });
         jMenu2.add(MeniuSetari);
 
-        jMenuItem1.setText("Testare");
-        jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItem1ActionPerformed(evt);
-            }
-        });
-        jMenu2.add(jMenuItem1);
-
         jMenuBar1.add(jMenu2);
 
         setJMenuBar(jMenuBar1);
@@ -487,15 +492,15 @@ public class MainFrame extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(Panel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(Grila, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel1)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jSlider1, javax.swing.GroupLayout.DEFAULT_SIZE, 966, Short.MAX_VALUE)))))
+                                .addComponent(jSlider1, javax.swing.GroupLayout.DEFAULT_SIZE, 886, Short.MAX_VALUE))
+                            .addComponent(Panel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(Grila, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -534,7 +539,6 @@ public class MainFrame extends javax.swing.JFrame {
                     Client.rezolvaCeleMari();
                     Client.calculeazaTablouDistante();
                     int viteza = VitezaAlgoritm.getSelectedIndex();
-//                    t.run(); //testarile
                     procente = new int[setari.memorie];
                     a = new AlgoritmGenetic(0,viteza);
                     a.setPriority(setari.prioritate);
@@ -649,56 +653,37 @@ public class MainFrame extends javax.swing.JFrame {
         }        
     }//GEN-LAST:event_SalveazaTXTActionPerformed
 
-    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
-        if(!ruleaza) {
-            new Thread(){
-                @Override
-                public void run() {
-                    MeniuIncarcaCSV.setEnabled(false);
-                    MeniuSetari.setEnabled(false);
-                    VitezaAlgoritm.setEnabled(false);
-                    CamionDisponibil.resetDisponibile();
-                    Client.restore();
-                    Client.calculeazaTablouDistante();
-                    Client.rezolvaCeleMari();
-                    //int viteza = VitezaAlgoritm.getSelectedIndex();
-                    t.run(); //testarile
-//                    procente = new int[setari.memorie];
-//                    a = new AlgoritmGenetic(0,viteza);
-//                    a.setPriority(setari.prioritate);
-//                    a.start();
-//                    PornesteGenerarea.setText("Opreste generarea");
-//                    ruleaza = true;
-//                    start = System.currentTimeMillis();
-//                    try {
-//                        a.join();
-//                    } catch (InterruptedException ex) {
-//                        Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
-//                    }
-//                    analiza.saveFile();
-//                    MeniuIncarcaCSV.setEnabled(true);
-//                    MeniuSetari.setEnabled(true);
-//                    VitezaAlgoritm.setEnabled(true);
-//                    PornesteGenerarea.setText("Porneste generarea");
-//                    ruleaza = false;
-                }
-            }.start();
-            
-        } else  {
+    private void SalveazaCSVActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SalveazaCSVActionPerformed
+        JFileChooser fileChooser = new JFileChooser(); //File curDir = din setari
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV File","csv");
+        fileChooser.setFileFilter(filter);
+        if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
             try {
-                a.opreste();
-                a.join();
-                analiza.saveFile();
-                MeniuIncarcaCSV.setEnabled(true);
-                MeniuSetari.setEnabled(true);
-                VitezaAlgoritm.setEnabled(true);
-                PornesteGenerarea.setText("Porneste generarea");
-                ruleaza = false;
-            } catch (InterruptedException ex) {
+                File file = fileChooser.getSelectedFile();
+                List<String> lines = Fisier.genereazaFisierCSV(Individ.best);//Arrays.asList("The first line", "The second line");
+                Path f = Paths.get(file.getAbsolutePath());
+                Files.write(f, lines, Charset.forName("UTF-8"));
+            } catch (IOException ex) {
                 Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
             }
-        }
-    }//GEN-LAST:event_jMenuItem1ActionPerformed
+        }       
+    }//GEN-LAST:event_SalveazaCSVActionPerformed
+
+    private void SalveazaHTMLActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SalveazaHTMLActionPerformed
+        JFileChooser fileChooser = new JFileChooser(); //File curDir = din setari
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("HTML File","html");
+        fileChooser.setFileFilter(filter);
+        if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+            try {
+                File file = fileChooser.getSelectedFile();
+                List<String> lines = Fisier.genereazaFisierHTML(Individ.best);//Arrays.asList("The first line", "The second line");
+                Path f = Paths.get(file.getAbsolutePath());
+                Files.write(f, lines, Charset.forName("UTF-8"));
+            } catch (IOException ex) {
+                Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }       
+    }//GEN-LAST:event_SalveazaHTMLActionPerformed
     
     /**
      * @param args the command line arguments
@@ -760,7 +745,6 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel7;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenuBar jMenuBar1;
-    private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;

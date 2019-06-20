@@ -3,9 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package main;
+package interfata;
 
-import static main.MainFrame.*;
+import algoritm.CamDisp;
+import static interfata.MainFrame.*;
 
 /**
  * Dialog de adaugat tipuri de camioane disponibile.

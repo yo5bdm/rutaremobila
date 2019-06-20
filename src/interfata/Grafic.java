@@ -3,15 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package main;
+package interfata;
 
 /**
  *
  * @author yo5bd
  */
 public class Grafic {
-    int generatia;
-    double fitness;
+    public int generatia;
+    public double fitness;
 
     public Grafic(int generatia, double fitness) {
         this.generatia = generatia;

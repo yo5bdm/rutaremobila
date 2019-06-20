@@ -3,16 +3,20 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */ 
-package main;
+package algoritm;
 
+import algoritm.Genealogie;
+import algoritm.Client;
+import algoritm.CamionDisponibil;
+import algoritm.Camion;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import static java.util.stream.IntStream.range;
-import static main.AlgoritmGenetic.R;
-import static main.MainFrame.setari;
+import static algoritm.AlgoritmGenetic.R;
+import static interfata.MainFrame.setari;
 
 /**
  * Individul folosit in algoritmul genetic.

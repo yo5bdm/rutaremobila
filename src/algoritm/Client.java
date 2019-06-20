@@ -3,11 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package main;
+package algoritm;
 
+import static interfata.MainFrame.setari;
+import interfata.Setari;
 import java.util.ArrayList;
 import java.util.Collections;
-import static main.MainFrame.setari;
 
 /**
  * Clasa cuprinde toate datele clientului.
@@ -34,11 +35,11 @@ public class Client implements Comparable {
         Collections.reverse(clienti);
     }
 
-    static int nrClienti() {
+    public static int nrClienti() {
         return nrClienti;
     }
 
-    static void numara() {
+    public static void numara() {
         nrClienti = clienti.size();
     }
     

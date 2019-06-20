@@ -3,8 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package main;
+package interfata;
 
+import algoritm.Client;
+import algoritm.CamDisp;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
@@ -59,7 +61,7 @@ public class Setari implements Serializable {
         return "Setari{" + "prioritate=" + prioritate + " memorie=" + memorie + " nrDescarcari=" + nrDescarcari + " ajungeAcasa=" + ajungeAcasa + '}';
     }
     
-    static void salveaza(Setari e) {
+    public static void salveaza(Setari e) {
         try {
            FileOutputStream fileOut = new FileOutputStream(Setari.FILENAME);
            ObjectOutputStream out = new ObjectOutputStream(fileOut);
@@ -71,7 +73,7 @@ public class Setari implements Serializable {
         }
     }
     
-    static Setari incarca(){
+    public static Setari incarca(){
         try {
             FileInputStream fileIn = new FileInputStream(Setari.FILENAME);
             ObjectInputStream in = new ObjectInputStream(fileIn);

@@ -3,13 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package main;
+package algoritm;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Objects;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import static main.MainFrame.*;
+import static interfata.MainFrame.*;
 
 /**
  * Clasa de lucru cu camioanele.

@@ -3,10 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package main;
+package interfata;
 
+import algoritm.CamDisp;
 import javax.swing.table.AbstractTableModel;
-import static main.MainFrame.*;
+import static interfata.MainFrame.*;
 
 /**
  * Modelul folosit pentru afisarea datelor in tabelul de pe pagina de setari.

@@ -3,17 +3,21 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package main;
+package interfata;
 
+import algoritm.Client;
+import algoritm.Camion;
+import static interfata.MainFrame.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static main.CSVUtils.*;
-import static main.MainFrame.*;
+import algoritm.Individ;
+import static interfata.CSVUtils.*;
 
 /**
  * Clasa de lucru cu fisierele
@@ -27,8 +31,6 @@ public class Fisier {
      * @return ArrayList de formatul String
      */
     public static ArrayList genereazaFisier(Individ ind) {
-        //todo Optiune scriere fisier text, csv sau html.
-        //todo imbunatatire aspect txt
         Client cli;
         ArrayList<String> ret = new ArrayList();
         ret.add("======================================");
@@ -94,6 +96,50 @@ public class Fisier {
         Client.numara();
         Client.clientiBak.addAll(Client.clienti);
         return true;
+    }
+
+    public static List<String> genereazaFisierCSV(Individ ind) {
+        Client cli;
+        ArrayList<String> ret = new ArrayList();
+        ret.add("\"Distanta totala de parcurs\";\"" + (int) (ind.getFitness() + Individ.celeMariDist) + " km\"");
+        ret.add("\"Numar total de camioane folosite\";\"" + (ind.camioane.size() + Individ.celeMariNrCamioane)+"\"");
+        ret.addAll(Individ.celeMari);
+        for (Camion cam : ind.camioane) {
+            ret.add("\"Camion volum\";\"Ocupat\";\"Opriri\";\"Distanta parcursa\"");
+            ret.add("\"" + (cam.capacitate - 1) + "\";\"" + cam.ocupat + "\";\"" + cam.opriri + "\";\"" + (int) cam.distanta + "\"");
+            ret.add("\"Pachetele de incarcat:\"");
+            ret.add("\"Cod Client\";\"Loc livrare\";\"Latitudine\";\"Longitudine\";\"Volum Total\"");
+            for (Integer i : cam.pachete) {
+                cli = Client.clienti.get(i);
+                ret.add("\""+cli.codClient + "\";\"" + cli.shipTo + "\";\"" + cli.latitudine + "\";\"" + cli.longitudine + "\";\"" + cli.volum+"\"");
+            }
+            ret.add("\"\"");
+        }
+        ret.add("\"\"");
+        ret.add("\"Fisier generat  " + LocalDateTime.now()+"\"");
+        return ret;
+    }
+    
+    public static List<String> genereazaFisierHTML(Individ ind) {
+        Client cli;
+        ArrayList<String> ret = new ArrayList();
+        ret.add("<html><head><title>Lista de camioane</title></head><body>");
+        ret.add("<h3>Distanta totala de parcurs: <strong>" + (int) (ind.getFitness() + Individ.celeMariDist) + " km</strong></h3>");
+        ret.add("<h3>Numar total de camioane folosite: <strong>" + (ind.camioane.size() + Individ.celeMariNrCamioane)+"</strong></h3>");
+        ret.addAll(Individ.celeMari);
+        for (Camion cam : ind.camioane) {
+            ret.add("<p>Camion volum " + (cam.capacitate - 1) + ", ocupat " + cam.ocupat + ", opriri " + cam.opriri + ", distanta totala " + (int) cam.distanta + " km</p>");
+            ret.add("<p>Pachetele de incarcat:</p><table>");
+            ret.add("<tr><th>Cod Client</th><th>Loc livrare</th><th>Latitudine</th><th>Longitudine</th><th>Volum Total</th></tr>");
+            for (Integer i : cam.pachete) {
+                cli = Client.clienti.get(i);
+                ret.add("<tr><td>"+cli.codClient + "</td><td>" + cli.shipTo + "</td><td>" + cli.latitudine + "</td><td>" + cli.longitudine + "</td><td>" + cli.volum+"</td><tr>");
+            }
+            ret.add("<br>");
+        }
+        ret.add("<br>");
+        ret.add("<p>Fisier generat  " + LocalDateTime.now()+"</p></body></html>");
+        return ret;
     }
     
 }

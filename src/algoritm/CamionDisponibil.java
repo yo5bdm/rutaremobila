@@ -3,12 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package main;
+package algoritm;
 
-import java.io.Serializable;
+import static interfata.MainFrame.*;
 import java.util.ArrayList;
 import java.util.Collections;
-import static main.MainFrame.*;
 
 /**
  * Clasa genereaza camioane disponibile, returneaza capacitatea acestuia.
@@ -114,24 +113,4 @@ public class CamionDisponibil {
         }
         return minSize;
     }
-}
-
-
-//clasa obiect cu care lucreaza clasa publica
-class CamDisp implements Comparable, Serializable {
-    Integer capacitate;
-    Integer disponibile;
-    public CamDisp(int capacitate, int disponibile) {
-        this.capacitate = capacitate;
-        this.disponibile = disponibile;
-    }
-
-    CamDisp(CamDisp i) {
-        this.capacitate = i.capacitate;
-        this.disponibile = i.disponibile;
-    }
-    public int compareTo(Object o) {
-        CamDisp c = (CamDisp) o;
-        return c.capacitate.compareTo(this.capacitate);
-    }    
 }

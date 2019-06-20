@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package main;
+package algoritm;
 
 /**
  * Aceasta clasa tine evidenta genealogiei unui anumit obiect. In tablou se
